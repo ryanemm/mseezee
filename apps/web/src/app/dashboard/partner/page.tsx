@@ -7,6 +7,8 @@ import { DisbursementList } from "@/components/dashboard/DisbursementList";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 
 export const metadata: Metadata = { title: "Partner dashboard" };
+// Shows live held funds — must never be a static snapshot from build time.
+export const dynamic = "force-dynamic";
 
 export default async function PartnerDashboardPage() {
   const view = await api.getPartnerView();

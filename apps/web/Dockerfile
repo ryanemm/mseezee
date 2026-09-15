@@ -30,6 +30,10 @@ RUN npm ci --ignore-scripts
 FROM base AS build
 COPY --from=deps /repo/node_modules ./node_modules
 COPY . .
+# `prisma generate` only needs this variable to exist, not to be reachable —
+# it never connects during generate. The real one is supplied at container
+# runtime via docker-compose's env_file, never baked into the image.
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 RUN npm run build --workspace @mseezee/web
 
 # ---- runtime ----
