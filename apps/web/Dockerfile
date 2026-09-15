@@ -19,7 +19,12 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/package.json
 COPY packages/shared/package.json packages/shared/package.json
-RUN npm ci
+# --ignore-scripts: apps/web's postinstall runs `prisma generate`, which needs
+# prisma/schema.prisma — not copied into this layer on purpose, so this stage
+# stays cached across source changes. The build stage below runs
+# `prisma generate` explicitly (via apps/web's own build script) once the
+# full source is present.
+RUN npm ci --ignore-scripts
 
 # ---- build: generate the Prisma client, typecheck shared, build Next.js ----
 FROM base AS build
