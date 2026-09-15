@@ -13,6 +13,11 @@
 
 FROM node:20-slim AS base
 WORKDIR /repo
+# Prisma's engine needs OpenSSL to detect which build to use — node:20-slim
+# doesn't ship it, so Prisma silently guesses instead (it guessed right in
+# testing, but that's not guaranteed). One install here covers every stage
+# built from `base`.
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # ---- deps: install once, cached unless a package.json changes ----
 FROM base AS deps
