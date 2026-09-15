@@ -1,0 +1,21 @@
+node_modules
+**/node_modules
+.next
+**/.next
+.git
+.DS_Store
+**/.DS_Store
+
+# never bake secrets into an image
+.env
+.env.local
+**/.env
+**/.env.local
+**/.env*.local
+
+# local-only artifacts
+apps/web/prisma/*.db
+apps/web/prisma/*.db-journal
+apps/web/src/generated
+docs
+scripts

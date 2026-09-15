@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+dist/
+.next/
+out/
+build/
+
+# env
+.env
+.env*.local
+
+# misc
+.DS_Store
+*.pem
+coverage/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma (spike: local sqlite + generated client)
+apps/web/prisma/*.db
+apps/web/prisma/*.db-journal
+apps/web/src/generated/

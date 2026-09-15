@@ -1,0 +1,19 @@
+# Lives on the VPS at /opt/mseezee/docker-compose.yml — copy it there once by
+# hand; the CI/CD pipeline only ever runs `docker compose pull` / `up -d`
+# against it, never edits it. See deploy/README.md for the full setup.
+
+services:
+  web:
+    image: ghcr.io/OWNER/mseezee-web:latest # replace OWNER with your GitHub username/org
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Host networking is the simplest way for this one container to reach a
+    # Postgres running directly on the VPS (native install, not Docker) at
+    # localhost:5432 — no Docker network/hostname juggling. If your Postgres
+    # is itself a container on a shared Docker network instead, swap this for
+    # `networks: [that-network]` and `ports: ["127.0.0.1:3210:3000"]`, and
+    # point DATABASE_URL in .env at that Postgres container's service name.
+    network_mode: host
+    environment:
+      - PORT=3210 # must match the port Apache proxies to below

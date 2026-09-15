@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   MseeZee design tokens
+   Warm paper ground, deep forest green as the primary, gold used sparingly.
+   Funeral circles get a darker, candle-warm treatment.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --paper: #f6f3ea;
+  --surface: #fffdf7;
+  --surface-sunk: #efeadd;
+  --ink: #1b241d;
+  --ink-soft: #515b52;
+  --ink-faint: #838c82;
+  --line: #e4ddcd;
+
+  --forest: #1f4a34;
+  --forest-deep: #12331f;
+  --forest-bright: #2f6c4a;
+  --gold: #a97d27;
+  --gold-line: #c8a24c;
+  --gold-soft: #f1e7ca;
+
+  --funeral: #221d18;
+  --funeral-soft: #37302a;
+
+  --good: #2f6c4a;
+  --warn: #a4611f;
+  --crit: #8f3a2c;
+
+  --mz-shadow-card: 0 1px 2px rgba(27, 36, 29, 0.05), 0 8px 24px rgba(27, 36, 29, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #101510;
+    --surface: #182018;
+    --surface-sunk: #121a12;
+    --ink: #e9e7db;
+    --ink-soft: #a8b1a5;
+    --ink-faint: #7c857b;
+    --line: #2a342a;
+
+    --forest: #4f9b71;
+    --forest-deep: #0e2417;
+    --forest-bright: #63b088;
+    --gold: #d6ab5b;
+    --gold-line: #c8a24c;
+    --gold-soft: #241d10;
+
+    --funeral: #0d0b09;
+    --funeral-soft: #1d1813;
+
+    --good: #63b088;
+    --warn: #d0904e;
+    --crit: #d76d5b;
+
+    --mz-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-forest: var(--forest);
+  --color-forest-deep: var(--forest-deep);
+  --color-forest-bright: var(--forest-bright);
+  --color-gold: var(--gold);
+  --color-gold-line: var(--gold-line);
+  --color-gold-soft: var(--gold-soft);
+  --color-funeral: var(--funeral);
+  --color-funeral-soft: var(--funeral-soft);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-crit: var(--crit);
+
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --shadow-card: var(--mz-shadow-card);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--forest-bright);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

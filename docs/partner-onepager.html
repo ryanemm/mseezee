@@ -1,0 +1,252 @@
+<title>MseeZee for Community Partners</title>
+<meta name="description" content="What MseeZee offers a burial society, church or funeral parlour — and the questions to ask them in a first conversation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+  :root {
+    --paper:     #F6F3EA;
+    --surface:   #FFFDF7;
+    --sunk:      #EFEADD;
+    --ink:       #1B241D;
+    --ink-soft:  #515B52;
+    --ink-faint: #838C82;
+    --line:      #E4DDCD;
+    --forest:    #1F4A34;
+    --forest-deep:#12331F;
+    --forest-br: #2F6C4B;
+    --gold:      #9A6E1C;
+    --gold-line: #C29A44;
+    --gold-bg:   #F1E7CA;
+    --shadow:    0 1px 2px rgba(27,36,29,.05), 0 8px 24px rgba(27,36,29,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #101510; --surface: #182018; --sunk: #121a12;
+      --ink: #E9E7DB; --ink-soft: #A8B1A5; --ink-faint: #7C857B; --line: #2A342A;
+      --forest: #4F9B71; --forest-deep: #0E2417; --forest-br: #63B088;
+      --gold: #D6AB5B; --gold-line: #C29A44; --gold-bg: #241D10;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #101510; --surface: #182018; --sunk: #121a12;
+    --ink: #E9E7DB; --ink-soft: #A8B1A5; --ink-faint: #7C857B; --line: #2A342A;
+    --forest: #4F9B71; --forest-deep: #0E2417; --forest-br: #63B088;
+    --gold: #D6AB5B; --gold-line: #C29A44; --gold-bg: #241D10;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-size: 16.5px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: clamp(1.5rem,5vw,3rem) clamp(1.15rem,5vw,2.25rem) 4rem; }
+
+  h1, h2, h3 { font-family: "Fraunces", Georgia, serif; font-weight: 600; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; margin: 0; }
+  .eyebrow { font-family: "Plus Jakarta Sans", sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--gold); margin: 0 0 .5rem; }
+
+  .brand { display: inline-flex; align-items: center; gap: .55rem; }
+  .brand svg { display: block; }
+  .brand span { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.15rem; color: var(--forest); }
+
+  header { border-bottom: 2px solid var(--forest); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  h1 { font-size: clamp(1.9rem, 1.4rem + 2.4vw, 2.8rem); margin: 1.1rem 0 0; max-width: 20ch; }
+  .sub { font-size: clamp(1rem,.95rem + .3vw,1.15rem); color: var(--ink-soft); margin: .8rem 0 0; max-width: 54ch; }
+  .meta { font-size: .78rem; color: var(--ink-faint); margin-top: 1.1rem; }
+
+  section { margin-top: 2.4rem; }
+  h2 { font-size: clamp(1.4rem,1.2rem + 1vw,1.8rem); }
+  h3 { font-size: 1.05rem; font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; margin-top: 1.5rem; }
+  p { margin: .85rem 0; max-width: 60ch; }
+  a { color: var(--forest-br); }
+  strong { font-weight: 700; }
+
+  .steps { list-style: none; counter-reset: step; padding: 0; margin: 1.2rem 0; display: flex; flex-direction: column; gap: .75rem; }
+  .steps li { counter-increment: step; position: relative; padding: .9rem 1rem .9rem 3.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+  .steps li::before { content: counter(step); position: absolute; left: .9rem; top: .9rem; width: 1.6rem; height: 1.6rem; display: grid; place-items: center; background: var(--forest); color: var(--surface); border-radius: 50%; font-weight: 700; font-size: .85rem; }
+  .steps li b { display: block; }
+
+  .grid { display: grid; gap: .75rem; margin: 1.2rem 0; }
+  @media (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .benefit { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; box-shadow: var(--shadow); }
+  .benefit b { display: block; font-family: "Fraunces", serif; font-size: 1.02rem; margin-bottom: .2rem; }
+  .benefit p { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+
+  .callout { background: var(--gold-bg); border: 1px solid var(--gold-line); border-left-width: 3px; border-radius: 0 10px 10px 0; padding: 1rem 1.15rem; margin: 1.4rem 0; }
+  :root[data-theme="dark"] .callout, :root:not([data-theme="light"]) .callout { color: var(--ink); }
+  .callout p { margin: .35rem 0; max-width: none; }
+  .callout p:first-child { margin-top: 0; } .callout p:last-child { margin-bottom: 0; }
+
+  .not-list { list-style: none; padding: 0; margin: 1rem 0; display: flex; flex-direction: column; gap: .4rem; }
+  .not-list li { padding-left: 1.6rem; position: relative; color: var(--ink-soft); font-size: .95rem; }
+  .not-list li::before { content: "\00d7"; position: absolute; left: .3rem; color: var(--gold); font-weight: 700; }
+
+  .qgroup { margin-top: 1.6rem; }
+  .qgroup h3 { color: var(--forest-br); margin-bottom: .3rem; }
+  ol.q { margin: .5rem 0; padding-left: 1.4rem; }
+  ol.q li { margin: .5rem 0; max-width: 60ch; }
+  ol.q li::marker { color: var(--gold-line); font-variant-numeric: tabular-nums; }
+
+  hr { border: none; border-top: 1px solid var(--line); margin: 2.6rem 0; }
+
+  .theme-toggle { position: fixed; top: .85rem; right: .85rem; font-family: "Plus Jakarta Sans", sans-serif; font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: .4rem .65rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor: pointer; box-shadow: var(--shadow); }
+  .theme-toggle:hover { color: var(--forest-br); }
+  :where(a,button):focus-visible { outline: 2px solid var(--forest-br); outline-offset: 3px; border-radius: 3px; }
+
+  footer { max-width: 760px; margin: 0 auto; padding: 0 clamp(1.15rem,5vw,2.25rem) 3rem; font-size: .78rem; color: var(--ink-faint); }
+
+  @media print {
+    .theme-toggle { display: none; }
+    body { background: #fff; color: #000; font-size: 10.5pt; }
+    .steps li, .benefit, .callout { box-shadow: none; }
+    .page-break { page-break-before: always; }
+    section { margin-top: 1.4rem; }
+  }
+</style>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle colour theme">Theme</button>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 26 26" aria-hidden="true">
+        <circle cx="13" cy="13" r="12.5" fill="var(--forest)"/>
+        <circle cx="9.5" cy="10" r="2.6" fill="var(--gold-line)"/>
+        <circle cx="16.5" cy="11.5" r="2.6" fill="#fffdf7"/>
+        <path d="M6 19c1.6-3 4-4.5 7-4.5s5.4 1.5 7 4.5" stroke="#fffdf7" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span>MseeZee</span>
+    </div>
+    <p class="eyebrow" style="margin-top:1.4rem">For community partners</p>
+    <h1>Your community, raising together — online</h1>
+    <p class="sub">MseeZee is a simple way for a neighbourhood to contribute towards a funeral, a family in need, or a local project. It works with organisations like yours that already carry this responsibility.</p>
+    <p class="meta">A conversation piece — MseeZee is in development and we are building it with a handful of partners first.</p>
+  </header>
+
+  <section>
+    <h2>What your organisation already does</h2>
+    <p>When someone in the community passes, families come to you. You help them arrange things, and often you help gather money — an envelope at the service, a WhatsApp group, transfers into your account. You count it, you bank it, you make sure it reaches the family.</p>
+    <p>MseeZee does not change that role. It gives you a <strong>page</strong> where your community can contribute from their phones, see the total climb, and leave a message — while the money still comes to your organisation, and you still decide how it reaches the family.</p>
+  </section>
+
+  <section>
+    <h2>How the money reaches a family</h2>
+    <ol class="steps">
+      <li><b>A family comes to you.</b> You create a circle in a few minutes — their name, the story, the goal.</li>
+      <li><b>The community contributes.</b> Relatives in other provinces, colleagues, church members, old friends — they give from their phones by PayShap, bank transfer or card. No app to install.</li>
+      <li><b>Contributions come to your organisation's account.</b> Every rand is recorded against the circle, with the giver's name unless they chose to stay private.</li>
+      <li><b>You disburse to the family the way you always have</b> — paying the funeral home directly, buying groceries, handing over cash — now with a clean record of what came in and what went out.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Why a partner uses MseeZee</h2>
+    <div class="grid">
+      <div class="benefit"><b>Reach further</b><p>People who can't be at the collection — family far away, colleagues, former neighbours — can still contribute.</p></div>
+      <div class="benefit"><b>No cash to handle</b><p>No envelope, no counting, no trip to the bank. It arrives in your account.</p></div>
+      <div class="benefit"><b>A clean record</b><p>Who gave, how much, and what it was spent on — protects your organisation and builds members' trust.</p></div>
+      <div class="benefit"><b>Families start immediately</b><p>Because a family is known to you, they don't wait on paperwork to begin collecting.</p></div>
+      <div class="benefit"><b>Your name vouches for it</b><p>The page carries your organisation's name. Givers trust a cause your organisation stands behind.</p></div>
+      <div class="benefit"><b>Free for families</b><p>MseeZee charges the grieving family nothing. The platform is kept running by small voluntary tips from contributors.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What MseeZee is not</h2>
+    <ul class="not-list">
+      <li>Not a loan or credit — there is nothing to repay.</li>
+      <li>Not funeral insurance or a policy.</li>
+      <li>Not a replacement for your organisation — you stay in charge of the family relationship and the money.</li>
+      <li>Not a way for strangers to ask your community for money — only circles your organisation approves appear under your name.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What we would need from you</h2>
+    <div class="callout">
+      <p><strong>A one-time setup:</strong> your organisation's registration details and bank account, and the name of the person who authorises payments.</p>
+      <p><strong>Then, per family:</strong> a few minutes to create and approve their circle.</p>
+      <p><strong>From us:</strong> we set everything up with you, train whoever needs it, and stay reachable.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <section class="page-break">
+    <p class="eyebrow">Founder's notes — not part of the leave-behind</p>
+    <h2>Questions to ask in the first conversation</h2>
+    <p>Listen more than you pitch. The goal is to understand how money already moves through this organisation and where it hurts.</p>
+
+    <div class="qgroup">
+      <h3>How they work today</h3>
+      <ol class="q">
+        <li>When a family in your community loses someone, walk me through what happens — who do they come to, and what do you help with?</li>
+        <li>How does a collection happen now — an envelope at the service, a WhatsApp group, transfers to an account?</li>
+        <li>Roughly how many funerals does your organisation support in a month? Over a year?</li>
+        <li>What does a typical collection raise, and what's the range from smallest to largest?</li>
+        <li>Who handles the money — the counting, the banking, the record-keeping? How long does it take them?</li>
+        <li>Do you already have an organisation bank account? Who is allowed to authorise a payment from it?</li>
+      </ol>
+    </div>
+
+    <div class="qgroup">
+      <h3>Where it hurts</h3>
+      <ol class="q" start="7">
+        <li>What is the hardest part of helping a family financially right now?</li>
+        <li>Do relatives who live far away ask how they can contribute? What do you tell them?</li>
+        <li>Has a collection ever fallen short of what the family needed? What happened then?</li>
+        <li>Have you had disagreements about money — how much was raised, where it went? How did you settle them?</li>
+        <li>How do you show a family, or your own members, where the money went?</li>
+      </ol>
+    </div>
+
+    <div class="qgroup">
+      <h3>Fit</h3>
+      <ol class="q" start="12">
+        <li>If your community could contribute to a funeral from their phones and the money came to your account, would that help or would it complicate things?</li>
+        <li>Would families trust a contribution page with your organisation's name on it?</li>
+        <li>What would make you decide <em>not</em> to use something like this?</li>
+        <li>If this existed today, would you try it with the next funeral?</li>
+        <li>Who else in the community — other societies, churches, the parlour you work with — should I be speaking to?</li>
+      </ol>
+    </div>
+
+    <div class="qgroup">
+      <h3>Practical</h3>
+      <ol class="q" start="17">
+        <li>What is your organisation's registration status — registered NPO, church, company, or an informal society?</li>
+        <li>Would you be willing to be one of a small number of partners we build this with over the next few months, and give us honest feedback?</li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<footer>MseeZee · Partner brief and discovery questions · 9 Sep 2026 · Draft for founder use</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById("themeToggle");
+    var KEY = "mseezee-theme";
+    try {
+      var saved = localStorage.getItem(KEY);
+      if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+    } catch (e) {}
+    function current() {
+      var explicit = root.getAttribute("data-theme");
+      if (explicit) return explicit;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    btn.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem(KEY, next); } catch (e) {}
+    });
+  })();
+</script>

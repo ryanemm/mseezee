@@ -1,0 +1,122 @@
+// Postgres. Local dev connects to a local server (see .env.local); the
+// deployed app connects to the VPS's Postgres via the same DATABASE_URL shape.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// One attempted contribution. Created as `pending` when checkout starts and
+/// moved to `settled` only by a verified Paystack signal (webhook or verify).
+model Contribution {
+  id                String    @id @default(cuid())
+  reference         String    @unique
+  circleId          String
+  circleSlug        String
+  contributorEmail  String
+  displayName       String
+  message           String?
+  anonymous         Boolean   @default(false)
+  showAmount        Boolean   @default(true)
+  showArea          Boolean   @default(false)
+  amountCents       Int
+  feeCents          Int       @default(0)
+  tipCents          Int       @default(0)
+  totalChargedCents Int
+  status            String    @default("pending") // pending | settled | failed
+  provider          String    @default("paystack")
+  providerRef       String? // Paystack transaction id
+  channel           String? // card | eft | ...
+  createdAt         DateTime  @default(now())
+  settledAt         DateTime?
+  failedAt          DateTime?
+
+  events PaymentEvent[]
+
+  @@index([circleId])
+  @@index([status])
+}
+
+/// Raw provider events, stored for idempotency and reconciliation.
+model PaymentEvent {
+  id             String   @id @default(cuid())
+  provider       String   @default("paystack")
+  dedupeKey      String   @unique // provider + event type + transaction id
+  eventType      String
+  reference      String?
+  signatureValid Boolean
+  processed      Boolean  @default(false)
+  payload        String // raw JSON body
+  receivedAt     DateTime @default(now())
+
+  contribution   Contribution? @relation(fields: [contributionId], references: [id])
+  contributionId String?
+
+  @@index([reference])
+}
+
+/// A signed-up person. Either an email+password or a verified phone number
+/// (or both) can sign them in — nothing about *money* lives here; a payout
+/// destination is a separate, verified thing tied to whoever actually
+/// receives funds, per the money-model decision.
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  phone         String?   @unique
+  phoneVerified DateTime?
+  createdAt     DateTime  @default(now())
+
+  circles Circle[]
+}
+
+/// A one-time code sent to a phone number via SMSPortal. Codes are hashed at
+/// rest; a phone can have several rows (retries) but only the latest
+/// unconsumed, unexpired one is checked.
+model PhoneOtp {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone])
+}
+
+/// A circle's static, organiser-authored content. Money figures are never
+/// stored here — `raisedCents` / `supporterCount` are always derived by
+/// summing `Contribution` rows, the same rule the ledger design in the
+/// architecture doc lays out.
+model Circle {
+  id                String    @id @default(cuid())
+  slug              String    @unique
+  type              String // "funeral" | "family" | "community"
+  title             String
+  summary           String
+  story             String
+  beneficiaryName   String
+  proxyName         String?
+  areaSlug          String
+  areaSection       String?
+  locationPrecision String    @default("area")
+  goalCents         Int
+  status            String    @default("collecting")
+  verificationTier  String    @default("unverified")
+  eventDate         DateTime?
+  createdAt         DateTime  @default(now())
+
+  organiserId String
+  organiser   User   @relation(fields: [organiserId], references: [id])
+
+  @@index([organiserId])
+  @@index([areaSlug])
+}

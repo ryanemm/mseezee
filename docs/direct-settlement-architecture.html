@@ -1,0 +1,1135 @@
+<title>Sisonke Direct Settlement Architecture</title>
+<meta name="description" content="Architecture and build plan for Sisonke's direct-settlement money model — funds move contributor to beneficiary through a licensed PSP, never through a Sisonke account.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --paper:      #F5F3EC;
+    --surface:    #FCFBF7;
+    --sunk:       #ECE8DB;
+    --ink:        #1C241F;
+    --ink-soft:   #4F5951;
+    --ink-faint:  #7C857C;
+    --rule:       #D9D4C5;
+    --accent:     #1F4A34;
+    --accent-br:  #2F6C4B;
+    --gold:       #9A6E1C;
+    --gold-line:  #C29A44;
+    --gold-bg:    #F2E8CC;
+    --good:       #2F6C4B;
+    --warn:       #9E571A;
+    --crit:       #93392B;
+    --shadow:     0 1px 2px rgba(28,36,31,.05), 0 6px 22px rgba(28,36,31,.05);
+    --measure:    68ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #0E1611;
+      --surface:   #16201A;
+      --sunk:      #101813;
+      --ink:       #E8E6DA;
+      --ink-soft:  #A6AFA4;
+      --ink-faint: #79827A;
+      --rule:      #29332B;
+      --accent:    #6FB88C;
+      --accent-br: #88CBA2;
+      --gold:      #D9B260;
+      --gold-line: #C29A44;
+      --gold-bg:   #241E11;
+      --good:      #6FB88C;
+      --warn:      #D28E4E;
+      --crit:      #DC6E5D;
+      --shadow:    0 1px 2px rgba(0,0,0,.35), 0 8px 26px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:     #0E1611;
+    --surface:   #16201A;
+    --sunk:      #101813;
+    --ink:       #E8E6DA;
+    --ink-soft:  #A6AFA4;
+    --ink-faint: #79827A;
+    --rule:      #29332B;
+    --accent:    #6FB88C;
+    --accent-br: #88CBA2;
+    --gold:      #D9B260;
+    --gold-line: #C29A44;
+    --gold-bg:   #241E11;
+    --good:      #6FB88C;
+    --warn:      #D28E4E;
+    --crit:      #DC6E5D;
+    --shadow:    0 1px 2px rgba(0,0,0,.35), 0 8px 26px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 17px;
+    line-height: 1.68;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .72rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    background: linear-gradient(180deg, var(--surface), var(--paper));
+  }
+  .masthead-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: clamp(2.75rem, 6vw, 4.75rem) clamp(1.25rem, 5vw, 2.5rem) clamp(2rem, 4vw, 3rem);
+  }
+  .brandmark {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .78rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent-br);
+  }
+  .brandmark::before {
+    content: "";
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 34%, var(--gold-line) 0 30%, transparent 31%),
+      radial-gradient(circle at 68% 42%, var(--accent-br) 0 32%, transparent 33%),
+      radial-gradient(circle at 50% 74%, var(--accent) 0 40%, transparent 41%);
+    border: 1px solid var(--rule);
+  }
+  h1 {
+    font-family: "Spectral", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 1.4rem 0 0;
+    max-width: 20ch;
+  }
+  .standfirst {
+    font-family: "Spectral", Georgia, serif;
+    font-size: clamp(1.05rem, 1rem + .5vw, 1.3rem);
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 1.1rem 0 0;
+  }
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.6rem;
+    margin-top: 1.8rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .74rem;
+    letter-spacing: .04em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .doc-meta span { white-space: nowrap; }
+  .doc-meta b { color: var(--ink-soft); font-weight: 500; }
+
+  /* ---------- Parameters panel ---------- */
+  .params {
+    margin-top: 2.4rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .params-head {
+    padding: .85rem 1.15rem;
+    border-bottom: 1px solid var(--rule);
+    background: var(--sunk);
+  }
+  .params dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) { .params dl { grid-template-columns: 1fr 1fr; } }
+  .params div {
+    display: flex;
+    flex-direction: column;
+    gap: .18rem;
+    padding: .8rem 1.15rem;
+    border-top: 1px solid var(--rule);
+  }
+  .params dl > div:first-child, .params dl > div:nth-child(2) { border-top: none; }
+  @media (max-width: 639px) { .params dl > div:nth-child(2) { border-top: 1px solid var(--rule); } }
+  .params dt {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .params dd { margin: 0; font-size: .92rem; color: var(--ink); }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 5vw, 4rem) clamp(1.25rem, 5vw, 2.5rem) 4rem;
+  }
+  @media (min-width: 1040px) {
+    .layout {
+      display: grid;
+      grid-template-columns: 214px minmax(0, 1fr);
+      gap: clamp(2.5rem, 5vw, 4.5rem);
+      align-items: start;
+    }
+  }
+
+  .toc {
+    font-size: .8rem;
+    line-height: 1.5;
+  }
+  @media (min-width: 1040px) {
+    .toc {
+      position: sticky;
+      top: 1.75rem;
+      max-height: calc(100vh - 3.5rem);
+      overflow-y: auto;
+      padding-right: .5rem;
+    }
+  }
+  .toc-title {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 .7rem;
+  }
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: toc;
+    border-left: 1px solid var(--rule);
+  }
+  .toc li { counter-increment: toc; }
+  .toc a {
+    display: block;
+    padding: .28rem 0 .28rem .85rem;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero) "  ";
+    color: var(--ink-faint);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72em;
+  }
+  .toc a:hover { color: var(--accent-br); }
+  .toc a:focus-visible { outline: 2px solid var(--accent-br); outline-offset: 2px; }
+  .toc a.active {
+    color: var(--accent-br);
+    border-left-color: var(--gold-line);
+    font-weight: 500;
+  }
+
+  main { min-width: 0; }
+  main > section { max-width: var(--measure); }
+
+  section {
+    padding-top: 2.6rem;
+    margin-top: 2.6rem;
+    border-top: 1px solid var(--rule);
+    scroll-margin-top: 1.5rem;
+  }
+  section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+  h2 {
+    font-family: "Spectral", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(1.55rem, 1.2rem + 1.5vw, 2.15rem);
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+    margin: .5rem 0 0;
+  }
+  h3 {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: .01em;
+    margin: 2rem 0 .5rem;
+    color: var(--ink);
+  }
+  p { margin: .9rem 0; max-width: var(--measure); }
+  a { color: var(--accent-br); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+  ul, ol.body-list { padding-left: 1.15rem; margin: .9rem 0; max-width: var(--measure); }
+  li { margin: .38rem 0; }
+  li::marker { color: var(--gold-line); }
+
+  strong { font-weight: 600; }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .86em;
+    background: var(--sunk);
+    padding: .12em .38em;
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+  }
+
+  .lede {
+    font-family: "Spectral", Georgia, serif;
+    font-size: 1.14rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 1rem 0 0;
+  }
+
+  /* ---------- Callout ---------- */
+  .note {
+    margin: 1.5rem 0;
+    padding: 1rem 1.15rem;
+    background: var(--gold-bg);
+    border: 1px solid var(--gold-line);
+    border-left-width: 3px;
+    border-radius: 0 8px 8px 0;
+    max-width: var(--measure);
+  }
+  .note p { margin: .4rem 0; }
+  .note p:first-child { margin-top: 0; }
+  .note p:last-child { margin-bottom: 0; }
+  .note .eyebrow { color: var(--gold); margin-bottom: .3rem; }
+  :root[data-theme="dark"] .note, :root:not([data-theme="light"]) .note { color: var(--ink); }
+
+  /* ---------- Tables ---------- */
+  .scroll {
+    overflow-x: auto;
+    margin: 1.4rem 0;
+    border: 1px solid var(--rule);
+    border-radius: 9px;
+    box-shadow: var(--shadow);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: .88rem;
+    background: var(--surface);
+  }
+  th, td {
+    text-align: left;
+    padding: .62rem .8rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  thead th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .66rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--sunk);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--sunk); }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td code { white-space: nowrap; }
+
+  /* ---------- Pills ---------- */
+  .pill {
+    display: inline-block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .64rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .16em .5em;
+    border-radius: 4px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+  .pill.good { color: var(--good); }
+  .pill.warn { color: var(--warn); }
+  .pill.crit { color: var(--crit); }
+  .pill.mute { color: var(--ink-faint); }
+
+  /* ---------- Figures / diagrams ---------- */
+  figure {
+    margin: 1.8rem 0;
+    padding: 1.4rem 1.2rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    max-width: none;
+  }
+  figure svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    color: var(--ink-soft);
+    overflow: visible;
+  }
+  figcaption {
+    margin-top: 1rem;
+    padding-top: .8rem;
+    border-top: 1px solid var(--rule);
+    font-size: .84rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .dg-box   { fill: var(--surface); stroke: currentColor; stroke-width: 1.25; }
+  .dg-box-a { fill: var(--gold-bg); stroke: var(--gold-line); stroke-width: 1.25; }
+  .dg-region { fill: var(--gold-bg); stroke: var(--gold-line); stroke-width: 1.25; stroke-dasharray: 5 4; opacity: .55; }
+  .dg-label { fill: var(--ink); font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; font-weight: 500; }
+  .dg-sub   { fill: var(--ink-soft); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .02em; }
+  .dg-arrowlabel { fill: var(--ink-soft); font-family: "IBM Plex Mono", monospace; font-size: 10px; }
+  .dg-money { stroke: currentColor; stroke-width: 1.6; fill: none; }
+  .dg-data  { stroke: var(--ink-faint); stroke-width: 1.3; fill: none; stroke-dasharray: 4 3; }
+  .dg-fee   { stroke: var(--gold-line); stroke-width: 1.8; fill: none; }
+  .dg-fill-arrow { fill: currentColor; }
+  .dg-fill-fee   { fill: var(--gold-line); }
+  .dg-fill-data  { fill: var(--ink-faint); }
+  .dg-regionlabel { fill: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .04em; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    border-top: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .footer-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 2rem clamp(1.25rem, 5vw, 2.5rem) 3rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .74rem;
+    letter-spacing: .04em;
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem 1.4rem;
+  }
+
+  /* ---------- Theme toggle ---------- */
+  .theme-toggle {
+    position: fixed;
+    top: 1rem; right: 1rem;
+    z-index: 10;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .45rem .7rem;
+    border-radius: 6px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .theme-toggle:hover { color: var(--accent-br); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--accent-br); outline-offset: 2px; }
+
+  :where(a, button):focus-visible { outline: 2px solid var(--accent-br); outline-offset: 3px; border-radius: 2px; }
+
+  @media print {
+    .theme-toggle, .toc { display: none; }
+    .layout { display: block; }
+    body { background: #fff; color: #000; font-size: 11pt; }
+    figure, .scroll, .params { box-shadow: none; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle colour theme">Theme</button>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="brandmark">Sisonke</span>
+    <p class="eyebrow" style="margin-top:1.6rem">Architecture &amp; Build Plan · v0.1 Draft</p>
+    <h1>Direct Settlement Architecture</h1>
+    <p class="standfirst">How money reaches a grieving family through Sisonke without ever passing through a Sisonke bank account — the model, the payment rails, the systems that track funds we never hold, and the sequence to build it.</p>
+    <div class="doc-meta">
+      <span>Prepared for <b>Sisonke</b></span>
+      <span>Date <b>7 Sep 2026</b></span>
+      <span>Status <b>Draft for review</b></span>
+      <span>Blocking <b>Attorney sign-off</b></span>
+    </div>
+
+    <div class="params">
+      <div class="params-head"><p class="eyebrow">Decisions carried into this document</p></div>
+      <dl>
+        <div><dt>Money model</dt><dd>Direct settlement — pass-through to the beneficiary</dd></div>
+        <div><dt>Fund custody</dt><dd>Licensed PSP only. Sisonke never holds the principal.</dd></div>
+        <div><dt>Payment rails</dt><dd>PayShap, Instant EFT, pay-by-bank — irreversible push only</dd></div>
+        <div><dt>Card payments</dt><dd>Deferred — chargeback exposure conflicts with direct settlement</dd></div>
+        <div><dt>Regulatory posture</dt><dd>Technology provider, outside TPPP designation <span class="pill warn">pending sign-off</span></dd></div>
+        <div><dt>Primary PSP</dt><dd>Stitch — shortlist also holds Peach Payments, Paystack</dd></div>
+        <div><dt>Identity &amp; KYC</dt><dd>Smile ID — organiser and beneficiary</dd></div>
+        <div><dt>Hosting</dt><dd>Web on Vercel · payments service on Fly.io Johannesburg · Postgres on Supabase Cape Town</dd></div>
+        <div><dt>Data residency</dt><dd>South Africa</dd></div>
+        <div><dt>Platform fee to families</dt><dd>0% — optional contributor tip, premium accounts for organisations</dd></div>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="Table of contents">
+    <p class="toc-title">Contents</p>
+    <ol>
+      <li><a href="#model">The model in one picture</a></li>
+      <li><a href="#regulatory">Regulatory positioning</a></li>
+      <li><a href="#rails">Payment rails</a></li>
+      <li><a href="#psp">Choosing the PSP</a></li>
+      <li><a href="#architecture">System architecture</a></li>
+      <li><a href="#tracking">Tracking money you never hold</a></li>
+      <li><a href="#datamodel">Data model</a></li>
+      <li><a href="#onboarding">Beneficiary onboarding &amp; KYC</a></li>
+      <li><a href="#lifecycle">Circle lifecycle &amp; verification tiers</a></li>
+      <li><a href="#contribution">Contribution flow</a></li>
+      <li><a href="#fees">Fees without touching the principal</a></li>
+      <li><a href="#fraud">Fraud &amp; trust</a></li>
+      <li><a href="#edgecases">Edge cases</a></li>
+      <li><a href="#notifications">Notifications</a></li>
+      <li><a href="#nonfunctional">Non-functional requirements</a></li>
+      <li><a href="#phases">Build phases</a></li>
+      <li><a href="#decisions">Open decisions</a></li>
+      <li><a href="#risks">Risks</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="model">
+      <p class="eyebrow">Section 01</p>
+      <h2>The model in one picture</h2>
+      <p class="lede">A contribution travels from the giver to the family through a licensed payment provider. Sisonke builds the circle page, the sharing loop, the verification, and the dashboard — but the money never lands in an account Sisonke owns.</p>
+
+      <figure>
+        <svg viewBox="0 0 860 470" role="img" aria-label="Money flows from contributor to PSP to a per-circle virtual account in the beneficiary's name and then sweeps to the beneficiary's bank account. Sisonke's systems only send payment requests to the PSP and receive event data and settlement files, plus a platform fee split. The principal never enters a Sisonke-controlled account.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="dg-fill-arrow"/>
+            </marker>
+            <marker id="ahd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="dg-fill-data"/>
+            </marker>
+            <marker id="ahf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="dg-fill-fee"/>
+            </marker>
+          </defs>
+
+          <!-- bright-line region -->
+          <rect class="dg-region" x="212" y="40" width="636" height="150" rx="8"/>
+          <text class="dg-regionlabel" x="230" y="58">HELD UNDER THE PSP&#39;S LICENCE — NEVER IN A SISONKE-CONTROLLED ACCOUNT</text>
+
+          <!-- money path nodes -->
+          <rect class="dg-box" x="18" y="86" width="132" height="72" rx="7"/>
+          <text class="dg-label" x="84" y="116" text-anchor="middle">Contributor</text>
+          <text class="dg-sub" x="84" y="134" text-anchor="middle">no account</text>
+
+          <rect class="dg-box" x="236" y="86" width="140" height="72" rx="7"/>
+          <text class="dg-label" x="306" y="116" text-anchor="middle">Licensed PSP</text>
+          <text class="dg-sub" x="306" y="134" text-anchor="middle">Stitch</text>
+
+          <rect class="dg-box-a" x="452" y="86" width="188" height="72" rx="7"/>
+          <text class="dg-label" x="546" y="112" text-anchor="middle">Circle virtual account</text>
+          <text class="dg-sub" x="546" y="130" text-anchor="middle">in the beneficiary&#39;s name</text>
+
+          <rect class="dg-box" x="700" y="86" width="140" height="72" rx="7"/>
+          <text class="dg-label" x="770" y="116" text-anchor="middle">Beneficiary</text>
+          <text class="dg-sub" x="770" y="134" text-anchor="middle">bank account</text>
+
+          <!-- money arrows -->
+          <line class="dg-money" x1="150" y1="122" x2="232" y2="122" marker-end="url(#ah)"/>
+          <text class="dg-arrowlabel" x="191" y="112" text-anchor="middle">pays</text>
+          <text class="dg-arrowlabel" x="191" y="140" text-anchor="middle">PayShap · EFT</text>
+
+          <line class="dg-money" x1="376" y1="122" x2="448" y2="122" marker-end="url(#ah)"/>
+          <text class="dg-arrowlabel" x="412" y="112" text-anchor="middle">settles</text>
+          <text class="dg-arrowlabel" x="412" y="140" text-anchor="middle">T+0–2</text>
+
+          <line class="dg-money" x1="640" y1="122" x2="696" y2="122" marker-end="url(#ah)"/>
+          <text class="dg-arrowlabel" x="668" y="112" text-anchor="middle">sweep</text>
+
+          <!-- Sisonke nodes -->
+          <rect class="dg-box" x="150" y="300" width="220" height="66" rx="7"/>
+          <text class="dg-label" x="260" y="330" text-anchor="middle">Sisonke platform</text>
+          <text class="dg-sub" x="260" y="348" text-anchor="middle">circle · verification · dashboard</text>
+
+          <rect class="dg-box" x="470" y="300" width="200" height="66" rx="7"/>
+          <text class="dg-label" x="570" y="330" text-anchor="middle">Sisonke revenue account</text>
+          <text class="dg-sub" x="570" y="348" text-anchor="middle">its own income only</text>
+
+          <!-- data arrows Sisonke <-> PSP -->
+          <path class="dg-data" d="M250,300 C250,240 280,210 296,162" marker-end="url(#ahd)"/>
+          <text class="dg-arrowlabel" x="150" y="250" text-anchor="start">create payment request</text>
+
+          <path class="dg-data" d="M330,162 C330,220 300,250 288,298" marker-start="url(#ahd)"/>
+          <text class="dg-arrowlabel" x="360" y="235" text-anchor="start">webhook events</text>
+          <text class="dg-arrowlabel" x="360" y="250" text-anchor="start">+ daily settlement file</text>
+
+          <!-- fee arrow PSP -> revenue -->
+          <path class="dg-fee" d="M368,150 C430,210 500,250 545,298" marker-end="url(#ahf)"/>
+          <text class="dg-arrowlabel" x="470" y="205" text-anchor="middle" style="fill:var(--gold)">platform fee + tip split</text>
+
+          <!-- legend -->
+          <line class="dg-money" x1="20" y1="420" x2="52" y2="420"/>
+          <text class="dg-sub" x="60" y="424">money movement</text>
+          <line class="dg-data" x1="215" y1="420" x2="247" y2="420"/>
+          <text class="dg-sub" x="255" y="424">instructions &amp; event data</text>
+          <line class="dg-fee" x1="470" y1="420" x2="502" y2="420"/>
+          <text class="dg-sub" x="510" y="424">Sisonke&#39;s own fee income</text>
+        </svg>
+        <figcaption>The contribution moves Contributor → PSP → beneficiary. Sisonke's systems exchange only payment instructions and event data with the PSP, and receive a platform fee as a split at settlement. Take Sisonke out of the diagram and the money still lands — that is the test that keeps the platform outside third-party-payment-provider rules.</figcaption>
+      </figure>
+
+      <p>Three properties define the model and everything downstream depends on them:</p>
+      <ul>
+        <li><strong>The beneficiary is the merchant of record.</strong> The family — or a verified organisation acting for them — holds the relationship with the PSP and is KYC'd by the PSP, not by Sisonke.</li>
+        <li><strong>Each circle gets its own virtual account</strong> issued by the PSP in the beneficiary's name. Contributions land there and sweep to the beneficiary's real bank account on a schedule or on demand.</li>
+        <li><strong>Sisonke's accounts only ever receive Sisonke's own money</strong> — the optional contributor tip and, later, subscription income. Never the principal, not even in transit.</li>
+      </ul>
+    </section>
+
+    <section id="regulatory">
+      <p class="eyebrow">Section 02</p>
+      <h2>Regulatory positioning</h2>
+      <p>South Africa's payment rules turn on a single question: does money ever vest in an account the platform owns or controls? If it does — even for a moment — Sisonke becomes a <strong>Third-Party Payment Provider</strong> under the South African Reserve Bank's framework (the National Payment System Act and Directive 1 of 2007), which requires PSP sponsorship, a ring-fenced trust account, independent audits, and registration with the payments industry body.</p>
+      <p>Direct settlement avoids that entirely. The PSP receives and holds the funds under its own licence — which it is permitted to do — and Sisonke stays a technology and trust-services provider.</p>
+
+      <h3>The bright line</h3>
+      <p><strong>Money must never enter an account Sisonke owns or controls.</strong> In practice that means:</p>
+      <ul>
+        <li>The beneficiary or a verified proxy is the merchant of record with the PSP; the virtual account holding a circle's funds is theirs, under the PSP's licence.</li>
+        <li>There is no "sweep to Sisonke, then pay out" step — ever, including for refunds, disputes, or corrections.</li>
+        <li>There is no manual "we'll collect it and forward it" fallback for awkward cases. If a case can't be served without Sisonke holding funds, it is out of scope until the managed-payout product exists.</li>
+        <li>Sisonke's bank accounts receive only platform fees and tips, which are ordinary income, not third-party money.</li>
+      </ul>
+
+      <div class="note">
+        <p class="eyebrow">Attorney sign-off checklist — before any public collection</p>
+        <p>A SA fintech attorney (Michalsons, ENSafrica, or Werksmans) must confirm, in writing:</p>
+        <ul>
+          <li>the PSP contract structure and virtual-account ownership place funds outside Sisonke's control;</li>
+          <li>the fee-split mechanism is characterised as Sisonke's service income, not held funds;</li>
+          <li>the terms of use position Sisonke as a conduit that does not guarantee how funds are used;</li>
+          <li>FICA obligations sit with the PSP and Smile ID, not Sisonke;</li>
+          <li>consumer-protection and POPIA disclosures are adequate;</li>
+          <li>an Information Officer is registered with the Information Regulator.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="rails">
+      <p class="eyebrow">Section 03</p>
+      <h2>Payment rails</h2>
+      <p>Because funds settle straight to the beneficiary and cannot be clawed back, Sisonke accepts only rails where the payer <em>pushes</em> the money and the transfer is final. This removes chargeback risk by construction — there is nothing to reverse.</p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Rail</th><th>Path</th><th>Speed</th><th>Reversible</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>PayShap</strong></td><td>via PSP (Stitch / Peach / Electrum)</td><td class="num">near real-time</td><td>No</td><td><span class="pill good">Launch</span></td></tr>
+            <tr><td><strong>Instant EFT</strong></td><td>Ozow / Stitch pay-by-bank</td><td class="num">minutes–hours</td><td>No</td><td><span class="pill good">Launch</span></td></tr>
+            <tr><td><strong>Manual EFT</strong></td><td>direct to circle virtual account</td><td class="num">hours</td><td>No</td><td><span class="pill good">Launch — fallback</span></td></tr>
+            <tr><td>Card (Visa / Mastercard)</td><td>PSP-hosted fields</td><td class="num">T+1–2</td><td>Yes — chargeback</td><td><span class="pill warn">Deferred</span></td></tr>
+            <tr><td>Debit order</td><td>—</td><td class="num">—</td><td>Yes</td><td><span class="pill mute">Not planned</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Cards are the obvious growth lever and can be reconsidered later — but safely accepting them means holding a reserve against chargebacks, which reintroduces fund-holding. That trade is deferred to a distinct phase with its own design (see <a href="#phases">Build phases</a>).</p>
+    </section>
+
+    <section id="psp">
+      <p class="eyebrow">Section 04</p>
+      <h2>Choosing the PSP</h2>
+      <p>The PSP relationship is the long pole of the whole project — onboarding and contract terms for a marketplace-style model take weeks. Start conversations with two providers in parallel immediately.</p>
+
+      <h3>Requirements</h3>
+      <ul>
+        <li>Connected-account / sub-merchant model with KYC performed by the PSP.</li>
+        <li>A per-circle virtual account or sub-account whose funds are owned by the beneficiary.</li>
+        <li>Automatic fee split routing Sisonke's cut to a Sisonke account at settlement.</li>
+        <li>PayShap and Instant EFT / pay-by-bank support.</li>
+        <li>Signed, idempotent webhooks for payment and payout events.</li>
+        <li>Payouts to SA bank accounts with FICA handled by the PSP.</li>
+        <li>A daily settlement report — file or API — for reconciliation.</li>
+        <li>A usable sandbox and a realistic onboarding timeline.</li>
+      </ul>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Provider</th><th>Fit for this model</th><th>Watch-outs</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stitch</strong> <span class="pill good">primary</span></td>
+              <td>Platform / marketplace native. Pay-by-bank, PayShap, virtual accounts, and payouts in one API. API-first with strong docs.</td>
+              <td>Confirm virtual-account ownership sits with the beneficiary; confirm split-fee settlement; newer than the incumbents.</td>
+            </tr>
+            <tr>
+              <td><strong>Peach Payments</strong> <span class="pill mute">fallback</span></td>
+              <td>Established SA aggregator. Split settlement, PayShap, PayByLink. Good route if cards are added later.</td>
+              <td>Marketplace payout flows less turnkey than Stitch; more configuration.</td>
+            </tr>
+            <tr>
+              <td><strong>Paystack</strong> <span class="pill mute">contingency</span></td>
+              <td>Excellent developer experience, subaccounts and splits, ZAR support. Existing internal prototype.</td>
+              <td>Weaker on pay-by-bank / PayShap breadth and on true per-beneficiary virtual accounts in SA.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <p class="eyebrow">Recommendation</p>
+        <p><strong>Stitch as primary.</strong> Open a Peach account in parallel as a hedge against onboarding delay and as the likely path if cards are introduced. Final choice is gated on written confirmation of virtual-account ownership and the fee-split mechanism.</p>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <p class="eyebrow">Section 05</p>
+      <h2>System architecture</h2>
+      <p>A small number of services, deliberately split so that a routine web deploy can never take down the giving flow or the money-handling code.</p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Choice</th><th>Responsibility</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Web app</strong></td><td>Next.js App Router · TypeScript · PWA · Vercel</td><td>Circle pages (server-rendered for WhatsApp / OpenGraph previews), contribution UI, organiser dashboard. No card data, minimal JS on the contribution path.</td></tr>
+            <tr><td><strong>Payments service</strong></td><td>Fastify · TypeScript · Fly.io Johannesburg</td><td>Creates payment intents, verifies and processes PSP webhooks, writes the ledger, runs reconciliation, polls payout and KYC status. Separate deploy, separate secrets.</td></tr>
+            <tr><td><strong>Database</strong></td><td>PostgreSQL · Supabase · Cape Town (af-south-1)</td><td>System of record for circles, contributions, the ledger mirror, verifications. Phone-OTP auth, row-level security, object storage.</td></tr>
+            <tr><td><strong>Jobs / queue</strong></td><td>pg-boss on the same Postgres</td><td>Notification fan-out, OpenGraph image generation, nightly reconciliation, KYC status polling. No extra infrastructure to start.</td></tr>
+            <tr><td><strong>Admin console</strong></td><td>Internal Next.js app · staff SSO</td><td>Verification review, circle moderation, dispute handling, reconciliation exceptions, refund coordination.</td></tr>
+            <tr><td><strong>Edge</strong></td><td>Cloudflare</td><td>WAF, rate limiting, bot protection, caching of public non-PII content.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Third-party services</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Need</th><th>Provider</th></tr></thead>
+          <tbody>
+            <tr><td>Payments, virtual accounts, payouts</td><td>Stitch</td></tr>
+            <tr><td>Identity &amp; liveness (organiser + beneficiary)</td><td>Smile ID</td></tr>
+            <tr><td>Transactional SMS</td><td>Clickatell</td></tr>
+            <tr><td>WhatsApp Business API</td><td>360dialog or Infobip</td></tr>
+            <tr><td>Email receipts</td><td>Resend</td></tr>
+            <tr><td>Error monitoring</td><td>Sentry</td></tr>
+            <tr><td>Product analytics (PII-masked)</td><td>PostHog</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tracking">
+      <p class="eyebrow">Section 06</p>
+      <h2>Tracking money you never hold</h2>
+      <p>Sisonke never sees the bank account, so its ledger cannot be the source of truth for balances. The PSP is the source of truth; Sisonke keeps a <strong>mirror</strong> and reconciles against it every night. Three signals feed the mirror:</p>
+      <ol class="body-list">
+        <li><strong>Payment-intent creation</strong> — Sisonke initiates, so it knows what inflow to expect.</li>
+        <li><strong>Signed webhook events</strong> — <code>payment.authorized</code>, <code>payment.settled</code>, <code>payout.completed</code> — near-real-time truth, processed idempotently by PSP event id.</li>
+        <li><strong>The daily settlement file</strong> — authoritative end-of-day truth. Every line is matched to a ledger entry; any mismatch pages an operator.</li>
+      </ol>
+
+      <figure>
+        <svg viewBox="0 0 860 300" role="img" aria-label="A contribution moves through the states initiated, authorized, settled, and swept to beneficiary. Each transition is confirmed by a specific PSP webhook. Failed and abandoned are terminal side states. A ledger entry is written only at the settled state, never from the browser redirect, and the whole pipeline is reconciled nightly against the PSP settlement file.">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="dg-fill-arrow"/>
+            </marker>
+          </defs>
+
+          <rect class="dg-box" x="14" y="40" width="120" height="46" rx="7"/>
+          <text class="dg-label" x="74" y="68" text-anchor="middle">initiated</text>
+
+          <rect class="dg-box" x="228" y="40" width="120" height="46" rx="7"/>
+          <text class="dg-label" x="288" y="68" text-anchor="middle">authorized</text>
+
+          <rect class="dg-box-a" x="442" y="40" width="120" height="46" rx="7"/>
+          <text class="dg-label" x="502" y="68" text-anchor="middle">settled</text>
+
+          <rect class="dg-box" x="656" y="40" width="150" height="46" rx="7"/>
+          <text class="dg-label" x="731" y="63" text-anchor="middle">swept to</text>
+          <text class="dg-label" x="731" y="78" text-anchor="middle">beneficiary</text>
+
+          <line class="dg-money" x1="134" y1="63" x2="224" y2="63" marker-end="url(#ah2)"/>
+          <text class="dg-arrowlabel" x="179" y="53" text-anchor="middle">webhook:</text>
+          <text class="dg-arrowlabel" x="179" y="98" text-anchor="middle">payment.authorized</text>
+
+          <line class="dg-money" x1="348" y1="63" x2="438" y2="63" marker-end="url(#ah2)"/>
+          <text class="dg-arrowlabel" x="393" y="53" text-anchor="middle">webhook:</text>
+          <text class="dg-arrowlabel" x="393" y="98" text-anchor="middle">payment.settled</text>
+
+          <line class="dg-money" x1="562" y1="63" x2="652" y2="63" marker-end="url(#ah2)"/>
+          <text class="dg-arrowlabel" x="607" y="53" text-anchor="middle">webhook:</text>
+          <text class="dg-arrowlabel" x="607" y="98" text-anchor="middle">payout.completed</text>
+
+          <!-- side states -->
+          <rect class="dg-box" x="150" y="150" width="110" height="40" rx="7"/>
+          <text class="dg-label" x="205" y="175" text-anchor="middle">failed</text>
+          <path class="dg-money" d="M120,86 C140,120 170,130 190,148" marker-end="url(#ah2)"/>
+
+          <rect class="dg-box" x="300" y="150" width="120" height="40" rx="7"/>
+          <text class="dg-label" x="360" y="175" text-anchor="middle">abandoned</text>
+          <path class="dg-data" d="M120,86 C160,140 260,150 300,166" marker-end="url(#ah2)"/>
+          <text class="dg-arrowlabel" x="215" y="140" text-anchor="middle">no callback within TTL</text>
+
+          <!-- ledger + reconciliation band -->
+          <rect class="dg-region" x="14" y="228" width="792" height="46" rx="7"/>
+          <text class="dg-regionlabel" x="30" y="248">LEDGER ENTRY WRITTEN ONLY ON &#39;SETTLED&#39; — NEVER FROM THE BROWSER REDIRECT</text>
+          <text class="dg-regionlabel" x="30" y="264">RECONCILED NIGHTLY AGAINST THE PSP SETTLEMENT FILE · UNCONFIRMED &gt; 24H IS PAGED</text>
+        </svg>
+        <figcaption>What Sisonke records at each step and where the authoritative signal comes from. The browser redirect after payment is treated as provisional; the signed webhook and the daily settlement file are the truth. A circle's <em>raised</em> total sums only settled entries — pending contributions are shown separately.</figcaption>
+      </figure>
+
+      <h3>Ledger rules</h3>
+      <ul>
+        <li>Append-only <code>ledger_entries</code>, double-entry, amounts in integer cents with an explicit currency column.</li>
+        <li>Entries are created only from confirmed webhook or settlement events — never from an optimistic client signal.</li>
+        <li>Every entry carries the PSP event id that produced it; processing is upsert-safe on that id.</li>
+        <li>The nightly reconciliation job pulls the settlement file, matches each line, produces an exceptions report, and pages on anything unmatched beyond a threshold or older than 24 hours.</li>
+      </ul>
+    </section>
+
+    <section id="datamodel">
+      <p class="eyebrow">Section 07</p>
+      <h2>Data model</h2>
+      <p>The core entities. Money is always integer cents; every PII column is encrypted at rest, and SA ID numbers and bank details get field-level encryption with a managed key.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Entity</th><th>Purpose</th><th>Notable fields</th></tr></thead>
+          <tbody>
+            <tr><td><code>organisers</code></td><td>Account holders who create circles</td><td>phone, kyc_status, reputation</td></tr>
+            <tr><td><code>beneficiaries</code></td><td>Who receives the funds</td><td>kyc_status, psp_connected_account_id, bank_verification_status, payout_method</td></tr>
+            <tr><td><code>proxies</code></td><td>Verified organisations (church, burial society, funeral parlour) that stand as beneficiary-of-record for families</td><td>org_type, verification_ref, disbursement_terms</td></tr>
+            <tr><td><code>circles</code></td><td>A single fundraising effort</td><td>type, goal_cents, currency, status, verification_tier, beneficiary_id, psp_virtual_account_id</td></tr>
+            <tr><td><code>contributions</code></td><td>One gift</td><td>amount_cents, fee_cents, net_cents, rail, psp_payment_id, status, display_name, message, anonymous, contributor_contact (nullable, encrypted)</td></tr>
+            <tr><td><code>ledger_entries</code></td><td>Immutable double-entry record</td><td>account, direction, amount_cents, currency, source_event_id</td></tr>
+            <tr><td><code>settlements</code></td><td>Lines from the daily PSP file</td><td>psp_reference, amount_cents, matched, matched_entry_id</td></tr>
+            <tr><td><code>payouts</code></td><td>Beneficiary withdrawals, executed by the PSP</td><td>amount_cents, status, psp_payout_id, evidence_ref</td></tr>
+            <tr><td><code>verifications</code></td><td>Identity, liveness, bank, and evidence checks</td><td>subject_type, check_type, provider_ref, reviewer, decision</td></tr>
+            <tr><td><code>kyc_documents</code></td><td>Encrypted document store (ID, death certificate)</td><td>separate locked bucket, access-audited, signed URLs &lt; 5 min</td></tr>
+            <tr><td><code>updates</code></td><td>Organiser progress posts</td><td>body, media_ref, published_at</td></tr>
+            <tr><td><code>messages</code> / <code>thank_yous</code></td><td>Contributor–organiser communication</td><td>channel, body, sent_at</td></tr>
+            <tr><td><code>reports</code></td><td>Trust &amp; safety flags from the public</td><td>reason, reporter_contact, status</td></tr>
+            <tr><td><code>notifications</code></td><td>Outbound message log</td><td>channel, template, status, provider_ref</td></tr>
+            <tr><td><code>audit_log</code></td><td>Append-only record of every money action and every staff action</td><td>actor, action, target, reason_code, before/after</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="onboarding">
+      <p class="eyebrow">Section 08</p>
+      <h2>Beneficiary onboarding &amp; KYC</h2>
+      <p>Direct settlement moves the KYC burden to the front of the process: a circle cannot collect until the beneficiary can receive.</p>
+
+      <h3>The flow</h3>
+      <ol class="body-list">
+        <li>Organiser creates a circle and names the beneficiary.</li>
+        <li>Beneficiary (or proxy) verifies a phone number.</li>
+        <li>Smile ID check — SA ID plus selfie liveness, validated against Home Affairs.</li>
+        <li>Bank-account verification — account-holder name match, via the PSP or a bureau.</li>
+        <li>PSP creates the connected account and issues the circle's virtual account.</li>
+        <li>The circle moves to <code>collecting</code>.</li>
+      </ol>
+
+      <h3>The funeral-timeline problem</h3>
+      <p>A funeral is often four days away and full KYC takes time. Three mitigations, in order of preference:</p>
+      <ul>
+        <li><strong>Pre-verified proxies.</strong> Churches, burial societies, and funeral parlours onboard once, then stand as beneficiary-of-record for many families and disburse onward. This is also the strongest distribution channel Sisonke has.</li>
+        <li><strong>Fast-path KYC.</strong> Smile ID selfie-plus-ID clears in minutes when documents are clean; bank verification uses an instant name check. Target: under two hours, with a visible progress indicator.</li>
+        <li><strong>Share-first, collect-later.</strong> The circle can be created and shared immediately in a <code>pending-verification</code> state; the "Contribute" button activates only once the virtual account exists.</li>
+      </ul>
+
+      <div class="note">
+        <p class="eyebrow">Decision needed</p>
+        <p>Allow contributions to be <em>pledged</em> before KYC clears, or block collection entirely until it does? <strong>Recommendation: block collection</strong>, with the proxy fast-path as the pressure valve. Pledges that can't be honoured are worse for trust than a short, visible wait.</p>
+      </div>
+    </section>
+
+    <section id="lifecycle">
+      <p class="eyebrow">Section 09</p>
+      <h2>Circle lifecycle &amp; verification tiers</h2>
+      <p>Verification gates <em>collection</em>, not payout — because settled funds cannot be recovered, a bad circle has to be stopped before it collects, not after.</p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Tier</th><th>Requirements</th><th>Collection cap</th><th>Visibility</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Unverified</strong></td><td>Phone number only</td><td class="num">R5,000</td><td>Unlisted, link-only</td></tr>
+            <tr><td><strong>ID-verified</strong></td><td>Organiser Smile ID + beneficiary bank verified</td><td class="num">R50,000</td><td>Listed</td></tr>
+            <tr><td><strong>Evidence-verified</strong></td><td>Above, plus death certificate or institutional letter, staff-reviewed</td><td class="num">Uncapped</td><td>Listed + eligible to be featured</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Lifecycle states</h3>
+      <p><code>draft</code> → <code>pending-verification</code> → <code>collecting</code> → <code>goal-reached</code> (still collecting) → <code>closed</code> → <code>settled-complete</code>. The organiser can close early; circles auto-close after a period of inactivity with a prompt.</p>
+    </section>
+
+    <section id="contribution">
+      <p class="eyebrow">Section 10</p>
+      <h2>Contribution flow</h2>
+      <ol class="body-list">
+        <li>Contributor opens the circle page — server-rendered, with an OpenGraph image showing live progress. No account required.</li>
+        <li>They pick an amount and a rail, enter a display name and optional message, and set the anonymity toggle.</li>
+        <li>The web app calls the payments service, which creates a payment intent, writes a <code>contribution</code> row as <code>initiated</code>, and returns a PSP-hosted payment URL or PayShap request.</li>
+        <li>The contributor completes payment at the PSP or in their banking app, then returns to a thank-you page — status still provisional.</li>
+        <li>The PSP webhook arrives; the payments service verifies the signature, processes it idempotently, and on <code>payment.settled</code> writes the ledger entry, marks the contribution <code>settled</code>, recomputes the circle total, and enqueues notifications.</li>
+        <li>Notifications go out: SMS and WhatsApp to the organiser ("R200 from Thandi M."), a receipt to the contributor if contact was given, and a thank-you prompt to the organiser.</li>
+        <li>Funds settle to the circle virtual account; the PSP sweeps them to the beneficiary's bank account on schedule or on demand.</li>
+      </ol>
+      <p>If payment fails or is abandoned, the contribution is marked <code>failed</code> or <code>abandoned</code>, no ledger entry is written, and the contributor gets a retry link. A lost webhook is caught by the nightly settlement reconciliation.</p>
+    </section>
+
+    <section id="fees">
+      <p class="eyebrow">Section 11</p>
+      <h2>Fees without touching the principal</h2>
+      <ul>
+        <li>The PSP performs a <strong>split at settlement</strong>: the beneficiary's virtual account receives the net, and a Sisonke account receives the platform fee (if any) plus the contributor tip.</li>
+        <li><strong>Recommended: 0% platform fee on funeral circles.</strong> A mandatory cut from a grieving family is the wrong posture. Contributors can add an optional tip to Sisonke at checkout — suggested by default, removed in one tap.</li>
+        <li>The PSP transaction fee is either shown transparently as deducted from the beneficiary's amount, or covered by a "cover the fee" toggle for the contributor (recommended default: on).</li>
+        <li>Later monetisation: premium accounts for proxies and organisations (multi-circle dashboards, branding, reporting), and B2B relationships with employers and insurers — never a cut from families.</li>
+        <li>Every fee movement is ordinary income into Sisonke's own account. No third-party funds are involved, so this does not compromise the regulatory posture.</li>
+      </ul>
+    </section>
+
+    <section id="fraud">
+      <p class="eyebrow">Section 12</p>
+      <h2>Fraud &amp; trust</h2>
+      <p>Funeral-fundraising fraud is the platform's biggest reputational risk, and direct settlement removes the holdback lever — so defence moves entirely to <em>before</em> collection starts.</p>
+      <ul>
+        <li><strong>Verification gates collection.</strong> A circle above the unverified cap cannot take money until identity, and for larger amounts evidence, is confirmed.</li>
+        <li><strong>Duplicate detection.</strong> The same deceased name, area, and date across circles is flagged for review.</li>
+        <li><strong>Velocity and anomaly checks.</strong> Sudden spikes, many small contributions from one instrument, and organiser–beneficiary identity overlap raise flags.</li>
+        <li><strong>Community reporting</strong> on every circle, with a staff takedown SLA and the ability to freeze a virtual account through the PSP.</li>
+        <li><strong>Reputation.</strong> Organiser and beneficiary identity is bound to a verified ID and carries across circles.</li>
+        <li><strong>Transparency as deterrent.</strong> Public progress, supporter counts, and required updates make fabricated circles harder to sustain.</li>
+        <li><strong>Audit everything.</strong> Append-only log of every money action and every staff action, with reason codes.</li>
+      </ul>
+    </section>
+
+    <section id="edgecases">
+      <p class="eyebrow">Section 13</p>
+      <h2>Edge cases</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Case</th><th>Handling</th></tr></thead>
+          <tbody>
+            <tr><td>Payment fails or is abandoned</td><td>No ledger entry; contributor gets a retry link.</td></tr>
+            <tr><td>Contributions exceed the goal</td><td>Collection continues unless the organiser closes the circle; the goal is shown as met.</td></tr>
+            <tr><td>Contributor wants a refund</td><td>Push payments are final and Sisonke cannot reverse them. The request is logged, the organiser or beneficiary is asked to refund voluntarily from received funds, and Sisonke facilitates a reverse PayShap — but cannot compel it. Checkout states plainly that contributions are final.</td></tr>
+            <tr><td>Card chargeback</td><td>Not applicable at launch — no cards.</td></tr>
+            <tr><td>Beneficiary is unbanked</td><td>They open an account (Capitec or TymeBank, minutes) or a pre-verified banked proxy receives on their behalf. No retail cash-out at launch.</td></tr>
+            <tr><td>Family dispute over the beneficiary</td><td>Circle frozen via the PSP; funds remain in the virtual account under PSP custody — not Sisonke's — pending a documented staff mediation.</td></tr>
+            <tr><td>Organiser abandons the circle or dies</td><td>The beneficiary or a proxy can claim it with verification, staff-assisted.</td></tr>
+            <tr><td>Sweep to the beneficiary bank fails</td><td>The PSP retries; the beneficiary re-verifies account details; funds stay in the virtual account meanwhile.</td></tr>
+            <tr><td>Fraud suspected after some funds have settled</td><td>Freeze the remainder, report, involve law enforcement. Already-settled funds may be unrecoverable — which is why pre-verification carries the weight.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="notifications">
+      <p class="eyebrow">Section 14</p>
+      <h2>Notifications</h2>
+      <p>In this market SMS and WhatsApp are the channels that reach people; email is a minority case for receipts.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Event</th><th>Channel</th><th>Recipient</th></tr></thead>
+          <tbody>
+            <tr><td>One-time PIN</td><td>SMS</td><td>User</td></tr>
+            <tr><td>Contribution received</td><td>SMS + WhatsApp</td><td>Organiser</td></tr>
+            <tr><td>Contribution receipt</td><td>Email or SMS</td><td>Contributor (if contact given)</td></tr>
+            <tr><td>KYC status change</td><td>SMS</td><td>Beneficiary / organiser</td></tr>
+            <tr><td>Payout sent</td><td>SMS + WhatsApp</td><td>Beneficiary</td></tr>
+            <tr><td>Circle milestone (50%, goal)</td><td>WhatsApp</td><td>Organiser</td></tr>
+            <tr><td>Thank-you prompt</td><td>WhatsApp</td><td>Organiser</td></tr>
+            <tr><td>Trust flag or takedown</td><td>Email + SMS</td><td>Organiser</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Providers: Clickatell for SMS (SA network deliverability), 360dialog or Infobip for the WhatsApp Business API, Resend for email. Every send is recorded in <code>notifications</code>.</p>
+    </section>
+
+    <section id="nonfunctional">
+      <p class="eyebrow">Section 15</p>
+      <h2>Non-functional requirements</h2>
+      <ul>
+        <li><strong>POPIA.</strong> Register an Information Officer with the Information Regulator. Lawful basis and consent captured; data-subject access and erasure supported; 72-hour breach notification. Retention: KYC documents held per FICA (five years), contribution records five years, then contributor contact purged.</li>
+        <li><strong>Data residency.</strong> Postgres, object storage, and KYC documents in South Africa. Vercel's edge caches only public, non-PII content.</li>
+        <li><strong>Encryption.</strong> TLS everywhere; PII encrypted at rest; SA ID numbers and bank details field-level encrypted with a managed key. KYC documents in a separate, access-audited bucket with signed URLs under five minutes.</li>
+        <li><strong>PCI.</strong> Scope stays SAQ-A — no card data at launch. If cards are added, PSP-hosted fields only.</li>
+        <li><strong>Load shedding.</strong> Every money flow is idempotent and resumable; form state is saved client-side; payment status is always re-fetchable; nothing depends on a single long-lived connection.</li>
+        <li><strong>Performance.</strong> The contribution path ships under 100&nbsp;KB of JavaScript and works on 3G; time-to-interactive under three seconds on a low-end Android. Public pages are server-rendered and cached.</li>
+        <li><strong>Accessibility &amp; language.</strong> WCAG AA. Internationalisation scaffold from day one: launch in English, then isiZulu, isiXhosa, Afrikaans, and Sesotho.</li>
+        <li><strong>Observability.</strong> Sentry for errors, PostHog for product analytics with PII masked, uptime checks on the create-circle, contribute, and webhook endpoints, alerts on reconciliation exceptions and webhook backlog.</li>
+      </ul>
+    </section>
+
+    <section id="phases">
+      <p class="eyebrow">Section 16</p>
+      <h2>Build phases</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Phase</th><th>Goal</th><th>In scope</th><th>Explicitly not yet</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>0 · Foundations</strong><br><span class="pill mute">wks 1–3</span></td>
+              <td>Company, contracts, legal in motion</td>
+              <td>Pty Ltd and bank accounts; Stitch and Peach onboarding started; attorney review commissioned; Information Officer registered</td>
+              <td>Any shipped code</td>
+            </tr>
+            <tr>
+              <td><strong>1 · Money-path spike</strong><br><span class="pill mute">wks 3–6</span></td>
+              <td>One funeral circle, end to end</td>
+              <td>Create circle; beneficiary KYC via Smile ID; virtual account; PayShap contribution; webhook → ledger; dashboard total</td>
+              <td>Family and community circle types; tiers; WhatsApp</td>
+            </tr>
+            <tr>
+              <td><strong>2 · Trust &amp; operations</strong><br><span class="pill mute">wks 6–10</span></td>
+              <td>Safe enough to pilot</td>
+              <td>Verification tiers; admin console; nightly reconciliation; duplicate detection; SMS notifications; refund-request flow</td>
+              <td>Featured circles; proxy accounts</td>
+            </tr>
+            <tr>
+              <td><strong>3 · Pilot</strong><br><span class="pill mute">wks 10–14</span></td>
+              <td>One burial society or church</td>
+              <td>Pre-verified proxy accounts; WhatsApp notifications; OpenGraph images; updates and thank-yous; i18n scaffold</td>
+              <td>Public launch marketing</td>
+            </tr>
+            <tr>
+              <td><strong>4 · Public launch</strong></td>
+              <td>Open sign-up</td>
+              <td>Family and community circle types; PostHog funnels; load and fraud hardening; insurance in place</td>
+              <td>Cards; retail cash-out</td>
+            </tr>
+            <tr>
+              <td><strong>Later</strong></td>
+              <td>Reach &amp; revenue</td>
+              <td>Card payments with a holdback reserve; retail cash-out; premium organisation accounts; more languages; WhatsApp-native giving</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="decisions">
+      <p class="eyebrow">Section 17</p>
+      <h2>Open decisions</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Question</th><th>Leaning</th></tr></thead>
+          <tbody>
+            <tr><td>Pledge before KYC clears, or block collection until it does?</td><td>Block, with the proxy fast-path as the pressure valve</td></tr>
+            <tr><td>Who covers the PSP transaction fee?</td><td>Contributor "cover the fee" toggle, default on</td></tr>
+            <tr><td>Primary PSP</td><td>Stitch, pending written confirmation on virtual-account ownership and fee split</td></tr>
+            <tr><td>Are proxies (burial societies) in the pilot or a later phase?</td><td>Pilot — they are the distribution channel</td></tr>
+            <tr><td>How hard to lean on "contributions are final"?</td><td>Firm and upfront; voluntary refunds facilitated but never guaranteed</td></tr>
+            <tr><td>Hosting shape</td><td>Vercel + Fly.io + Supabase split for the MVP; revisit all-in AWS af-south-1 at scale</td></tr>
+            <tr><td>Fee model</td><td>0% platform fee plus optional tip</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="risks">
+      <p class="eyebrow">Section 18</p>
+      <h2>Risks</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td>PSP onboarding is slow or rejects the marketplace model</td><td>Medium</td><td>High</td><td>Start now; two PSPs in parallel; the proxy model reduces the number of sub-accounts needed</td></tr>
+            <tr><td>SARB or counsel treats Sisonke as a TPPP</td><td>Low</td><td>High</td><td>Attorney sign-off before launch; conservative account structure; no fund-holding, ever</td></tr>
+            <tr><td>A funeral-scam story damages the brand</td><td>Medium</td><td>High</td><td>Pre-verification gates; evidence tier; duplicate detection; fast takedown; a prepared PR response</td></tr>
+            <tr><td>KYC is too slow for funeral urgency</td><td>High</td><td>Medium</td><td>Proxy fast-path; under-two-hour SLA target; clear progress UI</td></tr>
+            <tr><td>Chargeback exposure if cards are added too early</td><td>Medium</td><td>Medium</td><td>Cards deferred; a holdback reserve must be designed first</td></tr>
+            <tr><td>Reconciliation drift on money Sisonke can't see</td><td>Medium</td><td>Medium</td><td>Daily settlement file; nightly job; exceptions paging</td></tr>
+            <tr><td>Breach of stored KYC documents</td><td>Low</td><td>High</td><td>Isolated encrypted bucket; access audit; short-lived URLs; retention purge</td></tr>
+            <tr><td>Load shedding disrupts payment confirmation</td><td>High</td><td>Low</td><td>Idempotent, resumable flows; re-fetchable status</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Sisonke · Direct Settlement Architecture</span>
+    <span>v0.1 · 7 Sep 2026</span>
+    <span>Draft for review — not for distribution pending attorney sign-off</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById("themeToggle");
+    var KEY = "sisonke-theme";
+    try {
+      var saved = localStorage.getItem(KEY);
+      if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+    } catch (e) {}
+
+    function current() {
+      var explicit = root.getAttribute("data-theme");
+      if (explicit) return explicit;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    btn.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem(KEY, next); } catch (e) {}
+    });
+
+    // TOC active-section highlighting
+    var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove("active"); });
+          var a = byId[entry.target.id];
+          if (a) a.classList.add("active");
+        }
+      });
+    }, { rootMargin: "-10% 0px -80% 0px" });
+    document.querySelectorAll("main > section").forEach(function (s) { io.observe(s); });
+  })();
+</script>

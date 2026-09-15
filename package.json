@@ -1,0 +1,19 @@
+{
+  "name": "mseezee",
+  "private": true,
+  "version": "0.1.0",
+  "description": "MseeZee — location-based community contribution platform for South Africa",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @mseezee/web",
+    "build": "npm run build --workspace @mseezee/shared && npm run build --workspace @mseezee/web",
+    "lint": "npm run lint --workspace @mseezee/web",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
