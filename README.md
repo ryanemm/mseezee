@@ -4,12 +4,17 @@ Location-based community contribution platform for South Africa. People find
 funerals, families and neighbourhood projects **in their area** and contribute in
 seconds.
 
-> Status: frontend prototype. The money model (non-profit vs for-profit, who
-> holds funds, which PSP) is still being decided. The frontend is deliberately
-> built behind a typed API boundary with mock data so it survives that decision.
+> Status: live at mseezee.co.za (Frankfurt VPS, build-and-test — migrates to a
+> South Africa host before the pilot). Money model decided: **Pty Ltd now,
+> NPC conversion planned post-pilot**, funds settle directly to the
+> beneficiary (never held by MseeZee), our admin fee taken as a separate
+> split. Confirmed for **partner organisations**; **individual beneficiaries**
+> are wanted too but that's the same shape Stitch already declined — pending
+> written confirmation from Paystack before it's treated as real. See the
+> update note at the top of `money-model-decision.html`.
 >
 > Docs in [`docs/`](./docs):
-> - `money-model-decision.html` — the three lawful options + recommendation (for the founders + attorney)
+> - `money-model-decision.html` — the decision, what's confirmed vs pending, and why (for the founders + attorney)
 > - `partner-onepager.html` — explainer for burial societies / churches + discovery questions
 > - `payments-spike.md` — the Paystack test-mode integration: what's built and how to run it
 > - `direct-settlement-architecture.html` — earlier exploration (superseded on the money model, still useful on rails/PSPs/KYC)
