@@ -29,7 +29,12 @@
   --warn: #a4611f;
   --crit: #8f3a2c;
 
-  --mz-shadow-card: 0 1px 2px rgba(27, 36, 29, 0.05), 0 8px 24px rgba(27, 36, 29, 0.06);
+  /* Soft, slightly embossed elevation — a light top edge plus a long, low shadow. */
+  --mz-shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(27, 36, 29, 0.05),
+    0 14px 34px -10px rgba(27, 36, 29, 0.16);
+  --mz-shadow-pill: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 2px 8px rgba(27, 36, 29, 0.09);
+  --paper-glow: rgba(255, 255, 255, 0.75);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,7 +61,11 @@
     --warn: #d0904e;
     --crit: #d76d5b;
 
-    --mz-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.3);
+    --mz-shadow-card:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.4),
+      0 14px 34px -10px rgba(0, 0, 0, 0.5);
+    --mz-shadow-pill: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 2px 8px rgba(0, 0, 0, 0.35);
+    --paper-glow: rgba(255, 255, 255, 0.03);
   }
 }
 
@@ -83,8 +92,9 @@
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-card: 16px;
+  --radius-card: 22px;
   --shadow-card: var(--mz-shadow-card);
+  --shadow-pill: var(--mz-shadow-pill);
 }
 
 * {
@@ -97,7 +107,10 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background:
+    radial-gradient(130% 55% at 50% -8%, var(--paper-glow), transparent 62%), var(--paper);
+  background-repeat: no-repeat;
+  min-height: 100dvh;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -106,23 +119,30 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-  margin: 0;
+/* In a layer (not bare) so Tailwind utilities like `font-sans` or `leading-tight`
+   on a heading can actually override these defaults — unlayered rules beat
+   layered utilities regardless of specificity. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
 }
 
-.eyebrow {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gold);
+@layer components {
+  .eyebrow {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
 }
 
 .tnum {
@@ -142,4 +162,51 @@ h3 {
   outline: 2px solid var(--forest-bright);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Area map (Leaflet) — pastel, warm, and quiet so the pins carry the weight.
+   Scoped under .mz-map so nothing leaks into other Leaflet uses.
+   --------------------------------------------------------------------------- */
+.mz-map .leaflet-container {
+  background: #dfe9ea;
+  font-family: var(--font-sans);
+}
+.mz-map .leaflet-tile-pane {
+  filter: saturate(0.5) sepia(0.22) brightness(1.08) contrast(0.88);
+}
+.mz-map .mz-pin {
+  background: none;
+  border: none;
+  filter: drop-shadow(0 3px 3px rgba(27, 36, 29, 0.32));
+}
+.mz-map .leaflet-tooltip {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 7px 11px;
+  box-shadow: var(--mz-shadow-card);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.mz-map .leaflet-tooltip-top::before {
+  border-top-color: var(--surface);
+}
+.mz-map .leaflet-control-attribution {
+  background: rgba(255, 253, 247, 0.82);
+  border-radius: 10px 0 0 0;
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+.mz-map .leaflet-bar {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--mz-shadow-pill);
+}
+.mz-map .leaflet-bar a {
+  background: var(--surface);
+  color: var(--ink);
+  border-bottom-color: var(--line);
 }

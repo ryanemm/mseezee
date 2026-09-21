@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Logo } from "./Logo";
 import { AuthControl } from "@/components/auth/AuthControl";
 
@@ -10,31 +11,36 @@ type NavItem = {
   href: string;
   label: string;
   icon: (props: IconProps) => ReactElement;
+  /** Only shown once signed in — the sign-in link at the bottom covers it otherwise. */
+  authOnly?: boolean;
 };
 
 const NAV: NavItem[] = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/explore", label: "Explore", icon: MapIcon },
-  { href: "/activity", label: "Activity", icon: HeartIcon },
-  { href: "/profile", label: "Profile", icon: UserIcon },
+  { href: "/activity", label: "Circles", icon: HeartIcon, authOnly: true },
+  { href: "/profile", label: "Profile", icon: UserIcon, authOnly: true },
 ];
 
 /** The persistent left-hand nav shown at `md` and above, replacing the
  *  mobile header + bottom tab bar. */
 export function Sidebar() {
   const pathname = usePathname();
+  const { status } = useSession();
+  const signedIn = status === "authenticated";
+  const visibleNav = NAV.filter((item) => !item.authOnly || signedIn);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-line bg-surface md:flex">
       <Link href="/" className="flex items-center gap-2.5 px-6 py-6">
         <Logo className="size-8" />
-        <span className="font-display text-xl font-semibold tracking-tight text-forest">
+        <span className="font-display text-2xl font-bold tracking-tight text-forest">
           MseeZee
         </span>
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {visibleNav.map(({ href, label, icon: Icon }) => {
           const active =
             href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
@@ -57,7 +63,7 @@ export function Sidebar() {
       <div className="px-3 pb-3">
         <Link
           href="/create"
-          className="flex items-center justify-center gap-2 rounded-full bg-forest px-4 py-3 text-sm font-semibold text-surface shadow-[0_6px_16px_rgba(31,74,52,0.25)] transition-[filter,transform] hover:brightness-110 active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 rounded-full bg-[linear-gradient(180deg,var(--forest-bright),var(--forest))] px-4 py-3 text-sm font-semibold text-surface shadow-[0_8px_18px_-6px_rgba(31,74,52,0.55),inset_0_1px_0_rgba(255,255,255,0.2)] transition-[filter,transform] hover:brightness-110 active:scale-[0.98]"
         >
           <PlusIcon className="size-4" />
           Start a circle

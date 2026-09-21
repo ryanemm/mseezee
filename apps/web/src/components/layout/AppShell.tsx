@@ -9,11 +9,11 @@ import { BottomNav } from "./BottomNav";
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-dvh bg-paper">
+    <div className="min-h-dvh">
       <Sidebar />
       <div className="flex min-h-dvh flex-col md:pl-64">
         <MobileHeader />
-        <main className="flex-1 pb-24 md:pb-0">{children}</main>
+        <main className="flex-1 pb-32 md:pb-0">{children}</main>
         <BottomNav />
       </div>
     </div>

@@ -27,7 +27,9 @@ export function ContributeRail({ circle }: { circle: Circle }) {
           supporterCount={circle.supporterCount}
         />
 
-        <VerifiedChip tier={circle.verificationTier} />
+        <div className="flex">
+          <VerifiedChip tier={circle.verificationTier} />
+        </div>
 
         {closed ? (
           <span className="rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">

@@ -26,9 +26,9 @@ export function TypeChip({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.08em] ${
+      className={`inline-flex items-center rounded-full px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.1em] ${
         onDark
-          ? "bg-white/15 text-white"
+          ? "bg-black/30 text-[#f6e6bd] ring-1 ring-inset ring-gold-line/70 backdrop-blur-sm"
           : "bg-gold-soft text-gold"
       }`}
     >

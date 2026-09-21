@@ -9,7 +9,7 @@ export function AuthControl({ compact = false }: { compact?: boolean }) {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div className={compact ? "size-8" : "h-9"} />;
+    return <div className={compact ? "size-10" : "h-9"} />;
   }
 
   if (!session?.user) {
@@ -18,7 +18,7 @@ export function AuthControl({ compact = false }: { compact?: boolean }) {
         href="/sign-in"
         className={
           compact
-            ? "rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ink-soft"
+            ? "rounded-full border border-gold-line/60 bg-surface px-5 py-2.5 text-[0.95rem] font-semibold text-forest shadow-pill"
             : "flex items-center justify-center gap-2 rounded-full border border-line py-2.5 text-sm font-semibold text-ink-soft hover:bg-surface-sunk"
         }
       >
@@ -35,7 +35,7 @@ export function AuthControl({ compact = false }: { compact?: boolean }) {
         type="button"
         onClick={() => signOut({ callbackUrl: "/" })}
         aria-label={`Sign out of ${label}`}
-        className="flex size-8 items-center justify-center rounded-full bg-forest/10 text-xs font-semibold text-forest"
+        className="flex size-10 items-center justify-center rounded-full border border-gold-line/50 bg-surface text-sm font-bold text-forest shadow-pill"
       >
         {label.slice(0, 1).toUpperCase()}
       </button>

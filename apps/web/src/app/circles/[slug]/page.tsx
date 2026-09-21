@@ -51,14 +51,15 @@ export default async function CirclePage({
   const closed = circle.status === "closed";
 
   return (
-    <div className="pb-44 lg:pb-16">
+    <div className="pb-60 lg:pb-16">
       {/* Hero */}
       <div className="mx-auto w-full max-w-6xl lg:px-8">
         <div className="relative lg:overflow-hidden lg:rounded-card">
           <CoverArt
             cover={circle.cover}
             showMonogram={false}
-            className={isFuneral ? "h-56 lg:h-72" : "h-44 lg:h-64"}
+            emblemAside
+            className={isFuneral ? "h-64 lg:h-72" : "h-44 lg:h-64"}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <Link
@@ -76,9 +77,9 @@ export default async function CirclePage({
               />
             </svg>
           </Link>
-          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-4 text-white lg:p-7">
+          <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-4 text-white lg:p-7">
             <TypeChip type={circle.type} onDark />
-            {isFuneral && (
+            {isFuneral && !circle.title.toLowerCase().startsWith("in loving memory") && (
               <p className="font-display text-sm italic text-white/85 lg:text-base">
                 In loving memory of {circle.beneficiaryName.replace(" family", "")}
               </p>

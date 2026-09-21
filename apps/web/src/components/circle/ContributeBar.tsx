@@ -10,7 +10,7 @@ export function ContributeBar({
   closed?: boolean;
 }) {
   return (
-    <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+3.5rem)] z-20 border-t border-line bg-surface/95 px-4 py-3 backdrop-blur md:bottom-0 md:left-64 lg:hidden">
+    <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6rem)] z-20 rounded-[22px] border border-line bg-surface/95 px-3 py-2.5 shadow-card backdrop-blur md:inset-x-auto md:bottom-0 md:left-64 md:right-0 md:rounded-none md:border-x-0 md:border-b-0 md:px-4 md:py-3 lg:hidden">
       <div className="mx-auto flex w-full max-w-xl items-center gap-2">
         <button
           type="button"

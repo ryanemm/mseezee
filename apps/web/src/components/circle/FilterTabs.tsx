@@ -14,7 +14,7 @@ export function FilterTabs({
   areaSlug: string;
 }) {
   return (
-    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-2 pt-0.5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
       {TABS.map((tab) => {
         const isActive = active === tab.key;
         const href =
@@ -25,10 +25,10 @@ export function FilterTabs({
           <Link
             key={tab.key}
             href={href}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-full border px-4 py-2 text-[0.88rem] font-semibold transition-[background-color,box-shadow,color] ${
               isActive
-                ? "border-forest bg-forest text-surface"
-                : "border-line bg-surface text-ink-soft hover:border-ink-faint"
+                ? "border-forest bg-[linear-gradient(180deg,var(--forest-bright),var(--forest))] text-surface shadow-[0_6px_14px_-5px_rgba(31,74,52,0.55),inset_0_1px_0_rgba(255,255,255,0.2)]"
+                : "border-gold-line/45 bg-surface text-ink shadow-pill hover:border-gold-line"
             }`}
           >
             {tab.label}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Activity" };
+export const metadata: Metadata = { title: "Circles" };
 
 const links = [
   {
@@ -22,7 +22,7 @@ export default function ActivityPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-5 lg:px-8">
       <header className="flex flex-col gap-1">
-        <p className="eyebrow">Activity</p>
+        <p className="eyebrow">Circles</p>
         <h1 className="text-2xl">Your circles &amp; giving</h1>
         <p className="text-sm text-ink-soft">
           Partner-organisation accounts aren't built yet, so that dashboard
