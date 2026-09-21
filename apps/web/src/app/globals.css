@@ -97,6 +97,18 @@
   --shadow-pill: var(--mz-shadow-pill);
 }
 
+/* iOS Safari zooms the whole page when a field with text under 16px gets focus,
+   and leaves it zoomed and shifted. Unlayered on purpose: it must beat the
+   `text-sm` utilities on the fields. Touch and phone-width only, so desktop
+   keeps its compact fields. */
+@media (pointer: coarse), (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
