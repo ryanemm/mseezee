@@ -31,7 +31,11 @@ export function ContributeRail({ circle }: { circle: Circle }) {
           <VerifiedChip tier={circle.verificationTier} />
         </div>
 
-        {closed ? (
+        {circle.isDemo ? (
+          <span className="rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
+            Example circle — not open for contributions
+          </span>
+        ) : closed ? (
           <span className="rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
             This circle is closed
           </span>

@@ -5,7 +5,7 @@ import { formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { TypeChip, VerifiedChip } from "@/components/ui/Chip";
+import { ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
 import { AreaMiniMap } from "@/components/circle/AreaMiniMap";
 import { ContributeBar } from "@/components/circle/ContributeBar";
 import { ContributeRail } from "@/components/circle/ContributeRail";
@@ -113,6 +113,7 @@ export default async function CirclePage({
             />
             <div className="flex flex-wrap items-center gap-1.5">
               <VerifiedChip tier={circle.verificationTier} />
+              {circle.isDemo && <ExampleChip />}
               {circle.status === "goal_reached" && (
                 <span className="rounded-full bg-good/10 px-2 py-0.5 text-[0.68rem] font-semibold text-good">
                   Goal reached · still open
@@ -242,7 +243,7 @@ export default async function CirclePage({
         <ContributeRail circle={circle} />
       </div>
 
-      <ContributeBar slug={circle.slug} closed={closed} />
+      <ContributeBar slug={circle.slug} closed={closed} isDemo={circle.isDemo} />
     </div>
   );
 }

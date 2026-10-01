@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Circle } from "@mseezee/shared";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { DistanceChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
+import { DistanceChip, ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
 import { eventDateLabel } from "@/lib/format";
 
 export function CircleCard({
@@ -40,6 +40,7 @@ export function CircleCard({
         <div className="flex flex-wrap items-center gap-1.5">
           <DistanceChip distanceKm={circle.distanceKm} areaName={areaLabel} />
           <VerifiedChip tier={circle.verificationTier} />
+          {circle.isDemo && <ExampleChip />}
         </div>
 
         <h3 className="font-display text-[1.15rem] font-semibold leading-snug text-ink">

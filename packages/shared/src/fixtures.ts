@@ -24,7 +24,7 @@ const daysAgo = (n: number) =>
 const daysAhead = (n: number) =>
   new Date(Date.now() + n * 24 * 60 * 60 * 1000).toISOString();
 
-export const CIRCLES: Circle[] = [
+const CIRCLES_SEED: Circle[] = [
   {
     id: "circle_mokoena",
     slug: "mokoena-family-soweto",
@@ -295,6 +295,10 @@ export const CIRCLES: Circle[] = [
     cover: { tone: "essentials", monogram: "U4" },
   },
 ];
+
+/** Seeded so the app never looks empty before real circles exist — never
+ *  payable, see `Circle.isDemo` and the contribute-flow checks that gate on it. */
+export const CIRCLES: Circle[] = CIRCLES_SEED.map((c) => ({ ...c, isDemo: true }));
 
 export const UPDATES: CircleUpdate[] = [
   {

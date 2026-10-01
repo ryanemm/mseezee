@@ -205,11 +205,20 @@ body {
 .mz-map .leaflet-tooltip-top::before {
   border-top-color: var(--surface);
 }
+/* Required by OpenStreetMap's usage policy for the free tiles — kept small
+   and low-contrast rather than removed. Leaflet's own "Leaflet" credit is
+   dropped separately in AreaMapInner.tsx (QuietAttribution), since that part
+   isn't required. */
 .mz-map .leaflet-control-attribution {
-  background: rgba(255, 253, 247, 0.82);
-  border-radius: 10px 0 0 0;
-  font-size: 10px;
-  color: var(--ink-soft);
+  background: transparent;
+  padding: 0 4px;
+  font-size: 8px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+  opacity: 0.75;
+}
+.mz-map .leaflet-control-attribution a {
+  color: inherit;
 }
 .mz-map .leaflet-bar {
   border: 1px solid var(--line);

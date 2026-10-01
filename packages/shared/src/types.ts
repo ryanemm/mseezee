@@ -79,6 +79,10 @@ export interface Circle {
   distanceKm?: number;
   /** Visual key for the generated cover — no external image dependency. */
   cover: CoverArt;
+  /** Seeded example content, not a real cause — the contribute flow refuses
+   *  payment for these regardless of what the UI shows, so hiding the button
+   *  is never the only thing standing between this and a real charge. */
+  isDemo?: boolean;
 }
 
 export interface CoverArt {

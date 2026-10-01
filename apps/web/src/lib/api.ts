@@ -20,6 +20,7 @@ import {
   listDbCirclesByOrganiser,
 } from "@/lib/liveCircles";
 import { prisma } from "@/lib/db";
+import { reconcilePendingContributions } from "@/lib/payments";
 
 /**
  * The single place the app gets its data. Two sources feed every read:
@@ -40,6 +41,7 @@ function mergeCircle(circle: Circle, live: LiveTotals): Circle {
 }
 
 async function getCircle(slug: string) {
+  await reconcilePendingContributions(slug);
   const dbCircle = await getDbCircleBySlug(slug);
   if (dbCircle) return dbCircle; // already carries live totals
 
@@ -124,6 +126,7 @@ async function dbCircleDashboard(circle: Circle): Promise<CircleDashboard> {
 }
 
 async function getCircleDashboard(slug: string) {
+  await reconcilePendingContributions(slug);
   const dbCircle = await getDbCircleBySlug(slug);
   if (dbCircle) return dbCircleDashboard(dbCircle);
 

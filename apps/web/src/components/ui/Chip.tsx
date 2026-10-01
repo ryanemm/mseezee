@@ -37,6 +37,14 @@ export function TypeChip({
   );
 }
 
+export function ExampleChip() {
+  return (
+    <span className="inline-flex items-center rounded-full border border-dashed border-ink-faint/50 px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-[0.08em] text-ink-faint">
+      Example
+    </span>
+  );
+}
+
 export function DistanceChip({
   distanceKm,
   areaName,

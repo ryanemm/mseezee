@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Circle, ContributionDraft } from "@mseezee/shared";
 import {
+  MIN_CONTRIBUTION_CENTS,
   estimateFeeCents,
   formatZAR,
   parseRandInput,
@@ -37,7 +38,7 @@ export function ContributeForm({ circle }: { circle: Circle }) {
   const totalCents = amountCents + feeCents + tipCents;
 
   const nameError = !anonymous && displayName.trim().length === 0;
-  const amountError = amountCents < 1000;
+  const amountError = amountCents < MIN_CONTRIBUTION_CENTS;
 
   function selectPreset(cents: number) {
     setIsCustom(false);
@@ -131,7 +132,7 @@ export function ContributeForm({ circle }: { circle: Circle }) {
         )}
         {amountError && (
           <p className="text-xs text-crit">
-            The smallest contribution is {formatZAR(1000)}.
+            The smallest contribution is {formatZAR(MIN_CONTRIBUTION_CENTS)}.
           </p>
         )}
       </fieldset>

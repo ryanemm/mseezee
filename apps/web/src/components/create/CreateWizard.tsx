@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Area, CircleType, LocationPrecision } from "@mseezee/shared";
 import { CIRCLE_TYPES, findCircleType, formatZAR, parseRandInput } from "@mseezee/shared";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 
 export function CreateWizard({ areas }: { areas: Area[] }) {
   const [step, setStep] = useState(0);
@@ -81,24 +81,30 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
             />
           </svg>
         </div>
-        <h1 className="text-2xl">Circle created as a draft</h1>
+        <h1 className="text-2xl">Your circle is up</h1>
         <p className="max-w-xs text-sm text-ink-soft">
-          {isFuneral
-            ? "Next, choose a verified community partner in your area to receive the funds, or verify your own details. You can share the circle now — contributions open once verification is done."
-            : "Verify your identity to start collecting. Circles can raise up to R5,000 before verification."}
+          It&apos;s visible in your area now, marked{" "}
+          <span className="font-semibold text-ink">Unverified</span>. Before any
+          money is paid out, our team checks who receives the funds
+          {isFuneral ? " — usually a community partner near the family" : ""}.
         </p>
         <div className="flex w-full max-w-xs flex-col gap-2">
-          <Button className="w-full">Start verification</Button>
           {createdSlug && (
-            <Link
-              href={`/circles/${createdSlug}`}
-              className="pt-1 text-sm font-semibold text-forest"
-            >
-              View your circle
-            </Link>
+            <ButtonLink href={`/dashboard/${createdSlug}`} className="w-full">
+              Manage your circle
+            </ButtonLink>
           )}
-          <Link href="/dashboard" className="text-sm font-semibold text-forest">
-            Do this later
+          {createdSlug && (
+            <ButtonLink
+              href={`/circles/${createdSlug}`}
+              variant="secondary"
+              className="w-full"
+            >
+              View public page
+            </ButtonLink>
+          )}
+          <Link href="/dashboard" className="pt-1 text-sm font-semibold text-forest">
+            All my circles
           </Link>
         </div>
       </div>

@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { formatZAR } from "@mseezee/shared";
+import { auth } from "@/auth";
 import { api } from "@/lib/api";
+import { prisma } from "@/lib/db";
 import { StatTiles } from "@/components/dashboard/StatTiles";
 import { DisbursementList } from "@/components/dashboard/DisbursementList";
+import { PayoutAccountCard } from "@/components/dashboard/PayoutAccountCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { relativeDay } from "@/lib/format";
 
@@ -26,6 +29,20 @@ export default async function ManageCirclePage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
+  const [session, dbCircle] = await Promise.all([
+    auth(),
+    prisma.circle.findUnique({
+      where: { slug },
+      select: { organiserId: true, payoutBankName: true, payoutAccountName: true },
+    }),
+  ]);
+  // Mock fixture circles have no real organiser account and stay open, as
+  // before — this gate only applies to real, DB-backed circles.
+  if (dbCircle) {
+    if (!session?.user?.id) redirect(`/sign-in?callbackUrl=/dashboard/${slug}`);
+    if (dbCircle.organiserId !== session.user.id) notFound();
+  }
+
   const dash = await api.getCircleDashboard(slug);
   if (!dash) notFound();
 
@@ -112,6 +129,13 @@ export default async function ManageCirclePage({
 
       <section id="payouts" className="flex flex-col gap-2 scroll-mt-6">
         <h2 className="text-lg">Payouts</h2>
+        {dbCircle && (
+          <PayoutAccountCard
+            slug={slug}
+            initialBankName={dbCircle.payoutBankName}
+            initialAccountName={dbCircle.payoutAccountName}
+          />
+        )}
         <DisbursementList disbursements={dash.disbursements} />
         <p className="text-[0.78rem] text-ink-soft">
           {circle.proxyName

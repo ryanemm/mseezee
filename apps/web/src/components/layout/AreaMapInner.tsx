@@ -15,8 +15,9 @@ import { selectArea } from "@/lib/select-area";
  *
  * Pins sit at each *area's* centroid, never a household, and the map can't
  * zoom in past township level (`maxZoom`) — "general area" is a hard limit,
- * not a convention. Nothing here reads device location; choosing an area is
- * an explicit tap, same as the old dropdown.
+ * not a convention. Nothing here reads device location itself — `near`
+ * arrives already resolved from a one-off "find circles near me" tap
+ * elsewhere on the page.
  */
 
 const FOREST = "#1f4a34";
@@ -39,27 +40,54 @@ function pinIcon(active: boolean): L.DivIcon {
   });
 }
 
+/** The viewer's own position, once "find circles near me" resolves it — a
+ *  plain dot, deliberately not another teardrop pin, so it never reads as
+ *  "a circle is here." */
+function meIcon(): L.DivIcon {
+  return L.divIcon({
+    className: "mz-pin",
+    html: `<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" fill="#2f6c4a" fill-opacity="0.18"/>
+      <circle cx="11" cy="11" r="5.5" fill="#2f6c4a" stroke="#fffdf7" stroke-width="2.5"/>
+    </svg>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
+}
+
 const ICON_DEFAULT = pinIcon(false);
 const ICON_ACTIVE = pinIcon(true);
+const ICON_ME = meIcon();
 
 /** How far around the chosen area still counts as "nearby" when framing the map. */
 const NEIGHBOUR_KM = 150;
 /** Never zoom tighter than this — township level, keeping it "general area". */
 const FRAME_MAX_ZOOM = 9;
+/** Zoom used to frame the viewer's own position in "find near me" mode. */
+const NEAR_ME_ZOOM = 9;
+
+type LatLng = { lat: number; lng: number };
 
 export default function AreaMapInner({
   areas,
   current,
+  near,
 }: {
   areas: Area[];
-  current: string;
+  current?: string;
+  near?: LatLng | null;
 }) {
   const router = useRouter();
-  const currentArea = areas.find((a) => a.slug === current) ?? areas[0];
+  const currentArea = areas.find((a) => a.slug === current);
+  const initialCenter: [number, number] = near
+    ? [near.lat, near.lng]
+    : currentArea
+      ? [currentArea.lat, currentArea.lng]
+      : [-28.8, 24.7]; // roughly the centre of South Africa — the all-areas default
 
   return (
     <MapContainer
-      center={currentArea ? [currentArea.lat, currentArea.lng] : [-28.8, 24.7]}
+      center={initialCenter}
       zoom={FRAME_MAX_ZOOM}
       minZoom={5}
       maxZoom={11}
@@ -71,7 +99,11 @@ export default function AreaMapInner({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <FrameCurrent areas={areas} slug={current} />
+      <FrameMap areas={areas} current={current} near={near} />
+      <QuietAttribution />
+      {near && (
+        <Marker position={[near.lat, near.lng]} icon={ICON_ME} zIndexOffset={2000} interactive={false} />
+      )}
       {areas.map((a) => {
         const active = a.slug === current;
         return (
@@ -96,36 +128,75 @@ export default function AreaMapInner({
 }
 
 /**
- * Frames the chosen area together with its nearby neighbours — enough context to
- * see what's around you, tight enough that the pins don't pile on top of each
- * other. Runs on load (no animation) and whenever a pin or "near me" changes the
- * choice. Extra room at the top keeps the floating "Find circles near me"
+ * Frames the map to match whichever mode the home page is in:
+ *  - `near` set: centres on the viewer's own position.
+ *  - `current` set: frames that area together with its nearby neighbours,
+ *    the same "enough context, not too tight" behaviour as before.
+ *  - neither: frames every area, so the national default view isn't left
+ *    zoomed in on an arbitrary single pin.
+ * Runs on load (no animation) and re-flies (animated) whenever the mode
+ * changes. Extra room at the top keeps the floating "Find circles near me"
  * button clear of the pins.
  */
-function FrameCurrent({ areas, slug }: { areas: Area[]; slug: string }) {
+function FrameMap({
+  areas,
+  current,
+  near,
+}: {
+  areas: Area[];
+  current?: string;
+  near?: LatLng | null;
+}) {
   const map = useMap();
   const first = useRef(true);
+  const key = near ? `near:${near.lat},${near.lng}` : (current ?? "all");
+
   useEffect(() => {
-    const here = areas.find((a) => a.slug === slug);
-    if (!here) return;
-    const nearby = areas.filter(
-      (a) => distanceKm(here, a) <= NEIGHBOUR_KM,
-    );
-    const bounds = L.latLngBounds(nearby.map((a) => [a.lat, a.lng] as [number, number]));
     const opts = {
       paddingTopLeft: [32, 84] as [number, number],
       paddingBottomRight: [32, 36] as [number, number],
       maxZoom: FRAME_MAX_ZOOM,
     };
+
+    if (near) {
+      if (first.current) {
+        map.setView([near.lat, near.lng], NEAR_ME_ZOOM, { animate: false });
+      } else {
+        map.flyTo([near.lat, near.lng], NEAR_ME_ZOOM, { duration: 0.8 });
+      }
+      first.current = false;
+      return;
+    }
+
+    const here = current ? areas.find((a) => a.slug === current) : undefined;
+    const scope = here
+      ? areas.filter((a) => distanceKm(here, a) <= NEIGHBOUR_KM)
+      : areas; // no area chosen — frame everything
+    if (scope.length === 0) return;
+    const bounds = L.latLngBounds(scope.map((a) => [a.lat, a.lng] as [number, number]));
+
     if (first.current) {
       map.fitBounds(bounds, { ...opts, animate: false });
       first.current = false;
     } else {
       map.flyToBounds(bounds, { ...opts, duration: 0.8 });
     }
-    // Keyed on the chosen area only — re-running on every render would fight the
-    // user's own panning.
+    // Keyed on the resolved mode only — re-running on every render would fight
+    // the viewer's own panning.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
+  }, [key]);
+  return null;
+}
+
+/** Drops Leaflet's own "Leaflet" self-credit from the attribution line —
+ *  that part is just a courtesy, not required. The OpenStreetMap copyright
+ *  stays: their free tiles are conditioned on keeping it reasonably visible,
+ *  so it's only ever styled smaller (see `.mz-map .leaflet-control-attribution`
+ *  in globals.css), never removed. */
+function QuietAttribution() {
+  const map = useMap();
+  useEffect(() => {
+    map.attributionControl.setPrefix(false);
+  }, [map]);
   return null;
 }

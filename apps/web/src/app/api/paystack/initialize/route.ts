@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { estimateFeeCents } from "@mseezee/shared";
+import { MIN_CONTRIBUTION_CENTS, estimateFeeCents, formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { initializeTransaction, isPaystackConfigured } from "@/lib/paystack";
@@ -18,7 +18,16 @@ interface Body {
   anonymous: boolean;
   showAmount: boolean;
   showArea: boolean;
+  methodId?: string;
 }
+
+/** Our payment-method ids -> Paystack checkout channels. PayShap has no known
+ *  Paystack channel, so it (and anything unknown) leaves checkout unrestricted. */
+const CHANNELS_BY_METHOD: Record<string, string[]> = {
+  instant_eft: ["eft"],
+  capitec_pay: ["capitec_pay"],
+  card: ["card"],
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -51,9 +60,9 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (!Number.isInteger(body.amountCents) || body.amountCents < 1000) {
+  if (!Number.isInteger(body.amountCents) || body.amountCents < MIN_CONTRIBUTION_CENTS) {
     return NextResponse.json(
-      { error: "Minimum contribution is R10." },
+      { error: `Minimum contribution is ${formatZAR(MIN_CONTRIBUTION_CENTS)}.` },
       { status: 400 },
     );
   }
@@ -62,6 +71,22 @@ export async function POST(request: Request) {
   if (!circle) {
     return NextResponse.json({ error: "Circle not found" }, { status: 404 });
   }
+  if (circle.isDemo) {
+    // The UI already hides the Contribute button for these, but that's a
+    // convenience, not the security boundary — this is. Never move or relax
+    // this check based on what the client sends.
+    return NextResponse.json(
+      { error: "This is example content and isn't open for contributions." },
+      { status: 403 },
+    );
+  }
+  // Mock fixture circles have no DB row and so no subaccount — they fall
+  // back to the platform's own account, same as an organiser who hasn't set
+  // up a payout account yet.
+  const dbCircle = await prisma.circle.findUnique({
+    where: { slug: circle.slug },
+    select: { payoutSubaccountCode: true },
+  });
 
   const tipCents = Math.max(0, Math.trunc(body.tipCents || 0));
   const feeCents = body.coverFee ? estimateFeeCents(body.amountCents) : 0;
@@ -97,8 +122,9 @@ export async function POST(request: Request) {
       amountCents: totalChargedCents,
       reference,
       callbackUrl: `${appUrl}/circles/${circle.slug}/contribute/callback`,
-      subaccountCode: process.env.PAYSTACK_TEST_SUBACCOUNT || undefined,
+      subaccountCode: dbCircle?.payoutSubaccountCode ?? undefined,
       platformChargeCents: tipCents,
+      channels: body.methodId ? CHANNELS_BY_METHOD[body.methodId] : undefined,
       metadata: {
         circleId: circle.id,
         circleSlug: circle.slug,

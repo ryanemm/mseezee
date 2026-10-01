@@ -35,6 +35,9 @@ export function formatZAR(
 }
 
 /** Parse loose rand input ("R 1 200", "1200.50") to cents. Returns 0 on junk. */
+/** Smallest contribution accepted. Kept low while live payments are being tested. */
+export const MIN_CONTRIBUTION_CENTS = 100;
+
 export function parseRandInput(value: string): number {
   const cleaned = value.replace(/[^0-9.]/g, "");
   const parsed = Number.parseFloat(cleaned);

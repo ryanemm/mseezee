@@ -62,7 +62,8 @@ const PAYMENT_METHODS: PaymentMethod[] = [
     blurb: "Instant, from your banking app. To a cellphone or account.",
     kind: "push",
     recommended: true,
-    available: true,
+    // Not yet enabled on the Paystack account — flip this back on once it is.
+    available: false,
   },
   {
     id: "instant_eft",
@@ -78,7 +79,8 @@ const PAYMENT_METHODS: PaymentMethod[] = [
     blurb: "Approve the payment in your Capitec app.",
     kind: "push",
     recommended: false,
-    available: true,
+    // Not yet enabled on the Paystack account — flip this back on once it is.
+    available: false,
   },
   {
     id: "card",

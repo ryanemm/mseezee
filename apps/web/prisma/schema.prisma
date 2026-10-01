@@ -114,6 +114,13 @@ model Circle {
   eventDate         DateTime?
   createdAt         DateTime  @default(now())
 
+  /// Where contributions settle. Set once the organiser adds their payout bank
+  /// account; until then, checkout omits `subaccount` and money goes to the
+  /// platform's own Paystack account.
+  payoutSubaccountCode String?
+  payoutBankName       String?
+  payoutAccountName    String?
+
   organiserId String
   organiser   User   @relation(fields: [organiserId], references: [id])
 

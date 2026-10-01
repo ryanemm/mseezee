@@ -54,6 +54,8 @@ export interface InitializeArgs {
   /** Flat amount in cents routed to the main (MseeZee) account — the tip. */
   platformChargeCents?: number;
   metadata?: Record<string, unknown>;
+  /** Restrict Paystack's checkout to these channels (e.g. ["eft"]); omit to offer everything enabled. */
+  channels?: string[];
 }
 
 export interface InitializeResult {
@@ -73,6 +75,7 @@ export async function initializeTransaction(
     callback_url: args.callbackUrl,
     metadata: args.metadata ?? {},
   };
+  if (args.channels?.length) body.channels = args.channels;
   if (args.subaccountCode) {
     body.subaccount = args.subaccountCode;
     // Subaccount absorbs the Paystack processing fee.
@@ -104,6 +107,58 @@ export async function verifyTransaction(
   return paystack<PaystackTransaction>(
     `/transaction/verify/${encodeURIComponent(reference)}`,
   );
+}
+
+export interface ZarBank {
+  name: string;
+  code: string;
+}
+
+let bankListCache: { at: number; banks: ZarBank[] } | null = null;
+const BANK_LIST_TTL_MS = 60 * 60 * 1000;
+
+/** ZAR settlement banks, straight from Paystack rather than a hardcoded
+ *  list — bank codes differ by country and we'd rather not guess them.
+ *  Cached in memory for an hour since the list barely changes. */
+export async function listZarBanks(): Promise<ZarBank[]> {
+  if (bankListCache && Date.now() - bankListCache.at < BANK_LIST_TTL_MS) {
+    return bankListCache.banks;
+  }
+  const rows = await paystack<{ name: string; code: string }[]>(
+    "/bank?currency=ZAR&perPage=100",
+  );
+  const banks = rows.map((b) => ({ name: b.name, code: b.code }));
+  bankListCache = { at: Date.now(), banks };
+  return banks;
+}
+
+export interface CreateSubaccountArgs {
+  businessName: string;
+  bankCode: string;
+  accountNumber: string;
+}
+
+export interface SubaccountResult {
+  subaccount_code: string;
+  account_name: string | null;
+  settlement_bank: string;
+}
+
+/** Creates a Paystack subaccount that keeps 100% of what it settles (0%
+ *  platform cut here — MseeZee's admin fee is taken separately, per the
+ *  direct-settlement money model, not skimmed off this split). */
+export async function createSubaccount(
+  args: CreateSubaccountArgs,
+): Promise<SubaccountResult> {
+  return paystack<SubaccountResult>("/subaccount", {
+    method: "POST",
+    body: JSON.stringify({
+      business_name: args.businessName,
+      settlement_bank: args.bankCode,
+      account_number: args.accountNumber,
+      percentage_charge: 0,
+    }),
+  });
 }
 
 /** HMAC-SHA512 of the raw body with the secret key, per Paystack's webhook docs. */

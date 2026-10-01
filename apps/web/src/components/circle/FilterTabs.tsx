@@ -8,19 +8,21 @@ const TABS = [
 
 export function FilterTabs({
   active,
-  areaSlug,
+  baseParams,
 }: {
   active: string;
-  areaSlug: string;
+  /** Whichever params describe the current mode (`{ area }`, `{ lat, lng }`,
+   *  or `{}` for the default view) — carried along so switching a tab never
+   *  drops the viewer's area or "near me" choice. */
+  baseParams: Record<string, string>;
 }) {
   return (
     <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-2 pt-0.5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
       {TABS.map((tab) => {
         const isActive = active === tab.key;
-        const href =
-          tab.key === "all"
-            ? `/?area=${areaSlug}`
-            : `/?area=${areaSlug}&type=${tab.key}`;
+        const params = new URLSearchParams(baseParams);
+        if (tab.key !== "all") params.set("type", tab.key);
+        const href = `/?${params.toString()}`;
         return (
           <Link
             key={tab.key}

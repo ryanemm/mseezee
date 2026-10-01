@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Circle, ContributionDraft, PaymentMethod } from "@mseezee/shared";
-import { estimateFeeCents, formatZAR } from "@mseezee/shared";
-import { api } from "@/lib/api";
+// The demo fallback below only ever needs the client-safe in-memory
+// fixtures, never the server-merged `@/lib/api` (which pulls in Prisma and
+// the Paystack client — fine for a server component, not for this one).
+import { estimateFeeCents, formatZAR, mockApi } from "@mseezee/shared";
 import { Button } from "@/components/ui/Button";
 import { loadDraft, saveReceipt } from "@/lib/draft";
 
@@ -21,10 +23,13 @@ export function PaymentPanel({
   paymentsLive: boolean;
 }) {
   const router = useRouter();
+  // Not everything in the catalog is switched on at Paystack yet — see each
+  // method's `available` comment in packages/shared/src/api.ts.
+  const availableMethods = methods.filter((m) => m.available);
   const [draft, setDraft] = useState<ContributionDraft | null>(null);
   const [email, setEmail] = useState("");
   const [methodId, setMethodId] = useState(
-    methods.find((m) => m.recommended)?.id ?? methods[0]?.id ?? "",
+    availableMethods.find((m) => m.recommended)?.id ?? availableMethods[0]?.id ?? "",
   );
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +57,11 @@ export function PaymentPanel({
     if (!draft) return;
     setError(null);
 
+    if (circle.isDemo) {
+      setError("This is example content and isn't open for contributions.");
+      return;
+    }
+
     if (paymentsLive && !emailValid) {
       setError("Enter a valid email for your receipt.");
       return;
@@ -62,7 +72,7 @@ export function PaymentPanel({
     if (!paymentsLive) {
       // Demo fallback — no keys configured.
       try {
-        const receipt = await api.createContribution(draft);
+        const receipt = await mockApi.createContribution(draft);
         saveReceipt(circle.slug, receipt);
         router.push(`/circles/${circle.slug}/contribute/done`);
       } catch {
@@ -87,6 +97,7 @@ export function PaymentPanel({
           anonymous: draft.anonymous,
           showAmount: draft.showAmount,
           showArea: draft.showArea,
+          methodId,
         }),
       });
       const data = (await res.json()) as {
@@ -143,7 +154,7 @@ export function PaymentPanel({
         <legend className="mb-1 text-sm font-semibold text-ink">
           Choose how to pay
         </legend>
-        {methods.map((m) => (
+        {availableMethods.map((m) => (
           <label
             key={m.id}
             className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors ${
@@ -175,7 +186,7 @@ export function PaymentPanel({
         ))}
         {paymentsLive && (
           <p className="px-1 text-[0.72rem] text-ink-faint">
-            You&apos;ll pick the exact method on the next secure screen.
+            You&apos;ll finish on Paystack&apos;s secure payment screen.
           </p>
         )}
       </fieldset>
