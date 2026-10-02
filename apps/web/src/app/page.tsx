@@ -60,10 +60,15 @@ export default async function HomePage({
     areaGoal = inArea.reduce((sum, c) => sum + c.goalCents, 0);
   }
 
-  const featured = circles.find(
-    (c) => c.type === "funeral" && c.verificationTier === "evidence_verified",
-  );
-  const rest = circles.filter((c) => c.id !== featured?.id);
+  // "Near me" is already the most relevant ranking there is — pulling one
+  // circle out into its own "Needs support now" section would bury the
+  // actual closest result further down the page.
+  const featured = near
+    ? undefined
+    : circles.find(
+        (c) => c.type === "funeral" && c.verificationTier === "evidence_verified",
+      );
+  const rest = featured ? circles.filter((c) => c.id !== featured.id) : circles;
 
   const baseParams: Record<string, string> = near
     ? { lat: String(near.lat), lng: String(near.lng) }

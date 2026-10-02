@@ -9,6 +9,8 @@ import { ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
 import { AreaMiniMap } from "@/components/circle/AreaMiniMap";
 import { ContributeBar } from "@/components/circle/ContributeBar";
 import { ContributeRail } from "@/components/circle/ContributeRail";
+import { ShareCircle, ShareIconButton } from "@/components/circle/ShareCircle";
+import { circleShareText } from "@/lib/share";
 import { eventDateLabel, relativeDay } from "@/lib/format";
 
 type Params = { slug: string };
@@ -21,11 +23,22 @@ export async function generateMetadata({
   const { slug } = await params;
   const circle = await api.getCircle(slug);
   if (!circle) return { title: "Circle not found" };
+  const description = circleShareText(circle);
   return {
     title: circle.title,
-    description: `${circle.summary} · ${formatZAR(circle.raisedCents, {
-      compact: true,
-    })} raised in ${circle.area.name}.`,
+    description,
+    // What WhatsApp, Facebook and X show in the preview card when a circle's
+    // link is shared. The image comes from ./opengraph-image.tsx.
+    openGraph: {
+      title: circle.title,
+      description,
+      url: `/circles/${circle.slug}`,
+      siteName: "MseeZee",
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title: circle.title, description },
+    // Example circles aren't real causes — keep them out of search results.
+    robots: circle.isDemo ? { index: false } : undefined,
   };
 }
 
@@ -77,6 +90,11 @@ export default async function CirclePage({
               />
             </svg>
           </Link>
+          {!circle.isDemo && (
+            <div className="absolute right-3 top-3 lg:right-5 lg:top-5">
+              <ShareIconButton circle={circle} />
+            </div>
+          )}
           <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-4 text-white lg:p-7">
             <TypeChip type={circle.type} onDark />
             {isFuneral && !circle.title.toLowerCase().startsWith("in loving memory") && (
@@ -145,6 +163,8 @@ export default async function CirclePage({
               </p>
             )}
           </section>
+
+          {!circle.isDemo && !closed && <ShareCircle circle={circle} />}
 
           <section className="flex flex-col gap-2">
             <h2 className="text-lg">About this circle</h2>

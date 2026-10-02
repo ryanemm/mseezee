@@ -25,6 +25,16 @@ export function FindNearMeButton() {
       setError("Your browser doesn't support finding your location.");
       return;
     }
+    // Browsers silently refuse geolocation on a page that isn't HTTPS (or
+    // exactly "localhost") — no permission prompt ever appears, and the
+    // resulting error looks identical to a real decline. Catching it here
+    // gives an accurate message instead of blaming the browser's own prompt.
+    if (!window.isSecureContext) {
+      setError(
+        "This page isn't served securely, so the browser won't share location here.",
+      );
+      return;
+    }
     setLocating(true);
     setError(null);
 
@@ -43,7 +53,7 @@ export function FindNearMeButton() {
         setLocating(false);
         setError(
           err.code === err.PERMISSION_DENIED
-            ? "Location access was declined — pick an area on the map instead."
+            ? "Location access is blocked for this site — check your browser's site settings or your device's location settings, or pick an area on the map instead."
             : "Couldn't get your location. Pick an area on the map instead.",
         );
       },

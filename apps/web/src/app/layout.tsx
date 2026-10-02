@@ -20,6 +20,10 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  // Link previews (WhatsApp, Facebook, X) need absolute image URLs. The
+  // production image is built without NEXT_PUBLIC_APP_URL, so it falls back
+  // to the live domain.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://mseezee.co.za"),
   title: {
     default: "MseeZee — give where you live",
     template: "%s · MseeZee",

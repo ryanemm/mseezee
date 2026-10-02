@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Circle, ContributionReceipt } from "@mseezee/shared";
 import { formatZAR } from "@mseezee/shared";
 import { ButtonLink } from "@/components/ui/Button";
+import { ShareCircle } from "@/components/circle/ShareCircle";
 import { clearContribution, loadReceipt } from "@/lib/draft";
 
 export function ThankYou({
@@ -39,11 +40,6 @@ export function ThankYou({
   }
 
   const beneficiaryShort = circle.beneficiaryName.replace(" family", "");
-  const shareText = `I just supported ${circle.title} on MseeZee. Every bit helps ${beneficiaryShort} — please add yours:`;
-  const shareUrl = `https://mseezee.co.za/circles/${circle.slug}`;
-  const whatsapp = `https://wa.me/?text=${encodeURIComponent(
-    `${shareText} ${shareUrl}`,
-  )}`;
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 py-10 text-center">
@@ -112,18 +108,13 @@ export function ThankYou({
         </div>
       </dl>
 
-      <div className="flex w-full max-w-xs flex-col gap-2.5">
-        <p className="text-sm font-semibold text-ink">
-          Help {beneficiaryShort} reach more people
-        </p>
-        <a
-          href={whatsapp}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-white"
-        >
-          Share on WhatsApp
-        </a>
+      <div className="flex w-full max-w-sm flex-col gap-2.5">
+        <ShareCircle
+          circle={circle}
+          framed={false}
+          heading={`Help ${beneficiaryShort} reach more people`}
+          subheading="Share the circle with your family, church or street group."
+        />
         <ButtonLink
           href={`/circles/${circle.slug}`}
           variant="secondary"
