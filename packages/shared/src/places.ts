@@ -1,147 +1,50 @@
-import type { Area } from "./types";
+import type { CirclePlace } from "./types";
 
 /**
- * A small seed of South African areas for the prototype. Real deployment seeds
- * this from Municipal Demarcation Board ward boundaries plus StatsSA / OSM
- * suburb names. Centroids are approximate and used only for distance sorting
- * and the area map — never for locating a household.
+ * Places come from Stats SA's Census 2011 geography, loaded into the `Place`
+ * table in Postgres (see scripts/places/build_statssa_places.py). The handful
+ * defined here are the main places the example circles sit in, plus the map
+ * from the ten fixed "areas" the app used before places existed, so old
+ * `/areas/<slug>` links can redirect.
+ *
+ * Place data: Statistics South Africa, Census 2011.
  */
-export const AREAS: Area[] = [
-  {
-    id: "area_soweto",
-    slug: "soweto",
-    name: "Soweto",
-    kind: "township",
-    municipality: "City of Johannesburg",
-    province: "Gauteng",
-    lat: -26.2678,
-    lng: 27.8586,
-    activeCircleCount: 34,
-    raisedThisMonthCents: 4_812_000,
-    contributorCount: 1290,
-  },
-  {
-    id: "area_alexandra",
-    slug: "alexandra",
-    name: "Alexandra",
-    kind: "township",
-    municipality: "City of Johannesburg",
-    province: "Gauteng",
-    lat: -26.1039,
-    lng: 28.0968,
-    activeCircleCount: 19,
-    raisedThisMonthCents: 2_140_500,
-    contributorCount: 604,
-  },
-  {
-    id: "area_tembisa",
-    slug: "tembisa",
-    name: "Tembisa",
-    kind: "township",
-    municipality: "City of Ekurhuleni",
-    province: "Gauteng",
-    lat: -25.9964,
-    lng: 28.2264,
-    activeCircleCount: 22,
-    raisedThisMonthCents: 3_007_225,
-    contributorCount: 733,
-  },
-  {
-    id: "area_mamelodi",
-    slug: "mamelodi",
-    name: "Mamelodi",
-    kind: "township",
-    municipality: "City of Tshwane",
-    province: "Gauteng",
-    lat: -25.7069,
-    lng: 28.3903,
-    activeCircleCount: 16,
-    raisedThisMonthCents: 1_889_000,
-    contributorCount: 512,
-  },
-  {
-    id: "area_khayelitsha",
-    slug: "khayelitsha",
-    name: "Khayelitsha",
-    kind: "township",
-    municipality: "City of Cape Town",
-    province: "Western Cape",
-    lat: -34.0403,
-    lng: 18.6777,
-    activeCircleCount: 28,
-    raisedThisMonthCents: 3_654_000,
-    contributorCount: 981,
-  },
-  {
-    id: "area_gugulethu",
-    slug: "gugulethu",
-    name: "Gugulethu",
-    kind: "township",
-    municipality: "City of Cape Town",
-    province: "Western Cape",
-    lat: -33.9803,
-    lng: 18.5722,
-    activeCircleCount: 12,
-    raisedThisMonthCents: 1_204_775,
-    contributorCount: 388,
-  },
-  {
-    id: "area_mdantsane",
-    slug: "mdantsane",
-    name: "Mdantsane",
-    kind: "township",
-    municipality: "Buffalo City",
-    province: "Eastern Cape",
-    lat: -32.9445,
-    lng: 27.7688,
-    activeCircleCount: 14,
-    raisedThisMonthCents: 1_431_000,
-    contributorCount: 402,
-  },
-  {
-    id: "area_umlazi",
-    slug: "umlazi",
-    name: "Umlazi",
-    kind: "township",
-    municipality: "eThekwini",
-    province: "KwaZulu-Natal",
-    lat: -29.9558,
-    lng: 30.8823,
-    activeCircleCount: 25,
-    raisedThisMonthCents: 3_298_500,
-    contributorCount: 845,
-  },
-  {
-    id: "area_kwamashu",
-    slug: "kwamashu",
-    name: "KwaMashu",
-    kind: "township",
-    municipality: "eThekwini",
-    province: "KwaZulu-Natal",
-    lat: -29.7405,
-    lng: 30.9762,
-    activeCircleCount: 17,
-    raisedThisMonthCents: 2_010_000,
-    contributorCount: 559,
-  },
-  {
-    id: "area_sandton",
-    slug: "sandton",
-    name: "Sandton",
-    kind: "suburb",
-    municipality: "City of Johannesburg",
-    province: "Gauteng",
-    lat: -26.1076,
-    lng: 28.0567,
-    activeCircleCount: 6,
-    raisedThisMonthCents: 5_920_000,
-    contributorCount: 210,
-  },
-];
+function mainPlace(
+  id: string,
+  name: string,
+  municipality: string,
+  province: string,
+  lat: number,
+  lng: number,
+): CirclePlace {
+  return { id, name, mainPlaceId: id, mainPlaceName: name, municipality, province, lat, lng };
+}
+
+export const LEGACY_AREA_PLACES: Record<string, CirclePlace> = {
+  soweto: mainPlace("MP798030", "Soweto", "City of Johannesburg", "Gauteng", -26.2434, 27.8414),
+  alexandra: mainPlace("MP798027", "Alexandra", "City of Johannesburg", "Gauteng", -26.1048, 28.1008),
+  sandton: mainPlace("MP798013", "Sandton", "City of Johannesburg", "Gauteng", -26.0601, 28.0501),
+  tembisa: mainPlace("MP797006", "Tembisa", "Ekurhuleni", "Gauteng", -26.0106, 28.2219),
+  mamelodi: mainPlace("MP799045", "Mamelodi", "City of Tshwane", "Gauteng", -25.7159, 28.3932),
+  khayelitsha: mainPlace("MP199043", "Khayelitsha", "City of Cape Town", "Western Cape", -34.0413, 18.6722),
+  gugulethu: mainPlace("MP199034", "Gugulethu", "City of Cape Town", "Western Cape", -33.9855, 18.5767),
+  mdantsane: mainPlace("MP260088", "Mdantsane", "Buffalo City", "Eastern Cape", -32.9437, 27.7305),
+  umlazi: mainPlace("MP599167", "Umlazi", "Ethekwini", "KwaZulu-Natal", -29.9662, 30.8875),
+  kwamashu: mainPlace("MP599055", "KwaMashu", "Ethekwini", "KwaZulu-Natal", -29.7416, 30.9902),
+};
+
+/** How a place is labelled wherever there's room for context:
+ *  "Orlando West, Soweto · City of Johannesburg". */
+export function placeLabel(place: Pick<CirclePlace, "name" | "mainPlaceName" | "municipality">): string {
+  const where = place.name === place.mainPlaceName ? place.name : `${place.name}, ${place.mainPlaceName}`;
+  return `${where} · ${place.municipality}`;
+}
+
+export const PLACE_DATA_CREDIT = "Place data: Statistics South Africa, Census 2011";
 
 const EARTH_RADIUS_KM = 6371;
 
-/** Great-circle distance between two coarse centroids, in km. */
+/** Great-circle distance between two coarse centre points, in km. */
 export function distanceKm(
   a: { lat: number; lng: number },
   b: { lat: number; lng: number },
@@ -156,9 +59,3 @@ export function distanceKm(
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return Math.round(EARTH_RADIUS_KM * 2 * Math.asin(Math.sqrt(h)));
 }
-
-export function findArea(slug: string): Area | undefined {
-  return AREAS.find((a) => a.slug === slug);
-}
-
-export const DEFAULT_AREA_SLUG = "soweto";

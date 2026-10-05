@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import type { Area, Circle, CircleType } from "@mseezee/shared";
-import { distanceKm, findArea, formatZAR, isCircleType } from "@mseezee/shared";
+import { redirect } from "next/navigation";
+import type { Circle, CircleType } from "@mseezee/shared";
+import { LEGACY_AREA_PLACES, distanceKm, isCircleType } from "@mseezee/shared";
 import { api } from "@/lib/api";
-import { AREA_COOKIE } from "@/lib/area";
+import { summarisePlaces } from "@/lib/places";
 import { AreaMap } from "@/components/layout/AreaMap";
 import { CircleCard } from "@/components/circle/CircleCard";
 import { FilterTabs } from "@/components/circle/FilterTabs";
 import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 
 type Search = { area?: string; type?: string; lat?: string; lng?: string };
 
@@ -18,47 +17,23 @@ export default async function HomePage({
   searchParams: Promise<Search>;
 }) {
   const sp = await searchParams;
+
+  // Links from before places existed (`/?area=soweto`) still land somewhere sensible.
+  const legacy = sp.area ? LEGACY_AREA_PLACES[sp.area] : undefined;
+  if (legacy) redirect(`/places/${legacy.id}`);
+
   const type = normaliseType(sp.type);
   const near = parseNear(sp.lat, sp.lng);
 
-  // An explicit area only applies when there's no "near me" fix in play —
-  // a fresh location is a stronger, fresher signal than a remembered pick.
-  const explicitAreaSlug = near ? undefined : await resolveExplicitAreaSlug(sp.area);
+  const all = await api.listCircles({ sort: "most_supported" });
+  const everything: Circle[] = near
+    ? all
+        .map((c) => ({ ...c, distanceKm: distanceKm(near, c.area) }))
+        .sort((a, b) => a.distanceKm - b.distanceKm)
+    : all;
 
-  const areas = await api.listAreas();
-
-  let everything: Circle[];
-  let area: Area | null = null;
-
-  if (near) {
-    const areaBySlug = new Map(areas.map((a) => [a.slug, a]));
-    everything = (await api.listCircles({ sort: "most_supported" }))
-      .map((c) => {
-        const a = areaBySlug.get(c.area.slug);
-        return a ? { ...c, distanceKm: distanceKm(near, a) } : c;
-      })
-      .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
-  } else if (explicitAreaSlug) {
-    [area, everything] = await Promise.all([
-      api.getArea(explicitAreaSlug),
-      api.listCircles({ areaSlug: explicitAreaSlug, sort: "nearest" }),
-    ]);
-  } else {
-    everything = await api.listCircles({ sort: "most_supported" });
-  }
-
-  // The type filter narrows the feed, but the area's headline progress should
-  // always describe the whole area — so filter here rather than in the query.
   const circles =
     type === "all" ? everything : everything.filter((c) => c.type === type);
-
-  let areaRaised = 0;
-  let areaGoal = 0;
-  if (area) {
-    const inArea = everything.filter((c) => c.area.slug === area!.slug);
-    areaRaised = inArea.reduce((sum, c) => sum + c.raisedCents, 0);
-    areaGoal = inArea.reduce((sum, c) => sum + c.goalCents, 0);
-  }
 
   // "Near me" is already the most relevant ranking there is — pulling one
   // circle out into its own "Needs support now" section would bury the
@@ -72,15 +47,7 @@ export default async function HomePage({
 
   const baseParams: Record<string, string> = near
     ? { lat: String(near.lat), lng: String(near.lng) }
-    : explicitAreaSlug
-      ? { area: explicitAreaSlug }
-      : {};
-
-  const listLabel = near
-    ? "Closest to you"
-    : area
-      ? "Other circles near you"
-      : "Top circles right now";
+    : {};
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-6 lg:px-8">
@@ -93,42 +60,9 @@ export default async function HomePage({
 
       <FindNearMeButton />
 
-      <AreaMap areas={areas} current={explicitAreaSlug} near={near} />
+      <AreaMap places={summarisePlaces(all)} near={near} />
 
       <FilterTabs active={type} baseParams={baseParams} />
-
-      {area && (
-        <div className="flex items-center justify-between gap-4 rounded-[24px] border border-line bg-surface px-5 py-4 shadow-card lg:max-w-xl">
-          <div className="flex min-w-0 flex-1 flex-col gap-2.5">
-            <div>
-              <p className="font-display text-[1.7rem] font-bold leading-none text-ink">
-                {area.name}
-              </p>
-              <p className="mt-2 text-sm text-ink-soft">
-                <span className="font-bold text-ink tnum">
-                  {area.activeCircleCount}
-                </span>{" "}
-                active circles ·{" "}
-                <span className="font-bold text-ink tnum">
-                  {formatZAR(area.raisedThisMonthCents, { compact: true })}
-                </span>{" "}
-                this month
-              </p>
-            </div>
-            {areaGoal > 0 && (
-              <div title={`${formatZAR(areaRaised)} of ${formatZAR(areaGoal)} across circles here`}>
-                <ProgressBar raisedCents={areaRaised} goalCents={areaGoal} hideLabels />
-              </div>
-            )}
-          </div>
-          <Link
-            href={`/areas/${area.slug}`}
-            className="shrink-0 rounded-full border border-gold-line/55 bg-surface px-4 py-2.5 text-sm font-semibold text-ink shadow-pill transition-colors hover:bg-surface-sunk"
-          >
-            See area <span className="text-gold-line">→</span>
-          </Link>
-        </div>
-      )}
 
       {featured && (
         <section className="flex flex-col gap-3">
@@ -141,7 +75,9 @@ export default async function HomePage({
 
       <section className="flex flex-col gap-3 pb-4">
         {rest.length > 0 && (
-          <p className="eyebrow text-[0.78rem] tracking-[0.16em]">{listLabel}</p>
+          <p className="eyebrow text-[0.78rem] tracking-[0.16em]">
+            {near ? "Closest to you" : "Top circles right now"}
+          </p>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rest.map((circle) => (
@@ -149,10 +85,9 @@ export default async function HomePage({
           ))}
           {circles.length === 0 && (
             <p className="rounded-card border border-dashed border-line bg-surface px-4 py-8 text-center text-sm text-ink-faint sm:col-span-2 xl:col-span-3">
-              No {type === "all" ? "" : `${type} `}circles
-              {area ? ` in ${area.name}` : ""} right now.{" "}
+              No {type === "all" ? "" : `${type} `}circles right now.{" "}
               <Link href="/explore" className="font-semibold text-forest">
-                Explore other areas
+                Search by place
               </Link>
             </p>
           )}
@@ -163,7 +98,7 @@ export default async function HomePage({
         href="/explore"
         className="mb-2 text-center text-sm font-semibold text-forest"
       >
-        Explore causes in other areas →
+        Search causes by place →
       </Link>
     </div>
   );
@@ -171,19 +106,6 @@ export default async function HomePage({
 
 function normaliseType(value?: string): CircleType | "all" {
   return value && isCircleType(value) ? value : "all";
-}
-
-/** An explicit `?area=` wins, then a previously remembered choice — unlike
- *  `resolveAreaSlug` (used elsewhere for pages that always need *some* area),
- *  this returns nothing rather than a default, so the home page can tell
- *  "never chosen" apart from "chose the default area". */
-async function resolveExplicitAreaSlug(
-  searchParamArea?: string,
-): Promise<string | undefined> {
-  if (searchParamArea && findArea(searchParamArea)) return searchParamArea;
-  const store = await cookies();
-  const fromCookie = store.get(AREA_COOKIE)?.value;
-  return fromCookie && findArea(fromCookie) ? fromCookie : undefined;
 }
 
 function parseNear(

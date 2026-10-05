@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { formatZAR } from "@mseezee/shared";
+import { PLACE_DATA_CREDIT, formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
-import { resolveAreaSlug } from "@/lib/area";
+import { summarisePlaces } from "@/lib/places";
+import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
 
 export const metadata: Metadata = {
-  title: "Explore areas",
-  description: "Browse community causes by area across South Africa.",
+  title: "Explore places",
+  description: "Search community causes by suburb, township or town across South Africa.",
 };
 
 type Search = { province?: string };
@@ -17,10 +18,9 @@ export default async function ExplorePage({
   searchParams: Promise<Search>;
 }) {
   const sp = await searchParams;
-  const [areas, homeSlug] = await Promise.all([
-    api.listAreas(),
-    resolveAreaSlug(),
-  ]);
+  // Only places that actually have circles are listed; anything else is
+  // reachable through search, where its page says it has none yet.
+  const areas = summarisePlaces(await api.listCircles({}));
 
   const provinces = [...new Set(areas.map((a) => a.province))].sort();
   const province = provinces.includes(sp.province ?? "") ? sp.province : undefined;
@@ -31,13 +31,17 @@ export default async function ExplorePage({
       <header className="flex flex-col gap-2">
         <p className="eyebrow text-[0.78rem] tracking-[0.16em]">Explore</p>
         <h1 className="font-sans text-[1.95rem] font-extrabold leading-[1.1] tracking-tight text-forest lg:text-[2.7rem]">
-          Causes by area
+          Causes by place
         </h1>
         <p className="text-[0.95rem] leading-relaxed text-ink-soft lg:max-w-md">
-          Every neighbourhood on MseeZee has its own page. Support your own, or
-          back another.
+          Search any suburb, township or town to see what&apos;s happening there.
+          Support your own, or back another.
         </p>
       </header>
+
+      <div className="lg:max-w-xl">
+        <ExplorePlaceSearch />
+      </div>
 
       <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-2 pt-0.5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         <ProvincePill href="/explore" active={!province} label="All" />
@@ -55,29 +59,25 @@ export default async function ExplorePage({
         {visible.map((area) => (
           <li key={area.id}>
             <Link
-              href={`/areas/${area.slug}`}
+              href={`/places/${area.id}`}
               className="flex flex-col gap-3 rounded-[24px] border border-line bg-surface px-5 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between transition-[border-color,transform] hover:border-gold-line/60 active:scale-[0.99]"
             >
               <div className="min-w-0">
                 <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-display text-[1.35rem] font-bold leading-tight text-ink">
                   {area.name}
-                  {area.slug === homeSlug && (
-                    <span className="rounded-full border border-gold-line/60 bg-gold-soft/50 px-2.5 py-0.5 font-sans text-[0.62rem] font-bold uppercase tracking-[0.1em] text-forest">
-                      Your area
-                    </span>
-                  )}
                 </p>
                 <p className="mt-1 text-[0.82rem] text-ink-soft">
+                  {area.name === area.mainPlaceName ? "" : `${area.mainPlaceName} · `}
                   {area.municipality} · {area.province}
                 </p>
               </div>
               <div className="flex shrink-0 items-center justify-between gap-3 border-t border-line/70 pt-3 sm:justify-end sm:border-t-0 sm:pt-0">
                 <div className="sm:text-right">
                   <p className="text-base font-bold text-forest tnum">
-                    {formatZAR(area.raisedThisMonthCents, { compact: true })}
+                    {formatZAR(area.raisedCents, { compact: true })} raised
                   </p>
                   <p className="text-[0.72rem] text-ink-faint tnum">
-                    {area.activeCircleCount} circles · this month
+                    {area.circleCount} {area.circleCount === 1 ? "circle" : "circles"}
                   </p>
                 </div>
                 <span
@@ -92,7 +92,7 @@ export default async function ExplorePage({
         ))}
         {visible.length === 0 && (
           <li className="rounded-[24px] border border-dashed border-line bg-surface px-4 py-8 text-center text-sm text-ink-faint md:col-span-2">
-            No areas in this province yet.
+            No circles in this province yet — search a place above, or start one.
           </li>
         )}
       </ul>
@@ -107,6 +107,7 @@ export default async function ExplorePage({
           get in touch.
         </p>
       </div>
+      <p className="pb-2 text-center text-[0.7rem] text-ink-faint">{PLACE_DATA_CREDIT}</p>
     </div>
   );
 }

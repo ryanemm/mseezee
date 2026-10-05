@@ -53,7 +53,7 @@ async function getCircle(slug: string) {
 async function listCircles(filter?: CircleFilter) {
   const [mockCircles, dbCircles] = await Promise.all([
     mockApi.listCircles(filter),
-    listDbCircles(filter?.areaSlug),
+    listDbCircles(filter?.placeId),
   ]);
 
   const liveMap = await getLiveTotalsBatch(mockCircles.map((c) => c.id));
@@ -72,14 +72,6 @@ async function listCircles(filter?: CircleFilter) {
     combined = combined.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   return combined;
-}
-
-async function topCircles(areaSlug: string, limit?: number) {
-  const circles = await listCircles({ areaSlug });
-  return circles
-    .filter((c) => c.area.slug === areaSlug)
-    .sort((a, b) => b.raisedCents - a.raisedCents)
-    .slice(0, limit ?? 5);
 }
 
 async function listSupporters(circleId: string, limit?: number) {
@@ -162,7 +154,6 @@ export const api: MseeZeeApi = {
   ...mockApi,
   getCircle,
   listCircles,
-  topCircles,
   listSupporters,
   getCircleDashboard,
   getOrganiserView,

@@ -105,7 +105,8 @@ model Circle {
   story             String
   beneficiaryName   String
   proxyName         String?
-  areaSlug          String
+  placeId           String
+  place             Place     @relation(fields: [placeId], references: [id])
   areaSection       String?
   locationPrecision String    @default("area")
   goalCents         Int
@@ -125,5 +126,32 @@ model Circle {
   organiser   User   @relation(fields: [organiserId], references: [id])
 
   @@index([organiserId])
-  @@index([areaSlug])
+  @@index([placeId])
+}
+
+/// A searchable South African place from Stats SA's Census 2011 geography:
+/// one row per main place (e.g. "Soweto") and one per named sub place inside
+/// it (e.g. "Orlando West"). Each has a single centre point, never a boundary
+/// or address. Loaded by a migration generated with
+/// scripts/places/build_statssa_places.py.
+/// Source: Statistics South Africa, Census 2011 — credit required on reuse.
+model Place {
+  id            String @id // "MP798012" for main places, "SP798012001" for sub places
+  kind          String // "main" | "sub"
+  name          String
+  mainPlaceId   String // equals id for main places
+  mainPlaceName String
+  municipality  String
+  province      String
+  lat           Float
+  lng           Float
+  /// The main place's centre — what funeral circles show publicly.
+  mainLat       Float
+  mainLng       Float
+  /// Lower-cased "name main place municipality" for search.
+  searchText    String
+
+  circles Circle[]
+
+  @@index([mainPlaceId])
 }

@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { Area, CircleType, LocationPrecision } from "@mseezee/shared";
+import type { CircleType, LocationPrecision } from "@mseezee/shared";
+import type { PlaceSearchResult } from "@/lib/places";
+import { PlaceSearch } from "@/components/place/PlaceSearch";
 import { CIRCLE_TYPES, findCircleType, formatZAR, parseRandInput } from "@mseezee/shared";
 import { Button, ButtonLink } from "@/components/ui/Button";
 
-export function CreateWizard({ areas }: { areas: Area[] }) {
+export function CreateWizard() {
   const [step, setStep] = useState(0);
   const [type, setType] = useState<CircleType | null>(null);
-  const [areaSlug, setAreaSlug] = useState(areas[0]?.slug ?? "");
+  const [place, setPlace] = useState<PlaceSearchResult | null>(null);
   const [section, setSection] = useState("");
   const [precision, setPrecision] = useState<LocationPrecision>("area");
   const [title, setTitle] = useState("");
@@ -73,7 +75,7 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
           title: title.trim(),
           story: story.trim(),
           beneficiaryName: beneficiary.trim(),
-          areaSlug,
+          placeId: place?.id,
           areaSection: section.trim() || undefined,
           locationPrecision: precision,
           goalCents,
@@ -139,8 +141,8 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
         {open ? (
           <p className="max-w-xs text-sm text-ink-soft">
             Contributions go straight to the {selectedBank?.name ?? "bank"} account you
-            added. Before anything is paid out, our team checks who receives the funds
-            {isFuneral ? " — usually a community partner near the family" : ""}.
+            added, paid out by our payment provider on its normal schedule. Share your
+            circle to start receiving support.
           </p>
         ) : (
           <p className="max-w-xs text-sm text-ink-soft">
@@ -242,24 +244,41 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
         <section className="flex flex-col gap-4">
           <h1 className="text-xl">Where is this?</h1>
           <p className="-mt-2 text-sm text-ink-soft">
-            People nearby will see this circle first. We only ever show the area
-            publicly.
+            People nearby will see this circle first. Pick the suburb, township or
+            town — never a street address.
           </p>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">Area</span>
-            <select
-              value={areaSlug}
-              onChange={(e) => setAreaSlug(e.target.value)}
-              className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm font-semibold text-ink focus:outline-none"
-            >
-              {areas.map((a) => (
-                <option key={a.slug} value={a.slug}>
-                  {a.name} — {a.municipality}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-semibold text-ink">Suburb, township or town</span>
+            {place ? (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-forest bg-forest/5 px-3 py-2.5">
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-ink">{place.name}</span>
+                  <span className="block truncate text-xs text-ink-faint">
+                    {place.kind === "sub" ? `${place.mainPlaceName} · ` : ""}
+                    {place.municipality} · {place.province}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPlace(null)}
+                  className="shrink-0 text-sm font-semibold text-forest"
+                >
+                  Change
+                </button>
+              </div>
+            ) : (
+              <PlaceSearch onSelect={setPlace} />
+            )}
+            {place && isFuneral && place.kind === "sub" && (
+              <span className="text-xs text-ink-faint">
+                Funeral circles only show {place.mainPlaceName} publicly.
+              </span>
+            )}
+            <span className="text-[0.7rem] text-ink-faint">
+              Can&apos;t find it? Pick the nearest place and add the detail below.
+            </span>
+          </div>
 
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-semibold text-ink">
@@ -322,7 +341,7 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
             )}
           </fieldset>
 
-          <Button onClick={next} className="w-full">
+          <Button onClick={next} disabled={!place} className="w-full">
             Continue
           </Button>
         </section>
@@ -460,8 +479,9 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
               </label>
 
               <p className="rounded-lg bg-surface-sunk px-3 py-2 text-[0.76rem] text-ink-soft">
-                The bank confirms the account holder&apos;s name, and our team checks it
-                matches the beneficiary before any payout.
+                Double-check the account number — contributions are paid straight into
+                this account, so it should belong to the beneficiary or the
+                organisation holding the funds for them.
               </p>
             </>
           )}
@@ -489,10 +509,12 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
           <dl className="flex flex-col divide-y divide-line rounded-card border border-line bg-surface text-sm shadow-card">
             <ReviewRow label="Type" value={(type && findCircleType(type)?.label) ?? "—"} />
             <ReviewRow
-              label="Area"
+              label="Where"
               value={
-                areas.find((a) => a.slug === areaSlug)?.name +
-                (section ? ` · ${section}` : "")
+                place
+                  ? (place.kind === "sub" ? `${place.name}, ${place.mainPlaceName}` : place.name) +
+                    (section ? ` · ${section}` : "")
+                  : "—"
               }
             />
             <ReviewRow label="Title" value={title || "—"} />
@@ -520,8 +542,8 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
                 </li>
               )}
               <li>
-                Our team checks who receives the funds before anything is paid out
-                {isFuneral ? " — usually a community partner near the family" : ""}.
+                Contributions are paid straight into the account you added, on our
+                payment provider&apos;s normal schedule.
               </li>
               <li>Share your circle link and start receiving support.</li>
             </ol>

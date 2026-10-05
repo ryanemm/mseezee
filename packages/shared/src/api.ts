@@ -9,7 +9,6 @@
  */
 
 import type {
-  Area,
   Circle,
   CircleDashboard,
   CircleFilter,
@@ -22,7 +21,6 @@ import type {
   Supporter,
   ThankYouThread,
 } from "./types";
-import { AREAS, distanceKm, findArea } from "./places";
 import {
   CIRCLES,
   DEMO_ORGANISER,
@@ -36,12 +34,8 @@ import {
 import { estimateFeeCents } from "./money";
 
 export interface MseeZeeApi {
-  listAreas(): Promise<Area[]>;
-  getArea(slug: string): Promise<Area | null>;
   listCircles(filter?: CircleFilter): Promise<Circle[]>;
   getCircle(slug: string): Promise<Circle | null>;
-  /** Most-supported circles in an area, for the area page leaderboard. */
-  topCircles(areaSlug: string, limit?: number): Promise<Circle[]>;
   listSupporters(circleId: string, limit?: number): Promise<Supporter[]>;
   listUpdates(circleId: string): Promise<CircleUpdate[]>;
   getPaymentMethods(): Promise<PaymentMethod[]>;
@@ -94,14 +88,6 @@ const PAYMENT_METHODS: PaymentMethod[] = [
 
 const wait = (ms = 120) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function withDistance(circle: Circle, fromAreaSlug?: string): Circle {
-  if (!fromAreaSlug) return circle;
-  const from = findArea(fromAreaSlug);
-  const to = findArea(circle.area.slug);
-  if (!from || !to) return circle;
-  return { ...circle, distanceKm: distanceKm(from, to) };
-}
-
 function sortCircles(circles: Circle[], sort: CircleFilter["sort"]): Circle[] {
   const copy = [...circles];
   switch (sort) {
@@ -124,35 +110,22 @@ function sortCircles(circles: Circle[], sort: CircleFilter["sort"]): Circle[] {
 }
 
 export const mockApi: MseeZeeApi = {
-  async listAreas() {
-    await wait();
-    return [...AREAS].sort((a, b) => b.activeCircleCount - a.activeCircleCount);
-  },
-
-  async getArea(slug) {
-    await wait();
-    return findArea(slug) ?? null;
-  },
-
   async listCircles(filter = {}) {
     await wait();
-    let result = CIRCLES.map((c) => withDistance(c, filter.areaSlug));
+    let result = filter.placeId
+      ? CIRCLES.filter(
+          (c) => c.area.id === filter.placeId || c.area.mainPlaceId === filter.placeId,
+        )
+      : CIRCLES;
     if (filter.type && filter.type !== "all") {
       result = result.filter((c) => c.type === filter.type);
     }
-    return sortCircles(result, filter.sort ?? "nearest");
+    return sortCircles(result, filter.sort ?? "newest");
   },
 
   async getCircle(slug) {
     await wait();
     return CIRCLES.find((c) => c.slug === slug) ?? null;
-  },
-
-  async topCircles(areaSlug, limit = 3) {
-    await wait();
-    return CIRCLES.filter((c) => c.area.slug === areaSlug)
-      .sort((a, b) => b.raisedCents - a.raisedCents)
-      .slice(0, limit);
   },
 
   async listSupporters(circleId, limit) {

@@ -24,30 +24,29 @@ export type LocationPrecision = "exact" | "area" | "hidden";
  */
 export type VerificationTier = "unverified" | "id_verified" | "evidence_verified";
 
-export type AreaKind = "township" | "suburb" | "ward" | "town";
-
-export interface Area {
+/**
+ * Where a circle is, as shown publicly. Comes from a Stats SA place: either a
+ * main place ("Soweto") or a named sub place inside one ("Orlando West").
+ * Funeral circles are always coarsened to their main place before they leave
+ * the server. Centre points only — never an address.
+ */
+export interface CirclePlace {
   id: string;
-  slug: string;
   name: string;
-  kind: AreaKind;
-  /** Metro or local municipality this area sits in, e.g. "City of Johannesburg". */
+  mainPlaceId: string;
+  mainPlaceName: string;
+  /** Metro or local municipality, e.g. "City of Johannesburg". */
   municipality: string;
   province: string;
-  /** Coarse centroid — used for distance sorting and the area map, never a home address. */
   lat: number;
   lng: number;
-  activeCircleCount: number;
-  raisedThisMonthCents: number;
-  contributorCount: number;
 }
 
-/** Compact area summary denormalised onto a circle so cards render without a join. */
-export interface AreaRef {
-  slug: string;
-  name: string;
-  kind: AreaKind;
-  municipality: string;
+/** A place plus live totals from the circles in it — for Explore, place pages
+ *  and the map. Counted from real data, never seeded. */
+export interface PlaceSummary extends CirclePlace {
+  circleCount: number;
+  raisedCents: number;
 }
 
 export interface Circle {
@@ -63,7 +62,7 @@ export interface Circle {
   organiserName: string;
   /** Registered partner (church, burial society, parlour) holding funds, if any. */
   proxyName?: string;
-  area: AreaRef;
+  area: CirclePlace;
   locationPrecision: LocationPrecision;
   /** Shown only when precision allows it and never for funerals, e.g. "Zone 4". */
   areaSection?: string;
@@ -155,7 +154,8 @@ export interface ContributionReceipt {
 }
 
 export interface CircleFilter {
-  areaSlug?: string;
+  /** Matches circles in this place, or anywhere inside it for a main place. */
+  placeId?: string;
   type?: CircleType | "all";
   sort?: "nearest" | "newest" | "ending" | "most_supported";
 }

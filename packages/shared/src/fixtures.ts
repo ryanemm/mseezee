@@ -1,22 +1,17 @@
 import type {
-  AreaRef,
   Circle,
+  CirclePlace,
   CircleUpdate,
   Disbursement,
   Supporter,
   ThankYouThread,
 } from "./types";
-import { AREAS } from "./places";
+import { LEGACY_AREA_PLACES } from "./places";
 
-function areaRef(slug: string): AreaRef {
-  const area = AREAS.find((a) => a.slug === slug);
-  if (!area) throw new Error(`unknown area: ${slug}`);
-  return {
-    slug: area.slug,
-    name: area.name,
-    kind: area.kind,
-    municipality: area.municipality,
-  };
+function areaRef(slug: string): CirclePlace {
+  const place = LEGACY_AREA_PLACES[slug];
+  if (!place) throw new Error(`unknown area: ${slug}`);
+  return place;
 }
 
 const daysAgo = (n: number) =>

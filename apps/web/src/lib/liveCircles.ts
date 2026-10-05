@@ -1,12 +1,12 @@
-import { AREAS } from "@mseezee/shared";
 import type {
   Circle,
+  CirclePlace,
   CircleStatus,
   CircleType,
   LocationPrecision,
   VerificationTier,
 } from "@mseezee/shared";
-import type { Circle as DbCircle, User as DbUser } from "@/generated/prisma";
+import type { Circle as DbCircle, Place as DbPlace, User as DbUser } from "@/generated/prisma";
 import { prisma } from "@/lib/db";
 import { getLiveTotals } from "@/lib/liveContributions";
 
@@ -17,7 +17,45 @@ import { getLiveTotals } from "@/lib/liveContributions";
  * merge the two sources without either side knowing about the other.
  */
 
-type DbCircleWithOrganiser = DbCircle & { organiser: Pick<DbUser, "name" | "phone" | "email"> };
+type DbCircleWithOrganiser = DbCircle & {
+  organiser: Pick<DbUser, "name" | "phone" | "email">;
+  place: DbPlace;
+};
+
+const INCLUDE = { organiser: true, place: true } as const;
+
+/** The place a circle shows publicly. Funerals (and anyone who chose to hide
+ *  their location) only ever show the main place — some sub places are just a
+ *  few streets, which is too precise next to a running total. */
+export function publicPlace(
+  place: DbPlace,
+  type: string,
+  precision: string,
+): CirclePlace {
+  const coarse = type === "funeral" || precision === "hidden";
+  if (coarse || place.kind === "main") {
+    return {
+      id: place.mainPlaceId,
+      name: place.mainPlaceName,
+      mainPlaceId: place.mainPlaceId,
+      mainPlaceName: place.mainPlaceName,
+      municipality: place.municipality,
+      province: place.province,
+      lat: place.mainLat,
+      lng: place.mainLng,
+    };
+  }
+  return {
+    id: place.id,
+    name: place.name,
+    mainPlaceId: place.mainPlaceId,
+    mainPlaceName: place.mainPlaceName,
+    municipality: place.municipality,
+    province: place.province,
+    lat: place.lat,
+    lng: place.lng,
+  };
+}
 
 function slugify(input: string): string {
   const base = input
@@ -44,10 +82,7 @@ function organiserDisplayName(organiser: DbCircleWithOrganiser["organiser"]): st
   return organiser.name ?? organiser.email ?? organiser.phone ?? "MseeZee organiser";
 }
 
-async function toSharedCircle(row: DbCircleWithOrganiser): Promise<Circle | null> {
-  const area = AREAS.find((a) => a.slug === row.areaSlug);
-  if (!area) return null; // the wizard only offers slugs from this same list
-
+async function toSharedCircle(row: DbCircleWithOrganiser): Promise<Circle> {
   const live = await getLiveTotals(row.id);
 
   return {
@@ -60,7 +95,7 @@ async function toSharedCircle(row: DbCircleWithOrganiser): Promise<Circle | null
     beneficiaryName: row.beneficiaryName,
     organiserName: organiserDisplayName(row.organiser),
     proxyName: row.proxyName ?? undefined,
-    area: { slug: area.slug, name: area.name, kind: area.kind, municipality: area.municipality },
+    area: publicPlace(row.place, row.type, row.locationPrecision),
     locationPrecision: row.locationPrecision as LocationPrecision,
     areaSection: row.areaSection ?? undefined,
     goalCents: row.goalCents,
@@ -76,20 +111,27 @@ async function toSharedCircle(row: DbCircleWithOrganiser): Promise<Circle | null
   };
 }
 
-export async function listDbCircles(areaSlug?: string): Promise<Circle[]> {
+/** Real circles, optionally only those in a place (or anywhere inside it, for
+ *  a main place). Matched on the *public* place, so a funeral never turns up
+ *  on the page of the sub place it's really in. */
+export async function listDbCircles(placeId?: string): Promise<Circle[]> {
   const rows = await prisma.circle.findMany({
-    where: areaSlug ? { areaSlug } : undefined,
-    include: { organiser: true },
+    where: placeId
+      ? { OR: [{ placeId }, { place: { mainPlaceId: placeId } }] }
+      : undefined,
+    include: INCLUDE,
     orderBy: { createdAt: "desc" },
   });
   const mapped = await Promise.all(rows.map(toSharedCircle));
-  return mapped.filter((c): c is Circle => c !== null);
+  return placeId
+    ? mapped.filter((c) => c.area.id === placeId || c.area.mainPlaceId === placeId)
+    : mapped;
 }
 
 export async function getDbCircleBySlug(slug: string): Promise<Circle | null> {
   const row = await prisma.circle.findUnique({
     where: { slug },
-    include: { organiser: true },
+    include: INCLUDE,
   });
   return row ? toSharedCircle(row) : null;
 }
@@ -97,11 +139,10 @@ export async function getDbCircleBySlug(slug: string): Promise<Circle | null> {
 export async function listDbCirclesByOrganiser(organiserId: string): Promise<Circle[]> {
   const rows = await prisma.circle.findMany({
     where: { organiserId },
-    include: { organiser: true },
+    include: INCLUDE,
     orderBy: { createdAt: "desc" },
   });
-  const mapped = await Promise.all(rows.map(toSharedCircle));
-  return mapped.filter((c): c is Circle => c !== null);
+  return Promise.all(rows.map(toSharedCircle));
 }
 
 export interface CreateCircleInput {
@@ -109,7 +150,7 @@ export interface CreateCircleInput {
   title: string;
   story: string;
   beneficiaryName: string;
-  areaSlug: string;
+  placeId: string;
   areaSection?: string;
   locationPrecision: LocationPrecision;
   goalCents: number;
@@ -130,13 +171,13 @@ export async function createCircle(
       summary,
       story: input.story,
       beneficiaryName: input.beneficiaryName,
-      areaSlug: input.areaSlug,
+      placeId: input.placeId,
       areaSection: input.areaSection || null,
       locationPrecision: input.locationPrecision,
       goalCents: input.goalCents,
       organiserId,
     },
-    include: { organiser: true },
+    include: INCLUDE,
   });
   return toSharedCircle(row);
 }
