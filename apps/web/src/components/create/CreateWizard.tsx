@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Area, CircleType, LocationPrecision } from "@mseezee/shared";
 import { CIRCLE_TYPES, findCircleType, formatZAR, parseRandInput } from "@mseezee/shared";
@@ -21,11 +21,40 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Payout step. Optional at creation, but a circle can't take contributions
+  // until it has one, so MseeZee never ends up holding a circle's money.
+  const [banks, setBanks] = useState<Bank[] | null>(null);
+  const [banksError, setBanksError] = useState<string | null>(null);
+  const [bankCode, setBankCode] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [payoutSaved, setPayoutSaved] = useState(false);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
+
   const isFuneral = type === "funeral";
   const goalCents = parseRandInput(goal);
+  const cleanAccount = accountNumber.replace(/\s+/g, "");
+  const selectedBank = banks?.find((b) => b.code === bankCode);
+  const payoutEntered = Boolean(selectedBank && cleanAccount);
+  const accountValid = /^\d{6,17}$/.test(cleanAccount);
+
+  useEffect(() => {
+    if (step !== PAYOUT_STEP || banks) return;
+    fetch("/api/paystack/banks")
+      .then((res) => res.json())
+      .then((data: { banks?: Bank[]; error?: string }) => {
+        if (data.banks) setBanks(data.banks);
+        else setBanksError(data.error ?? "Could not load the bank list.");
+      })
+      .catch(() => setBanksError("Could not load the bank list."));
+  }, [step, banks]);
 
   function next() {
-    setStep((s) => Math.min(s + 1, 3));
+    setStep((s) => Math.min(s + 1, LAST_STEP));
+  }
+  function skipPayout() {
+    setBankCode("");
+    setAccountNumber("");
+    next();
   }
   function back() {
     setStep((s) => Math.max(s - 1, 0));
@@ -60,6 +89,26 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
         return;
       }
       setCreatedSlug(data.circle.slug);
+
+      if (payoutEntered && selectedBank) {
+        const payoutRes = await fetch(`/api/circles/${data.circle.slug}/payout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bankCode: selectedBank.code,
+            bankName: selectedBank.name,
+            accountNumber: cleanAccount,
+          }),
+        });
+        const payoutData = (await payoutRes.json().catch(() => ({}))) as { error?: string };
+        if (payoutRes.ok) {
+          setPayoutSaved(true);
+        } else {
+          // The circle itself was created — don't make them redo it, just
+          // send them to add the account again from the dashboard.
+          setPayoutError(payoutData.error ?? "We couldn't save that bank account.");
+        }
+      }
       setDone(true);
     } catch {
       setSubmitError("Could not reach the server. Check your connection.");
@@ -68,9 +117,14 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
   }
 
   if (done) {
+    const open = payoutSaved;
     return (
       <div className="flex flex-col items-center gap-5 px-4 py-12 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-good/15 text-good">
+        <div
+          className={`flex size-14 items-center justify-center rounded-full ${
+            open ? "bg-good/15 text-good" : "bg-gold-soft text-gold"
+          }`}
+        >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="m5 13 4 4L19 7"
@@ -81,26 +135,41 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
             />
           </svg>
         </div>
-        <h1 className="text-2xl">Your circle is up</h1>
-        <p className="max-w-xs text-sm text-ink-soft">
-          It&apos;s visible in your area now, marked{" "}
-          <span className="font-semibold text-ink">Unverified</span>. Before any
-          money is paid out, our team checks who receives the funds
-          {isFuneral ? " — usually a community partner near the family" : ""}.
-        </p>
+        <h1 className="text-2xl">{open ? "Your circle is open" : "Your circle is saved"}</h1>
+        {open ? (
+          <p className="max-w-xs text-sm text-ink-soft">
+            Contributions go straight to the {selectedBank?.name ?? "bank"} account you
+            added. Before anything is paid out, our team checks who receives the funds
+            {isFuneral ? " — usually a community partner near the family" : ""}.
+          </p>
+        ) : (
+          <p className="max-w-xs text-sm text-ink-soft">
+            {payoutError
+              ? `${payoutError} `
+              : ""}
+            It isn&apos;t open for contributions yet. Add the bank account the money
+            should go to — the beneficiary&apos;s, or the organisation holding the funds —
+            and it opens straight away.
+          </p>
+        )}
         <div className="flex w-full max-w-xs flex-col gap-2">
-          {createdSlug && (
-            <ButtonLink href={`/dashboard/${createdSlug}`} className="w-full">
-              Manage your circle
+          {createdSlug && !open && (
+            <ButtonLink href={`/dashboard/${createdSlug}#payouts`} className="w-full">
+              Add payout account
+            </ButtonLink>
+          )}
+          {createdSlug && open && (
+            <ButtonLink href={`/circles/${createdSlug}`} className="w-full">
+              View and share your circle
             </ButtonLink>
           )}
           {createdSlug && (
             <ButtonLink
-              href={`/circles/${createdSlug}`}
+              href={open ? `/dashboard/${createdSlug}` : `/circles/${createdSlug}`}
               variant="secondary"
               className="w-full"
             >
-              View public page
+              {open ? "Manage your circle" : "View public page"}
             </ButtonLink>
           )}
           <Link href="/dashboard" className="pt-1 text-sm font-semibold text-forest">
@@ -133,7 +202,7 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
           </Link>
         )}
         <div className="flex flex-1 gap-1">
-          {[0, 1, 2, 3].map((i) => (
+          {Array.from({ length: LAST_STEP + 1 }, (_, i) => i).map((i) => (
             <span
               key={i}
               className={`h-1 flex-1 rounded-full ${
@@ -341,7 +410,80 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
         </section>
       )}
 
-      {step === 3 && (
+      {step === PAYOUT_STEP && (
+        <section className="flex flex-col gap-4">
+          <h1 className="text-xl">Where the money goes</h1>
+          <p className="-mt-2 text-sm text-ink-soft">
+            Contributions settle straight into this account — the beneficiary&apos;s own,
+            or the organisation holding the funds for them. MseeZee never holds the
+            money. You can skip this for now, but the circle won&apos;t take
+            contributions until it&apos;s added.
+          </p>
+
+          {banksError && (
+            <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">{banksError}</p>
+          )}
+          {!banks && !banksError && <p className="text-sm text-ink-faint">Loading banks…</p>}
+
+          {banks && (
+            <>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-semibold text-ink">Bank</span>
+                <select
+                  value={bankCode}
+                  onChange={(e) => setBankCode(e.target.value)}
+                  className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm font-semibold text-ink focus:outline-none"
+                >
+                  <option value="">Choose a bank</option>
+                  {banks.map((b) => (
+                    <option key={b.code} value={b.code}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-semibold text-ink">Account number</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
+                  placeholder="e.g. 62012345678"
+                  className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+                />
+                {cleanAccount && !accountValid && (
+                  <span className="text-xs text-crit">Enter digits only, 6 to 17 of them.</span>
+                )}
+              </label>
+
+              <p className="rounded-lg bg-surface-sunk px-3 py-2 text-[0.76rem] text-ink-soft">
+                The bank confirms the account holder&apos;s name, and our team checks it
+                matches the beneficiary before any payout.
+              </p>
+            </>
+          )}
+
+          <Button
+            onClick={next}
+            disabled={!selectedBank || !accountValid}
+            className="w-full"
+          >
+            Continue
+          </Button>
+          <button
+            type="button"
+            onClick={skipPayout}
+            className="text-sm font-semibold text-forest"
+          >
+            Skip for now
+          </button>
+        </section>
+      )}
+
+      {step === REVIEW_STEP && (
         <section className="flex flex-col gap-4">
           <h1 className="text-xl">Review</h1>
           <dl className="flex flex-col divide-y divide-line rounded-card border border-line bg-surface text-sm shadow-card">
@@ -356,16 +498,30 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
             <ReviewRow label="Title" value={title || "—"} />
             <ReviewRow label="Receives funds" value={beneficiary || "—"} />
             <ReviewRow label="Goal" value={goalCents ? formatZAR(goalCents) : "—"} />
+            <ReviewRow
+              label="Payout account"
+              value={
+                payoutEntered && selectedBank
+                  ? `${selectedBank.name} · ••••${cleanAccount.slice(-4)}`
+                  : "Not added yet"
+              }
+            />
           </dl>
 
           <div className="rounded-card bg-forest/5 p-4 text-[0.82rem] text-ink-soft">
             <p className="font-semibold text-ink">What happens next</p>
             <ol className="mt-2 flex list-decimal flex-col gap-1 pl-4">
-              <li>Your circle is saved as a draft.</li>
+              {payoutEntered ? (
+                <li>Your circle opens for contributions as soon as it&apos;s created.</li>
+              ) : (
+                <li>
+                  Your circle is saved, but won&apos;t take contributions until you add a
+                  payout account from its dashboard.
+                </li>
+              )}
               <li>
-                {isFuneral
-                  ? "Choose a verified community partner to hold the funds, or verify your own details."
-                  : "Verify your identity to collect above R5,000."}
+                Our team checks who receives the funds before anything is paid out
+                {isFuneral ? " — usually a community partner near the family" : ""}.
               </li>
               <li>Share your circle link and start receiving support.</li>
             </ol>
@@ -384,6 +540,15 @@ export function CreateWizard({ areas }: { areas: Area[] }) {
       )}
     </div>
   );
+}
+
+const PAYOUT_STEP = 3;
+const REVIEW_STEP = 4;
+const LAST_STEP = REVIEW_STEP;
+
+interface Bank {
+  name: string;
+  code: string;
 }
 
 function ReviewRow({ label, value }: { label: string; value: string }) {

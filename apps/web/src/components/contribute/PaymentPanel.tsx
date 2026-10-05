@@ -9,6 +9,7 @@ import type { Circle, ContributionDraft, PaymentMethod } from "@mseezee/shared";
 import { estimateFeeCents, formatZAR, mockApi } from "@mseezee/shared";
 import { Button } from "@/components/ui/Button";
 import { loadDraft, saveReceipt } from "@/lib/draft";
+import { contributionBlock } from "@/lib/contributions-open";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -57,8 +58,9 @@ export function PaymentPanel({
     if (!draft) return;
     setError(null);
 
-    if (circle.isDemo) {
-      setError("This is example content and isn't open for contributions.");
+    const blocked = contributionBlock(circle);
+    if (blocked) {
+      setError(`${blocked}.`);
       return;
     }
 

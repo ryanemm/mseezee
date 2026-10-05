@@ -100,8 +100,9 @@ export function PayoutAccountCard({
       <div>
         <p className="text-sm font-semibold text-ink">Add a payout account</p>
         <p className="text-xs text-ink-soft">
-          Contributions to this circle will settle here instead of MseeZee's
-          main account.
+          {initialBankName
+            ? "Contributions to this circle settle into this account."
+            : "Your circle isn't open for contributions until you add the account the money goes to — the beneficiary's own, or the organisation holding the funds."}
         </p>
       </div>
 

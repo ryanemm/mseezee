@@ -4,12 +4,11 @@ import { ButtonLink } from "@/components/ui/Button";
  *  the circle page shows a sticky `ContributeRail` in a right column instead. */
 export function ContributeBar({
   slug,
-  closed,
-  isDemo,
+  blocked,
 }: {
   slug: string;
-  closed?: boolean;
-  isDemo?: boolean;
+  /** Why contributions are off (see `contributionBlock`), or null if open. */
+  blocked: string | null;
 }) {
   return (
     <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6rem)] z-20 rounded-[22px] border border-line bg-surface/95 px-3 py-2.5 shadow-card backdrop-blur md:inset-x-auto md:bottom-0 md:left-64 md:right-0 md:rounded-none md:border-x-0 md:border-b-0 md:px-4 md:py-3 lg:hidden">
@@ -28,13 +27,9 @@ export function ContributeBar({
             />
           </svg>
         </button>
-        {isDemo ? (
+        {blocked ? (
           <span className="flex-1 rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
-            Example circle — not open for contributions
-          </span>
-        ) : closed ? (
-          <span className="flex-1 rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
-            This circle is closed
+            {blocked}
           </span>
         ) : (
           <ButtonLink href={`/circles/${slug}/contribute`} className="flex-1">

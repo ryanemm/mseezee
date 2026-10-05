@@ -72,6 +72,7 @@ async function toSharedCircle(row: DbCircleWithOrganiser): Promise<Circle | null
     eventDate: row.eventDate?.toISOString(),
     cover: { tone: row.type as Circle["cover"]["tone"], monogram: monogram(row.title) },
     isDemo: false,
+    payoutReady: Boolean(row.payoutSubaccountCode),
   };
 }
 

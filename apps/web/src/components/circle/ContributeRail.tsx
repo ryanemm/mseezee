@@ -3,11 +3,12 @@ import { formatZAR } from "@mseezee/shared";
 import { ButtonLink } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { VerifiedChip } from "@/components/ui/Chip";
+import { contributionBlock } from "@/lib/contributions-open";
 
 /** The desktop (`lg`+) equivalent of the mobile `ContributeBar` — a sticky
  *  card in the circle page's right column, always visible while reading. */
 export function ContributeRail({ circle }: { circle: Circle }) {
-  const closed = circle.status === "closed";
+  const blocked = contributionBlock(circle);
 
   return (
     <aside className="hidden w-[21rem] shrink-0 lg:block">
@@ -31,13 +32,9 @@ export function ContributeRail({ circle }: { circle: Circle }) {
           <VerifiedChip tier={circle.verificationTier} />
         </div>
 
-        {circle.isDemo ? (
+        {blocked ? (
           <span className="rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
-            Example circle — not open for contributions
-          </span>
-        ) : closed ? (
-          <span className="rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
-            This circle is closed
+            {blocked}
           </span>
         ) : (
           <ButtonLink href={`/circles/${circle.slug}/contribute`} className="w-full">

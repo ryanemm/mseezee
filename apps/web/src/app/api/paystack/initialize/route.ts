@@ -80,13 +80,20 @@ export async function POST(request: Request) {
       { status: 403 },
     );
   }
-  // Mock fixture circles have no DB row and so no subaccount — they fall
-  // back to the platform's own account, same as an organiser who hasn't set
-  // up a payout account yet.
+  // Every contribution settles to the circle's own payout subaccount — never
+  // MseeZee's main account, which would mean MseeZee holding the money. No
+  // subaccount (organiser skipped that step, or no DB row at all), no charge.
   const dbCircle = await prisma.circle.findUnique({
     where: { slug: circle.slug },
     select: { payoutSubaccountCode: true },
   });
+  const subaccountCode = dbCircle?.payoutSubaccountCode;
+  if (!subaccountCode) {
+    return NextResponse.json(
+      { error: "This circle isn't open for contributions yet." },
+      { status: 403 },
+    );
+  }
 
   const tipCents = Math.max(0, Math.trunc(body.tipCents || 0));
   const feeCents = body.coverFee ? estimateFeeCents(body.amountCents) : 0;
@@ -122,7 +129,7 @@ export async function POST(request: Request) {
       amountCents: totalChargedCents,
       reference,
       callbackUrl: `${appUrl}/circles/${circle.slug}/contribute/callback`,
-      subaccountCode: dbCircle?.payoutSubaccountCode ?? undefined,
+      subaccountCode,
       platformChargeCents: tipCents,
       channels: body.methodId ? CHANNELS_BY_METHOD[body.methodId] : undefined,
       metadata: {

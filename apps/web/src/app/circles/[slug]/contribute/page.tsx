@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { StepHeader } from "@/components/contribute/StepHeader";
 import { ContributeForm } from "@/components/contribute/ContributeForm";
+import { contributionBlock } from "@/lib/contributions-open";
 
 export const metadata: Metadata = { title: "Contribute" };
 
@@ -16,20 +17,20 @@ export default async function ContributePage({
   const circle = await api.getCircle(slug);
   if (!circle) notFound();
 
-  if (circle.isDemo) {
+  const blocked = contributionBlock(circle);
+  if (blocked) {
     return (
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-3 px-4 py-16 text-center">
-        <h1 className="text-xl">This is example content</h1>
+        <h1 className="text-xl">{blocked}</h1>
         <p className="max-w-sm text-sm text-ink-soft">
-          &ldquo;{circle.title}&rdquo; is seeded so the app has something to
-          show while real circles get going — it isn&apos;t a real cause, and
-          it isn&apos;t open for contributions.
+          {circle.isDemo
+            ? `“${circle.title}” is seeded so the app has something to show while real circles get going — it isn't a real cause.`
+            : circle.payoutReady === false
+              ? "The organiser hasn't added the account the money goes to yet. Check back soon."
+              : "This circle has finished collecting."}
         </p>
-        <Link
-          href="/"
-          className="pt-2 text-sm font-semibold text-forest"
-        >
-          Back to circles
+        <Link href={`/circles/${circle.slug}`} className="pt-2 text-sm font-semibold text-forest">
+          Back to the circle
         </Link>
       </div>
     );

@@ -7,6 +7,7 @@ import type { Circle, ContributionReceipt } from "@mseezee/shared";
 import { formatZAR } from "@mseezee/shared";
 import { ButtonLink } from "@/components/ui/Button";
 import { ShareCircle } from "@/components/circle/ShareCircle";
+import { circleSupporterMessage } from "@/lib/share";
 import { clearContribution, loadReceipt } from "@/lib/draft";
 
 export function ThankYou({
@@ -112,6 +113,7 @@ export function ThankYou({
         <ShareCircle
           circle={circle}
           framed={false}
+          message={circleSupporterMessage(circle)}
           heading={`Help ${beneficiaryShort} reach more people`}
           subheading="Share the circle with your family, church or street group."
         />

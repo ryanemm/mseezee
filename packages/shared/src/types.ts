@@ -83,6 +83,10 @@ export interface Circle {
    *  payment for these regardless of what the UI shows, so hiding the button
    *  is never the only thing standing between this and a real charge. */
   isDemo?: boolean;
+  /** Real circles only: whether a payout bank account has been added. A
+   *  circle without one never takes contributions — otherwise the money
+   *  would land in MseeZee's own account. */
+  payoutReady?: boolean;
 }
 
 export interface CoverArt {

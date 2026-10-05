@@ -11,6 +11,7 @@ import { ContributeBar } from "@/components/circle/ContributeBar";
 import { ContributeRail } from "@/components/circle/ContributeRail";
 import { ShareCircle, ShareIconButton } from "@/components/circle/ShareCircle";
 import { circleShareText } from "@/lib/share";
+import { contributionBlock } from "@/lib/contributions-open";
 import { eventDateLabel, relativeDay } from "@/lib/format";
 
 type Params = { slug: string };
@@ -61,7 +62,7 @@ export default async function CirclePage({
   ).length;
 
   const isFuneral = circle.type === "funeral";
-  const closed = circle.status === "closed";
+  const blocked = contributionBlock(circle);
 
   return (
     <div className="pb-60 lg:pb-16">
@@ -90,7 +91,7 @@ export default async function CirclePage({
               />
             </svg>
           </Link>
-          {!circle.isDemo && (
+          {!blocked && (
             <div className="absolute right-3 top-3 lg:right-5 lg:top-5">
               <ShareIconButton circle={circle} />
             </div>
@@ -164,7 +165,7 @@ export default async function CirclePage({
             )}
           </section>
 
-          {!circle.isDemo && !closed && <ShareCircle circle={circle} />}
+          {!blocked && <ShareCircle circle={circle} />}
 
           <section className="flex flex-col gap-2">
             <h2 className="text-lg">About this circle</h2>
@@ -263,7 +264,7 @@ export default async function CirclePage({
         <ContributeRail circle={circle} />
       </div>
 
-      <ContributeBar slug={circle.slug} closed={closed} isDemo={circle.isDemo} />
+      <ContributeBar slug={circle.slug} blocked={blocked} />
     </div>
   );
 }

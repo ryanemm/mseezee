@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { Circle } from "@mseezee/shared";
-import { circleSharePath, circleShareText } from "@/lib/share";
+import { circleShareMessage, circleSharePath } from "@/lib/share";
 
 type ShareableCircle = Pick<
   Circle,
-  "slug" | "title" | "type" | "beneficiaryName" | "raisedCents" | "goalCents"
+  "slug" | "title" | "type" | "beneficiaryName" | "raisedCents" | "goalCents" | "area"
 >;
 
 /** Builds the absolute link on the client so it always matches whatever host
@@ -17,6 +17,16 @@ function useShareUrl(slug: string): string {
     setUrl(`${window.location.origin}${circleSharePath(slug)}`);
   }, [slug]);
   return url;
+}
+
+/** Phones only — desktop browsers can have a share sheet too, but it doesn't
+ *  list Facebook, so on a computer the web share page is the better route. */
+function useIsPhone(): boolean {
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    setPhone(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  }, []);
+  return phone;
 }
 
 function useCanNativeShare(): boolean {
@@ -54,8 +64,12 @@ export function ShareCircle({
   heading = "Share this circle",
   subheading = "The more people who see it, the faster it fills.",
   framed = true,
+  message,
 }: {
   circle: ShareableCircle;
+  /** Overrides the default call-to-contribute, e.g. the first-person message
+   *  on the thank-you page. */
+  message?: string;
   heading?: string;
   subheading?: string;
   /** Card styling for the circle page; off where the parent already frames it. */
@@ -63,8 +77,9 @@ export function ShareCircle({
 }) {
   const url = useShareUrl(circle.slug);
   const canNativeShare = useCanNativeShare();
+  const isPhone = useIsPhone();
   const [copied, setCopied] = useState(false);
-  const text = circleShareText(circle);
+  const text = message ?? circleShareMessage(circle);
 
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`;
   const facebook = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
@@ -102,9 +117,22 @@ export function ShareCircle({
       </a>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <a href={facebook} target="_blank" rel="noreferrer" className={pill}>
-          Facebook
-        </a>
+        {/* On phones the Facebook app intercepts its own web share link and
+            opens the feed without the link, so go through the share sheet,
+            whose Facebook option opens the post composer with the link. */}
+        {isPhone && canNativeShare ? (
+          <button
+            type="button"
+            onClick={() => nativeShare(circle.title, text, url)}
+            className={pill}
+          >
+            Facebook
+          </button>
+        ) : (
+          <a href={facebook} target="_blank" rel="noreferrer" className={pill}>
+            Facebook
+          </a>
+        )}
         <a href={x} target="_blank" rel="noreferrer" className={pill}>
           X
         </a>
@@ -133,7 +161,7 @@ export function ShareIconButton({ circle }: { circle: ShareableCircle }) {
 
   async function share() {
     if (typeof navigator.share === "function") {
-      if (await nativeShare(circle.title, circleShareText(circle), url)) return;
+      if (await nativeShare(circle.title, circleShareMessage(circle), url)) return;
     }
     if (await copyToClipboard(url)) {
       setCopied(true);
