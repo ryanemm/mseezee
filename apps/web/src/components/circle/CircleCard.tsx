@@ -5,14 +5,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { DistanceChip, ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
 import { eventDateLabel } from "@/lib/format";
 
-export function CircleCard({
-  circle,
-  featured = false,
-}: {
-  circle: Circle;
-  /** The hero treatment for "needs support now" — taller cover, gold hairline. */
-  featured?: boolean;
-}) {
+export function CircleCard({ circle }: { circle: Circle }) {
   const areaLabel = circle.areaSection
     ? `${circle.area.name} · ${circle.areaSection}`
     : circle.area.name;
@@ -20,11 +13,9 @@ export function CircleCard({
   return (
     <Link
       href={`/circles/${circle.slug}`}
-      className={`group block overflow-hidden rounded-[24px] border bg-surface shadow-card transition-transform active:scale-[0.99] ${
-        featured ? "border-gold-line/60" : "border-line"
-      }`}
+      className="group block overflow-hidden rounded-[24px] border border-line bg-surface shadow-card transition-transform active:scale-[0.99]"
     >
-      <div className={`relative ${featured ? "h-48" : "h-32"}`}>
+      <div className="relative h-32">
         <CoverArt cover={circle.cover} className="h-full w-full" />
         <div className="absolute left-3.5 top-3.5">
           <TypeChip type={circle.type} onDark />

@@ -27,6 +27,7 @@ export function PaymentPanel({
   // Not everything in the catalog is switched on at Paystack yet — see each
   // method's `available` comment in packages/shared/src/api.ts.
   const availableMethods = methods.filter((m) => m.available);
+  const comingSoonMethods = methods.filter((m) => !m.available && m.comingSoon);
   const [draft, setDraft] = useState<ContributionDraft | null>(null);
   const [email, setEmail] = useState("");
   const [methodId, setMethodId] = useState(
@@ -185,6 +186,24 @@ export function PaymentPanel({
               <span className="text-xs text-ink-faint">{m.blurb}</span>
             </span>
           </label>
+        ))}
+        {comingSoonMethods.map((m) => (
+          <div
+            key={m.id}
+            aria-disabled="true"
+            className="flex items-start gap-3 rounded-xl border border-dashed border-line bg-surface-sunk/60 p-3.5"
+          >
+            <span className="mt-0.5 size-4 shrink-0 rounded-full border border-line" aria-hidden="true" />
+            <span className="flex-1">
+              <span className="flex items-center gap-2 text-sm font-semibold text-ink-faint">
+                {m.label}
+                <span className="rounded-full border border-gold-line/60 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-gold">
+                  Coming soon
+                </span>
+              </span>
+              <span className="text-xs text-ink-faint">{m.blurb}</span>
+            </span>
+          </div>
         ))}
         {paymentsLive && (
           <p className="px-1 text-[0.72rem] text-ink-faint">

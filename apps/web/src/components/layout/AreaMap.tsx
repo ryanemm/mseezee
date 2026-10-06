@@ -1,9 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import type { PlaceSummary } from "@mseezee/shared";
 import { PLACE_DATA_CREDIT } from "@mseezee/shared";
+import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
 
 // Leaflet touches `window` at import time, so the real map only ever loads
 // in the browser — this is the standard Next.js + Leaflet pairing.
@@ -35,17 +35,9 @@ export function AreaMap({
         <AreaMapInner places={places} near={near} />
       </div>
 
-      <div className="-mt-[26px] flex flex-col gap-2 rounded-b-[26px] border border-t-0 border-line bg-surface px-4 pb-3.5 pt-[2.4rem] shadow-pill sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <span className="text-[0.78rem] leading-relaxed text-ink-soft">
-          Approximate areas only — never a home address.
-          <span className="block text-[0.68rem] text-ink-faint">{PLACE_DATA_CREDIT}</span>
-        </span>
-        <Link
-          href="/explore"
-          className="shrink-0 self-end whitespace-nowrap text-[0.85rem] font-semibold text-ink sm:self-auto sm:pt-0.5"
-        >
-          Browse by name <span className="text-gold-line">→</span>
-        </Link>
+      <div className="-mt-[26px] flex flex-col gap-2 rounded-b-[26px] border border-t-0 border-line bg-surface px-4 pb-3.5 pt-[2.4rem] shadow-pill">
+        <ExplorePlaceSearch />
+        <span className="text-[0.68rem] text-ink-faint">{PLACE_DATA_CREDIT}</span>
       </div>
     </div>
   );

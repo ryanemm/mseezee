@@ -68,6 +68,16 @@ export async function POST(request: Request) {
     );
   }
 
+  if (body.methodId) {
+    const methods = await api.getPaymentMethods();
+    if (!methods.some((m) => m.id === body.methodId && m.available)) {
+      return NextResponse.json(
+        { error: "That payment method isn't available yet. Please pay by card." },
+        { status: 400 },
+      );
+    }
+  }
+
   const circle = await api.getCircle(body.circleSlug);
   if (!circle) {
     return NextResponse.json({ error: "Circle not found" }, { status: 404 });

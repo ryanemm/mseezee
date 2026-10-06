@@ -35,16 +35,6 @@ export default async function HomePage({
   const circles =
     type === "all" ? everything : everything.filter((c) => c.type === type);
 
-  // "Near me" is already the most relevant ranking there is — pulling one
-  // circle out into its own "Needs support now" section would bury the
-  // actual closest result further down the page.
-  const featured = near
-    ? undefined
-    : circles.find(
-        (c) => c.type === "funeral" && c.verificationTier === "evidence_verified",
-      );
-  const rest = featured ? circles.filter((c) => c.id !== featured.id) : circles;
-
   const baseParams: Record<string, string> = near
     ? { lat: String(near.lat), lng: String(near.lng) }
     : {};
@@ -64,23 +54,14 @@ export default async function HomePage({
 
       <FilterTabs active={type} baseParams={baseParams} />
 
-      {featured && (
-        <section className="flex flex-col gap-3">
-          <p className="eyebrow text-[0.78rem] tracking-[0.16em]">Needs support now</p>
-          <div className="lg:max-w-lg">
-            <CircleCard circle={featured} featured />
-          </div>
-        </section>
-      )}
-
       <section className="flex flex-col gap-3 pb-4">
-        {rest.length > 0 && (
+        {circles.length > 0 && (
           <p className="eyebrow text-[0.78rem] tracking-[0.16em]">
-            {near ? "Closest to you" : "Top circles right now"}
+            {near ? "Closest to you" : "Popular causes right now"}
           </p>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {rest.map((circle) => (
+          {circles.map((circle) => (
             <CircleCard key={circle.id} circle={circle} />
           ))}
           {circles.length === 0 && (

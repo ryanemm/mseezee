@@ -49,15 +49,16 @@ export interface MseeZeeApi {
   getPartnerView(): Promise<PartnerView>;
 }
 
+// Only card is switched on at Paystack for now. To turn a method on, set
+// `available: true` (and drop `comingSoon`) once Paystack has enabled it.
 const PAYMENT_METHODS: PaymentMethod[] = [
   {
-    id: "payshap",
-    label: "PayShap",
-    blurb: "Instant, from your banking app. To a cellphone or account.",
-    kind: "push",
-    recommended: true,
-    // Not yet enabled on the Paystack account — flip this back on once it is.
-    available: false,
+    id: "card",
+    label: "Card",
+    blurb: "Visa or Mastercard, credit or debit.",
+    kind: "card",
+    recommended: false,
+    available: true,
   },
   {
     id: "instant_eft",
@@ -65,7 +66,17 @@ const PAYMENT_METHODS: PaymentMethod[] = [
     blurb: "Pay securely from your bank. No card needed.",
     kind: "push",
     recommended: true,
-    available: true,
+    available: false,
+    comingSoon: true,
+  },
+  {
+    id: "payshap",
+    label: "PayShap",
+    blurb: "Instant, from your banking app. To a cellphone or account.",
+    kind: "push",
+    recommended: true,
+    available: false,
+    comingSoon: true,
   },
   {
     id: "capitec_pay",
@@ -73,16 +84,7 @@ const PAYMENT_METHODS: PaymentMethod[] = [
     blurb: "Approve the payment in your Capitec app.",
     kind: "push",
     recommended: false,
-    // Not yet enabled on the Paystack account — flip this back on once it is.
     available: false,
-  },
-  {
-    id: "card",
-    label: "Card",
-    blurb: "Visa or Mastercard. Higher fees than paying from your bank.",
-    kind: "card",
-    recommended: false,
-    available: true,
   },
 ];
 

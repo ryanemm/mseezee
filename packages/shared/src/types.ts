@@ -123,7 +123,11 @@ export interface PaymentMethod {
   kind: "push" | "card";
   /** Irreversible push rails are preferred; cards are a higher-cost fallback. */
   recommended: boolean;
+  /** Switched on at Paystack and selectable. */
   available: boolean;
+  /** Not available yet, but shown greyed out with a "Coming soon" label.
+   *  Methods that are neither stay hidden. */
+  comingSoon?: boolean;
 }
 
 /** The contribution form state, collected before a payment method is chosen. */
