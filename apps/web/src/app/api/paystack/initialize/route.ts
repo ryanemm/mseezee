@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { initializeTransaction, isPaystackConfigured } from "@/lib/paystack";
 import { newReference } from "@/lib/payments";
+import { publicAppUrl } from "@/lib/app-url";
 
 export const runtime = "nodejs";
 
@@ -100,8 +101,7 @@ export async function POST(request: Request) {
   const totalChargedCents = body.amountCents + tipCents + feeCents;
 
   const reference = newReference();
-  const origin = new URL(request.url).origin;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? origin;
+  const appUrl = publicAppUrl(request);
 
   await prisma.contribution.create({
     data: {
