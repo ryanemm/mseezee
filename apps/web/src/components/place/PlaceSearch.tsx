@@ -1,20 +1,24 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { PlaceSearchResult } from "@/lib/places";
+import { findCircleType, formatZAR } from "@mseezee/shared";
+import type { CircleSearchResult, PlaceSearchResult } from "@/lib/places";
 
 /**
- * Type-ahead search over Stats SA places. Shows "Orlando West" with
+ * Type-ahead search over Stats SA places — and, when `onSelectCircle` is
+ * given, over circles too (shown first, as their own group). Shows "Orlando West" with
  * "Soweto · City of Johannesburg" under it, since the same name often exists
  * in several places ("Mountain View" appears nine times).
  */
 export function PlaceSearch({
   onSelect,
+  onSelectCircle,
   placeholder = "Search a suburb, township or town",
   showCircleCounts = false,
   autoFocus = false,
 }: {
   onSelect: (place: PlaceSearchResult) => void;
+  onSelectCircle?: (circle: CircleSearchResult) => void;
   placeholder?: string;
   /** Explore shows how many circles each result has; creating a circle doesn't need it. */
   showCircleCounts?: boolean;
@@ -23,6 +27,8 @@ export function PlaceSearch({
   const listId = useId();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceSearchResult[]>([]);
+  const [circles, setCircles] = useState<CircleSearchResult[]>([]);
+  const withCircles = Boolean(onSelectCircle);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const latest = useRef(0);
@@ -31,6 +37,7 @@ export function PlaceSearch({
     const q = query.trim();
     if (q.length < 2) {
       setResults([]);
+      setCircles([]);
       setLoading(false);
       return;
     }
@@ -38,25 +45,45 @@ export function PlaceSearch({
     const ticket = ++latest.current;
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/places?q=${encodeURIComponent(q)}`);
-        const data = (await res.json()) as { places?: PlaceSearchResult[] };
+        const res = await fetch(
+          `/api/places?q=${encodeURIComponent(q)}${withCircles ? "&circles=1" : ""}`,
+        );
+        const data = (await res.json()) as {
+          places?: PlaceSearchResult[];
+          circles?: CircleSearchResult[];
+        };
         // A slower, older request finishing late mustn't overwrite newer results.
-        if (ticket === latest.current) setResults(data.places ?? []);
+        if (ticket === latest.current) {
+          setResults(data.places ?? []);
+          setCircles(data.circles ?? []);
+        }
       } catch {
-        if (ticket === latest.current) setResults([]);
+        if (ticket === latest.current) {
+          setResults([]);
+          setCircles([]);
+        }
       } finally {
         if (ticket === latest.current) setLoading(false);
       }
     }, 200);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, withCircles]);
 
-  function choose(place: PlaceSearchResult) {
-    onSelect(place);
+  function reset() {
     setQuery("");
     setResults([]);
+    setCircles([]);
     setOpen(false);
   }
+  function choose(place: PlaceSearchResult) {
+    onSelect(place);
+    reset();
+  }
+  function chooseCircle(circle: CircleSearchResult) {
+    onSelectCircle?.(circle);
+    reset();
+  }
+  const nothing = results.length === 0 && circles.length === 0;
 
   const showList = open && query.trim().length >= 2;
 
@@ -89,15 +116,37 @@ export function PlaceSearch({
           role="listbox"
           className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-80 overflow-y-auto rounded-xl border border-line bg-surface py-1 shadow-card"
         >
-          {loading && results.length === 0 && (
+          {loading && nothing && (
             <li className="px-3.5 py-3 text-sm text-ink-faint">Searching…</li>
           )}
-          {!loading && results.length === 0 && (
+          {!loading && nothing && (
             <li className="px-3.5 py-3 text-sm text-ink-faint">
-              No places match &ldquo;{query.trim()}&rdquo;. Try a nearby suburb or the
+              Nothing matches &ldquo;{query.trim()}&rdquo;. Try a nearby suburb or the
               town name.
             </li>
           )}
+          {circles.length > 0 && <GroupLabel>Circles</GroupLabel>}
+          {circles.map((c) => (
+            <li key={c.slug} role="option" aria-selected={false}>
+              <button
+                type="button"
+                onClick={() => chooseCircle(c)}
+                className="flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left hover:bg-surface-sunk"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-ink">{c.title}</span>
+                  <span className="block truncate text-xs text-ink-faint">
+                    {findCircleType(c.type)?.shortLabel ?? c.type} · {c.placeName}
+                    {c.isDemo ? " · Example" : ""}
+                  </span>
+                </span>
+                <span className="shrink-0 text-xs font-semibold text-forest tnum">
+                  {formatZAR(c.raisedCents, { compact: true })}
+                </span>
+              </button>
+            </li>
+          ))}
+          {circles.length > 0 && results.length > 0 && <GroupLabel>Places</GroupLabel>}
           {results.map((p) => (
             <li key={p.id} role="option" aria-selected={false}>
               <button
@@ -129,6 +178,17 @@ export function PlaceSearch({
         </ul>
       )}
     </div>
+  );
+}
+
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <li
+      role="presentation"
+      className="px-3.5 pb-1 pt-2.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-gold"
+    >
+      {children}
+    </li>
   );
 }
 

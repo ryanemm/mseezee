@@ -1,7 +1,6 @@
 import type { Circle, CirclePlace, PlaceSummary } from "@mseezee/shared";
 import type { Place as DbPlace } from "@/generated/prisma";
 import { prisma } from "@/lib/db";
-import { api } from "@/lib/api";
 
 /**
  * Stats SA places (see the `Place` model) and the circles in them. Circle
@@ -43,15 +42,24 @@ export async function getPlace(id: string): Promise<CirclePlace | null> {
   return row ? toCirclePlace(row) : null;
 }
 
+function searchWords(query: string): string[] {
+  const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean).slice(0, 5);
+  return words.join("").length < 2 ? [] : words;
+}
+
 /**
  * Suburb/township search. Every word typed has to appear somewhere in the
  * place's name, main place or municipality ("orlando soweto" works). Ranked
  * so exact and starts-with name matches come first, then main places ahead of
  * the sub places inside them.
  */
-export async function searchPlaces(query: string, limit = 12): Promise<PlaceSearchResult[]> {
-  const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean).slice(0, 5);
-  if (words.length === 0 || words.join("").length < 2) return [];
+export async function searchPlaces(
+  query: string,
+  all: Circle[],
+  limit = 12,
+): Promise<PlaceSearchResult[]> {
+  const words = searchWords(query);
+  if (words.length === 0) return [];
 
   const rows = await prisma.place.findMany({
     where: { AND: words.map((w) => ({ searchText: { contains: w } })) },
@@ -72,7 +80,6 @@ export async function searchPlaces(query: string, limit = 12): Promise<PlaceSear
     .sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name))
     .slice(0, limit);
 
-  const all = await api.listCircles({});
   return ranked.map((row) => ({
     id: row.id,
     kind: row.kind as "main" | "sub",
@@ -100,4 +107,52 @@ export function summarisePlaces(circles: Circle[]): PlaceSummary[] {
   return [...byPlace.values()].sort(
     (a, b) => b.circleCount - a.circleCount || b.raisedCents - a.raisedCents,
   );
+}
+
+export interface CircleSearchResult {
+  slug: string;
+  title: string;
+  type: Circle["type"];
+  placeName: string;
+  raisedCents: number;
+  goalCents: number;
+  isDemo: boolean;
+}
+
+/**
+ * Circles whose public details match every word typed — title, beneficiary,
+ * and the place it shows. Only what's already on the circle's public page is
+ * searched (never organiser contact details), and a funeral matches on its
+ * main place only, since that's all it shows.
+ */
+export function searchCircles(query: string, all: Circle[], limit = 4): CircleSearchResult[] {
+  const words = searchWords(query);
+  if (words.length === 0) return [];
+  const q = words.join(" ");
+
+  return all
+    .map((c) => {
+      const title = c.title.toLowerCase();
+      const haystack = [c.title, c.beneficiaryName, c.area.name, c.area.mainPlaceName, c.area.municipality]
+        .join(" ")
+        .toLowerCase();
+      if (!words.every((w) => haystack.includes(w))) return null;
+      const score =
+        (title.startsWith(q) ? 60 : title.includes(q) ? 40 : 0) +
+        (c.beneficiaryName.toLowerCase().includes(q) ? 20 : 0) +
+        (c.isDemo ? 0 : 5);
+      return { c, score };
+    })
+    .filter((x): x is { c: Circle; score: number } => x !== null)
+    .sort((a, b) => b.score - a.score || b.c.raisedCents - a.c.raisedCents)
+    .slice(0, limit)
+    .map(({ c }) => ({
+      slug: c.slug,
+      title: c.title,
+      type: c.type,
+      placeName: c.area.name,
+      raisedCents: c.raisedCents,
+      goalCents: c.goalCents,
+      isDemo: Boolean(c.isDemo),
+    }));
 }
