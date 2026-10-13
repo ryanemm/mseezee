@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ContributionReceipt } from "@mseezee/shared";
 import { api } from "@/lib/api";
@@ -7,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { verifyTransaction } from "@/lib/paystack";
 import { reconcileFromTransaction } from "@/lib/payments";
 import { ThankYou } from "@/components/contribute/ThankYou";
+import { Placeholder } from "@/components/layout/Placeholder";
 
 export const metadata: Metadata = { title: "Thank you" };
 export const dynamic = "force-dynamic";
@@ -74,35 +74,22 @@ export default async function CallbackPage({
 
 function MissingReference({ slug }: { slug: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 px-4 py-16 text-center">
-      <h1 className="text-xl">We couldn&apos;t find that payment</h1>
-      <p className="max-w-sm text-sm text-ink-soft">
-        If you were charged, it will still reach the circle — nothing is lost.
-        Check your bank SMS, or try again.
-      </p>
-      <Link
-        href={`/circles/${slug}`}
-        className="pt-2 text-sm font-semibold text-forest"
-      >
-        Back to the circle
-      </Link>
-    </div>
+    <Placeholder
+      title="We couldn't find that payment"
+      body="If you were charged, it will still reach the circle — nothing is lost. Check your bank SMS, or try again."
+      actionHref={`/circles/${slug}`}
+      actionLabel="Back to the circle"
+    />
   );
 }
 
 function PaymentFailed({ slug }: { slug: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 px-4 py-16 text-center">
-      <h1 className="text-xl">The payment didn&apos;t go through</h1>
-      <p className="max-w-sm text-sm text-ink-soft">
-        You have not been charged. You can try again with another method.
-      </p>
-      <Link
-        href={`/circles/${slug}/contribute`}
-        className="pt-2 text-sm font-semibold text-forest"
-      >
-        Try again
-      </Link>
-    </div>
+    <Placeholder
+      title="The payment didn't go through"
+      body="You have not been charged. You can try again with another method."
+      actionHref={`/circles/${slug}/contribute`}
+      actionLabel="Try again"
+    />
   );
 }

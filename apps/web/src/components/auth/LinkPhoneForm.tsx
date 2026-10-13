@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
 const inputClass =
-  "rounded-xl border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-forest";
+  "rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink";
 
 /** Lets a signed-in user attach a verified phone number to their account —
  *  from then on, signing in with that number logs into this same account. */
@@ -57,23 +57,23 @@ export function LinkPhoneForm() {
 
   if (linked) {
     return (
-      <p className="rounded-xl bg-good/10 px-3.5 py-3 text-sm text-good">
+      <p className="rounded-2xl bg-good/10 px-4 py-3 text-sm text-good">
         {linked} is now linked to your account.
       </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4 shadow-card">
+    <div className="flex flex-col gap-4 rounded-[32px] bg-surface p-6 shadow-card">
       <div>
-        <p className="text-sm font-semibold text-ink">Add a phone number</p>
-        <p className="text-xs text-ink-faint">
+        <p className="text-[1.2rem] font-bold text-ink">Add a phone number</p>
+        <p className="text-[0.9rem] text-ink-soft">
           Once verified, signing in with this number logs into this account.
         </p>
       </div>
 
       {error && (
-        <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">{error}</p>
+        <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
       )}
 
       {!codeSent ? (
@@ -94,7 +94,7 @@ export function LinkPhoneForm() {
         </form>
       ) : (
         <form onSubmit={verifyAndLink} className="flex flex-col gap-2">
-          <p className="text-xs text-ink-soft">
+          <p className="text-[0.9rem] text-ink-soft">
             Enter the code sent to <span className="font-medium text-ink">{phone}</span>.
           </p>
           <div className="flex gap-2">
@@ -119,7 +119,7 @@ export function LinkPhoneForm() {
               setCode("");
               setError(null);
             }}
-            className="self-start text-xs font-semibold text-forest"
+            className="self-start link text-xs"
           >
             Use a different number
           </button>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Circle } from "@mseezee/shared";
 import { circleShareMessage, circleSharePath } from "@/lib/share";
+import { ShareIcon } from "@/components/ui/Icons";
+import { iconButtonClass } from "@/components/ui/IconButton";
 
 type ShareableCircle = Pick<
   Circle,
@@ -93,24 +95,22 @@ export function ShareCircle({
   }
 
   const pill =
-    "inline-flex items-center justify-center gap-2 rounded-full border border-gold-line/45 bg-surface px-4 py-2.5 text-sm font-semibold text-ink shadow-pill transition-colors hover:bg-surface-sunk";
+    "inline-flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-4 py-3 text-sm font-bold text-ink transition-colors hover:bg-surface-sunk";
 
   return (
     <section
-      className={`flex flex-col gap-3 ${
-        framed ? "rounded-card border border-line bg-surface p-4 shadow-card lg:p-5" : ""
-      }`}
+      className={`flex flex-col gap-3.5 ${framed ? "rounded-card bg-surface-sunk p-5 lg:p-6" : ""}`}
     >
       <div className={framed ? "" : "text-center"}>
-        <h2 className="text-lg">{heading}</h2>
-        <p className="text-sm text-ink-soft">{subheading}</p>
+        <h2 className="text-[1.3rem] font-bold">{heading}</h2>
+        <p className="text-ink-soft">{subheading}</p>
       </div>
 
       <a
         href={whatsapp}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-5 py-3.5 text-[0.95rem] font-semibold text-white shadow-[0_8px_18px_-8px_rgba(37,211,102,0.7)] transition-[filter,transform] hover:brightness-105 active:scale-[0.99]"
+        className="inline-flex h-14 items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-5 text-[1rem] font-bold text-white transition-[filter,transform] hover:brightness-105 active:scale-[0.99]"
       >
         <WhatsAppIcon />
         Share on WhatsApp
@@ -153,7 +153,7 @@ export function ShareCircle({
   );
 }
 
-/** A compact share control for the circle hero — opens the phone's share
+/** The round share button on the circle hero — opens the phone's share
  *  sheet where available, otherwise copies the link. */
 export function ShareIconButton({ circle }: { circle: ShareableCircle }) {
   const url = useShareUrl(circle.slug);
@@ -170,29 +170,24 @@ export function ShareIconButton({ circle }: { circle: ShareableCircle }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={share}
-      aria-label="Share this circle"
-      className="flex h-9 items-center justify-center gap-1.5 rounded-full bg-black/40 px-3 text-sm font-semibold text-white backdrop-blur"
-    >
-      <ShareIcon />
-      {copied ? "Copied" : "Share"}
-    </button>
-  );
-}
-
-function ShareIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div className="relative">
+      <button
+        type="button"
+        onClick={share}
+        aria-label="Share this circle"
+        className={iconButtonClass("round")}
+      >
+        <ShareIcon className="size-[22px]" />
+      </button>
+      {copied && (
+        <span
+          role="status"
+          className="absolute right-0 top-full mt-2 whitespace-nowrap rounded-full bg-night px-3 py-1.5 text-xs font-bold text-on-night"
+        >
+          Link copied
+        </span>
+      )}
+    </div>
   );
 }
 

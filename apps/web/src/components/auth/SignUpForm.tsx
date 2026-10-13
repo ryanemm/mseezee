@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/layout/Logo";
 
 const inputClass =
-  "rounded-xl border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-forest";
+  "rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -46,22 +47,23 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-4 py-10">
-      <header className="flex flex-col gap-1 text-center">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+3rem)] md:pt-16">
+      <header className="flex flex-col items-center gap-1.5 text-center">
+        <Logo className="mb-3 size-14" />
         <p className="eyebrow">Join MseeZee</p>
-        <h1 className="text-2xl">Create an account</h1>
-        <p className="text-sm text-ink-soft">
+        <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Create an account</h1>
+        <p className="text-ink-soft">
           You'll need this to start and manage a circle.
         </p>
       </header>
 
       {error && (
-        <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">{error}</p>
+        <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
       )}
 
-      <form onSubmit={submit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-ink">
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-2">
+          <span className="font-semibold text-ink">
             Your name <span className="font-normal text-ink-faint">(optional)</span>
           </span>
           <input
@@ -72,8 +74,8 @@ export function SignUpForm() {
             className={inputClass}
           />
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-ink">Email</span>
+        <label className="flex flex-col gap-2">
+          <span className="font-semibold text-ink">Email</span>
           <input
             type="email"
             autoComplete="email"
@@ -83,8 +85,8 @@ export function SignUpForm() {
             required
           />
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-ink">Password</span>
+        <label className="flex flex-col gap-2">
+          <span className="font-semibold text-ink">Password</span>
           <input
             type="password"
             autoComplete="new-password"
@@ -103,7 +105,7 @@ export function SignUpForm() {
 
       <p className="text-center text-sm text-ink-soft">
         Already have an account?{" "}
-        <Link href="/sign-in" className="font-semibold text-forest">
+        <Link href="/sign-in" className="link">
           Sign in
         </Link>
       </p>

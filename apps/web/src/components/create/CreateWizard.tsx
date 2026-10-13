@@ -7,6 +7,9 @@ import type { PlaceSearchResult } from "@/lib/places";
 import { PlaceSearch } from "@/components/place/PlaceSearch";
 import { CIRCLE_TYPES, findCircleType, formatZAR, parseRandInput } from "@mseezee/shared";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { CircleEmblem } from "@/components/ui/CoverArt";
+import { BackLink, iconButtonClass } from "@/components/ui/IconButton";
+import { BackIcon, CheckIcon, ChevronRightIcon, ClockIcon } from "@/components/ui/Icons";
 
 export function CreateWizard() {
   const [step, setStep] = useState(0);
@@ -121,31 +124,23 @@ export function CreateWizard() {
   if (done) {
     const open = payoutSaved;
     return (
-      <div className="flex flex-col items-center gap-5 px-4 py-12 text-center">
+      <div className="flex flex-col items-center gap-5 px-5 pb-12 pt-[calc(env(safe-area-inset-top)+3rem)] text-center">
         <div
-          className={`flex size-14 items-center justify-center rounded-full ${
-            open ? "bg-good/15 text-good" : "bg-gold-soft text-gold"
+          className={`flex size-24 items-center justify-center rounded-full ${
+            open ? "bg-lime text-on-lime" : "bg-surface-sunk text-ink"
           }`}
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="m5 13 4 4L19 7"
-              stroke="currentColor"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {open ? <CheckIcon className="size-12" /> : <ClockIcon className="size-11" />}
         </div>
-        <h1 className="text-2xl">{open ? "Your circle is open" : "Your circle is saved"}</h1>
+        <h1 className="text-[2rem] font-extrabold leading-tight">{open ? "Your circle is open" : "Your circle is saved"}</h1>
         {open ? (
-          <p className="max-w-xs text-sm text-ink-soft">
+          <p className="max-w-sm text-ink-soft">
             Contributions go straight to the {selectedBank?.name ?? "bank"} account you
             added, paid out by our payment provider on its normal schedule. Share your
             circle to start receiving support.
           </p>
         ) : (
-          <p className="max-w-xs text-sm text-ink-soft">
+          <p className="max-w-sm text-ink-soft">
             {payoutError
               ? `${payoutError} `
               : ""}
@@ -154,7 +149,7 @@ export function CreateWizard() {
             and it opens straight away.
           </p>
         )}
-        <div className="flex w-full max-w-xs flex-col gap-2">
+        <div className="mt-2 flex w-full max-w-sm flex-col gap-3">
           {createdSlug && !open && (
             <ButtonLink href={`/dashboard/${createdSlug}#payouts`} className="w-full">
               Add payout account
@@ -174,7 +169,7 @@ export function CreateWizard() {
               {open ? "Manage your circle" : "View public page"}
             </ButtonLink>
           )}
-          <Link href="/dashboard" className="pt-1 text-sm font-semibold text-forest">
+          <Link href="/dashboard" className="link mt-2 self-center">
             All my circles
           </Link>
         </div>
@@ -183,33 +178,24 @@ export function CreateWizard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-5">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-7 px-5 pb-12 pt-[calc(env(safe-area-inset-top)+1.25rem)] md:pt-10">
+      <div className="flex items-center gap-4">
         {step > 0 ? (
-          <button
-            type="button"
-            onClick={back}
-            aria-label="Back"
-            className="flex size-9 items-center justify-center rounded-full border border-line text-ink-soft"
-          >
-            <Arrow />
+          <button type="button" onClick={back} aria-label="Back" className={iconButtonClass("square")}>
+            <BackIcon className="size-5" />
           </button>
         ) : (
-          <Link
-            href="/"
-            aria-label="Cancel"
-            className="flex size-9 items-center justify-center rounded-full border border-line text-ink-soft"
-          >
-            <Arrow />
-          </Link>
+          <BackLink href="/" label="Cancel" />
         )}
-        <div className="flex flex-1 gap-1">
+        <div
+          className="flex flex-1 gap-1.5"
+          role="img"
+          aria-label={`Step ${step + 1} of ${LAST_STEP + 1}`}
+        >
           {Array.from({ length: LAST_STEP + 1 }, (_, i) => i).map((i) => (
             <span
               key={i}
-              className={`h-1 flex-1 rounded-full ${
-                i <= step ? "bg-forest" : "bg-line"
-              }`}
+              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-night" : "bg-line"}`}
             />
           ))}
         </div>
@@ -217,7 +203,9 @@ export function CreateWizard() {
 
       {step === 0 && (
         <section className="flex flex-col gap-3">
-          <h1 className="text-xl">What are you creating?</h1>
+          <h1 className="mb-2 text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">
+            What are you creating?
+          </h1>
           {CIRCLE_TYPES.map((t) => (
             <button
               key={t.key}
@@ -227,14 +215,16 @@ export function CreateWizard() {
                 if (t.key === "funeral") setPrecision("area");
                 next();
               }}
-              className={`rounded-card border p-4 text-left transition-colors ${
-                type === t.key
-                  ? "border-forest bg-forest/5"
-                  : "border-line bg-surface hover:border-ink-faint"
+              className={`flex items-center gap-4 rounded-card bg-surface p-4 text-left shadow-card transition-[box-shadow,transform] active:scale-[0.99] ${
+                type === t.key ? "ring-2 ring-ink" : ""
               }`}
             >
-              <p className="font-display text-lg text-ink">{t.label}</p>
-              <p className="mt-0.5 text-sm text-ink-soft">{t.blurb}</p>
+              <CircleEmblem type={t.key} className="size-16 rounded-[20px]" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[1.1rem] font-bold text-ink">{t.label}</span>
+                <span className="mt-0.5 block text-[0.9rem] text-ink-soft">{t.blurb}</span>
+              </span>
+              <ChevronRightIcon className="size-5 shrink-0 text-ink-soft" />
             </button>
           ))}
         </section>
@@ -242,16 +232,16 @@ export function CreateWizard() {
 
       {step === 1 && (
         <section className="flex flex-col gap-4">
-          <h1 className="text-xl">Where is this?</h1>
-          <p className="-mt-2 text-sm text-ink-soft">
+          <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Where is this?</h1>
+          <p className="-mt-2 text-ink-soft">
             People nearby will see this circle first. Pick the suburb, township or
             town — never a street address.
           </p>
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">Suburb, township or town</span>
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold text-ink">Suburb, township or town</span>
             {place ? (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-forest bg-forest/5 px-3 py-2.5">
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3.5 ring-2 ring-ink">
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold text-ink">{place.name}</span>
                   <span className="block truncate text-xs text-ink-faint">
@@ -262,7 +252,7 @@ export function CreateWizard() {
                 <button
                   type="button"
                   onClick={() => setPlace(null)}
-                  className="shrink-0 text-sm font-semibold text-forest"
+                  className="shrink-0 link text-sm"
                 >
                   Change
                 </button>
@@ -280,8 +270,8 @@ export function CreateWizard() {
             </span>
           </div>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">
+          <label className="flex flex-col gap-2">
+            <span className="font-semibold text-ink">
               Section or zone{" "}
               <span className="font-normal text-ink-faint">(optional)</span>
             </span>
@@ -290,12 +280,12 @@ export function CreateWizard() {
               value={section}
               onChange={(e) => setSection(e.target.value)}
               placeholder="e.g. Zone 4, Site B, NU7"
-              className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+              className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
             />
           </label>
 
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-semibold text-ink">
+            <legend className="mb-2 font-semibold text-ink">
               How much location to show
             </legend>
             {(
@@ -314,10 +304,8 @@ export function CreateWizard() {
             ).map((opt) => (
               <label
                 key={opt.key}
-                className={`flex items-start gap-3 rounded-xl border p-3 ${
-                  precision === opt.key
-                    ? "border-forest bg-forest/5"
-                    : "border-line bg-surface"
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl bg-surface p-4 shadow-card ${
+                  precision === opt.key ? "ring-2 ring-ink" : ""
                 }`}
               >
                 <input
@@ -325,7 +313,7 @@ export function CreateWizard() {
                   name="precision"
                   checked={precision === opt.key}
                   onChange={() => setPrecision(opt.key)}
-                  className="mt-0.5 size-4 accent-forest"
+                  className="mt-0.5 size-4 accent-ink"
                 />
                 <span className="text-sm">
                   <span className="font-semibold text-ink">{opt.label}</span>
@@ -334,7 +322,7 @@ export function CreateWizard() {
               </label>
             ))}
             {isFuneral && (
-              <p className="rounded-lg bg-surface-sunk px-3 py-2 text-[0.76rem] text-ink-soft">
+              <p className="rounded-2xl bg-surface-sunk px-4 py-3 text-[0.85rem] text-ink-soft">
                 For funerals we never show a street address — publishing one next
                 to a running total is a safety risk.
               </p>
@@ -349,10 +337,10 @@ export function CreateWizard() {
 
       {step === 2 && (
         <section className="flex flex-col gap-4">
-          <h1 className="text-xl">The basics</h1>
+          <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">The basics</h1>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">Circle title</span>
+          <label className="flex flex-col gap-2">
+            <span className="font-semibold text-ink">Circle title</span>
             <input
               type="text"
               value={title}
@@ -366,12 +354,12 @@ export function CreateWizard() {
                       ? "e.g. Uniforms for Phase 4 learners"
                       : "e.g. Dlomo Street lighting"
               }
-              className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+              className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
             />
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">
+          <label className="flex flex-col gap-2">
+            <span className="font-semibold text-ink">
               Who receives the funds
             </span>
             <input
@@ -379,13 +367,13 @@ export function CreateWizard() {
               value={beneficiary}
               onChange={(e) => setBeneficiary(e.target.value)}
               placeholder="Family name, or the committee / organisation"
-              className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+              className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
             />
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">Goal amount</span>
-            <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5">
+          <label className="flex flex-col gap-2">
+            <span className="font-semibold text-ink">Goal amount</span>
+            <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3.5 focus-within:border-ink">
               <span className="text-sm font-semibold text-ink-faint">R</span>
               <input
                 type="text"
@@ -403,8 +391,8 @@ export function CreateWizard() {
             )}
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-ink">
+          <label className="flex flex-col gap-2">
+            <span className="font-semibold text-ink">
               Tell the story
             </span>
             <textarea
@@ -412,7 +400,7 @@ export function CreateWizard() {
               onChange={(e) => setStory(e.target.value.slice(0, 600))}
               rows={4}
               placeholder="What happened, who it helps, what the money covers."
-              className="resize-none rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+              className="resize-none rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
             />
             <span className="self-end text-[0.7rem] text-ink-faint tnum">
               {story.length}/600
@@ -431,8 +419,8 @@ export function CreateWizard() {
 
       {step === PAYOUT_STEP && (
         <section className="flex flex-col gap-4">
-          <h1 className="text-xl">Where the money goes</h1>
-          <p className="-mt-2 text-sm text-ink-soft">
+          <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Where the money goes</h1>
+          <p className="-mt-2 text-ink-soft">
             Contributions settle straight into this account — the beneficiary&apos;s own,
             or the organisation holding the funds for them. MseeZee never holds the
             money. You can skip this for now, but the circle won&apos;t take
@@ -440,18 +428,18 @@ export function CreateWizard() {
           </p>
 
           {banksError && (
-            <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">{banksError}</p>
+            <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{banksError}</p>
           )}
           {!banks && !banksError && <p className="text-sm text-ink-faint">Loading banks…</p>}
 
           {banks && (
             <>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-semibold text-ink">Bank</span>
+              <label className="flex flex-col gap-2">
+                <span className="font-semibold text-ink">Bank</span>
                 <select
                   value={bankCode}
                   onChange={(e) => setBankCode(e.target.value)}
-                  className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm font-semibold text-ink focus:outline-none"
+                  className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] font-semibold text-ink focus:border-ink focus:outline-none"
                 >
                   <option value="">Choose a bank</option>
                   {banks.map((b) => (
@@ -462,8 +450,8 @@ export function CreateWizard() {
                 </select>
               </label>
 
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-semibold text-ink">Account number</span>
+              <label className="flex flex-col gap-2">
+                <span className="font-semibold text-ink">Account number</span>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -471,14 +459,14 @@ export function CreateWizard() {
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
                   placeholder="e.g. 62012345678"
-                  className="rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+                  className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
                 />
                 {cleanAccount && !accountValid && (
                   <span className="text-xs text-crit">Enter digits only, 6 to 17 of them.</span>
                 )}
               </label>
 
-              <p className="rounded-lg bg-surface-sunk px-3 py-2 text-[0.76rem] text-ink-soft">
+              <p className="rounded-2xl bg-surface-sunk px-4 py-3 text-[0.85rem] text-ink-soft">
                 Double-check the account number — contributions are paid straight into
                 this account, so it should belong to the beneficiary or the
                 organisation holding the funds for them.
@@ -496,7 +484,7 @@ export function CreateWizard() {
           <button
             type="button"
             onClick={skipPayout}
-            className="text-sm font-semibold text-forest"
+            className="link text-sm"
           >
             Skip for now
           </button>
@@ -505,8 +493,8 @@ export function CreateWizard() {
 
       {step === REVIEW_STEP && (
         <section className="flex flex-col gap-4">
-          <h1 className="text-xl">Review</h1>
-          <dl className="flex flex-col divide-y divide-line rounded-card border border-line bg-surface text-sm shadow-card">
+          <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Review</h1>
+          <dl className="flex flex-col divide-y divide-line rounded-card bg-surface px-5 text-[0.95rem] shadow-card">
             <ReviewRow label="Type" value={(type && findCircleType(type)?.label) ?? "—"} />
             <ReviewRow
               label="Where"
@@ -530,8 +518,8 @@ export function CreateWizard() {
             />
           </dl>
 
-          <div className="rounded-card bg-forest/5 p-4 text-[0.82rem] text-ink-soft">
-            <p className="font-semibold text-ink">What happens next</p>
+          <div className="rounded-card bg-surface-sunk p-5 text-[0.88rem] text-ink-soft">
+            <p className="font-bold text-ink">What happens next</p>
             <ol className="mt-2 flex list-decimal flex-col gap-1 pl-4">
               {payoutEntered ? (
                 <li>Your circle opens for contributions as soon as it&apos;s created.</li>
@@ -550,7 +538,7 @@ export function CreateWizard() {
           </div>
 
           {submitError && (
-            <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">
+            <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">
               {submitError}
             </p>
           )}
@@ -575,23 +563,9 @@ interface Bank {
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-4 p-3.5">
-      <dt className="text-ink-faint">{label}</dt>
-      <dd className="text-right font-medium text-ink">{value}</dd>
+    <div className="flex justify-between gap-4 py-4">
+      <dt className="text-ink-soft">{label}</dt>
+      <dd className="text-right font-bold text-ink">{value}</dd>
     </div>
-  );
-}
-
-function Arrow() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="m15 5-7 7 7 7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

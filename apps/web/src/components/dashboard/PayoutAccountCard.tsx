@@ -2,6 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { BankIcon } from "@/components/ui/Icons";
 
 interface Bank {
   name: string;
@@ -72,19 +73,22 @@ export function PayoutAccountCard({
 
   if (!editing) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface p-4 shadow-card">
-        <div>
-          <p className="text-sm font-semibold text-ink">
+      <div className="flex items-center gap-4 rounded-card bg-surface p-5 shadow-card">
+        <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-lime text-on-lime">
+          <BankIcon className="size-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-bold text-ink">
             Payouts go to {bankName}
           </p>
-          <p className="text-xs text-ink-faint">
+          <p className="text-[0.88rem] text-ink-soft">
             {accountName ?? "Account name not confirmed by the bank"}
           </p>
         </div>
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="text-sm font-semibold text-forest"
+          className="link text-sm"
         >
           Change
         </button>
@@ -95,11 +99,11 @@ export function PayoutAccountCard({
   return (
     <form
       onSubmit={submit}
-      className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4 shadow-card"
+      className="flex flex-col gap-4 rounded-card bg-surface p-6 shadow-card"
     >
       <div>
-        <p className="text-sm font-semibold text-ink">Add a payout account</p>
-        <p className="text-xs text-ink-soft">
+        <p className="text-[1.2rem] font-bold text-ink">Add a payout account</p>
+        <p className="text-[0.9rem] text-ink-soft">
           {initialBankName
             ? "Contributions to this circle settle into this account."
             : "Your circle isn't open for contributions until you add the account the money goes to — the beneficiary's own, or the organisation holding the funds."}
@@ -115,7 +119,7 @@ export function PayoutAccountCard({
           value={bankCode}
           onChange={(e) => setBankCode(e.target.value)}
           required
-          className="rounded-xl border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-forest"
+          className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink"
         >
           <option value="" disabled>
             Choose your bank
@@ -134,7 +138,7 @@ export function PayoutAccountCard({
         placeholder="Account number"
         inputMode="numeric"
         required
-        className="rounded-xl border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-forest"
+        className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink"
       />
 
       {error && <p className="text-xs text-crit">{error}</p>}

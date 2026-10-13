@@ -30,3 +30,13 @@ export function eventDateLabel(iso: string): string {
   if (d <= 7) return `${date} · in ${d} days`;
   return date;
 }
+
+/** "Sipho Ndlovu" → "SN", for avatar discs. */
+export function initials(name: string): string {
+  const clean = name.replace(/[^a-zA-Z ]/g, "").trim();
+  if (!clean) return "•";
+  const parts = clean.split(/\s+/);
+  return (
+    (parts[0]?.[0] ?? "") + (parts.length > 1 ? (parts.at(-1)?.[0] ?? "") : "")
+  ).toUpperCase();
+}

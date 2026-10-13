@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/layout/Logo";
 
 type Tab = "phone" | "email";
 
 const inputClass =
-  "rounded-xl border border-line bg-surface px-3.5 py-3 text-sm outline-none focus:border-forest";
+  "rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink";
 
 export function SignInForm() {
   const router = useRouter();
@@ -111,18 +112,19 @@ export function SignInForm() {
 
   if (needsName) {
     return (
-      <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-4 py-10">
-        <header className="flex flex-col gap-1 text-center">
+      <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+3rem)] md:pt-16">
+        <header className="flex flex-col items-center gap-1.5 text-center">
+          <Logo className="mb-3 size-14" />
           <p className="eyebrow">Almost there</p>
-          <h1 className="text-2xl">What should we call you?</h1>
-          <p className="text-sm text-ink-soft">
+          <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">What should we call you?</h1>
+          <p className="text-ink-soft">
             Shown to your supporters and on any circle you organise.
           </p>
         </header>
         {error && (
-          <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">{error}</p>
+          <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
         )}
-        <form onSubmit={submitName} className="flex flex-col gap-3">
+        <form onSubmit={submitName} className="flex flex-col gap-4">
           <Field label="Your name">
             <input
               type="text"
@@ -144,13 +146,14 @@ export function SignInForm() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-4 py-10">
-      <header className="flex flex-col gap-1 text-center">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+3rem)] md:pt-16">
+      <header className="flex flex-col items-center gap-1.5 text-center">
+        <Logo className="mb-3 size-14" />
         <p className="eyebrow">Welcome back</p>
-        <h1 className="text-2xl">Sign in to MseeZee</h1>
+        <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Sign in to MseeZee</h1>
       </header>
 
-      <div className="flex rounded-full border border-line bg-surface-sunk p-1">
+      <div className="flex rounded-full bg-surface-sunk p-1.5">
         <TabButton active={tab === "phone"} onClick={() => switchTab("phone")}>
           Phone
         </TabButton>
@@ -160,12 +163,12 @@ export function SignInForm() {
       </div>
 
       {error && (
-        <p className="rounded-xl bg-crit/10 px-3 py-2.5 text-sm text-crit">{error}</p>
+        <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
       )}
 
       {tab === "phone" ? (
         !codeSent ? (
-          <form onSubmit={sendCode} className="flex flex-col gap-3">
+          <form onSubmit={sendCode} className="flex flex-col gap-4">
             <Field label="Cellphone number">
               <input
                 type="tel"
@@ -183,7 +186,7 @@ export function SignInForm() {
             </Button>
           </form>
         ) : (
-          <form onSubmit={verifyCode} className="flex flex-col gap-3">
+          <form onSubmit={verifyCode} className="flex flex-col gap-4">
             <p className="text-sm text-ink-soft">
               Enter the code we sent to <span className="font-medium text-ink">{phone}</span>.
             </p>
@@ -209,14 +212,14 @@ export function SignInForm() {
                 setCode("");
                 setError(null);
               }}
-              className="text-sm font-semibold text-forest"
+              className="link text-sm"
             >
               Use a different number
             </button>
           </form>
         )
       ) : (
-        <form onSubmit={submitEmail} className="flex flex-col gap-3">
+        <form onSubmit={submitEmail} className="flex flex-col gap-4">
           <Field label="Email">
             <input
               type="email"
@@ -245,7 +248,7 @@ export function SignInForm() {
 
       <p className="text-center text-sm text-ink-soft">
         New to MseeZee?{" "}
-        <Link href="/sign-up" className="font-semibold text-forest">
+        <Link href="/sign-up" className="link">
           Create an account
         </Link>
       </p>
@@ -266,8 +269,8 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-full py-2 text-sm font-semibold transition-colors ${
-        active ? "bg-surface text-forest shadow-card" : "text-ink-faint"
+      className={`flex-1 rounded-full py-3 font-semibold transition-colors ${
+        active ? "bg-night text-on-night" : "text-ink-soft hover:text-ink"
       }`}
     >
       {children}
@@ -277,8 +280,8 @@ function TabButton({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-semibold text-ink">{label}</span>
+    <label className="flex flex-col gap-2">
+      <span className="font-semibold text-ink">{label}</span>
       {children}
     </label>
   );

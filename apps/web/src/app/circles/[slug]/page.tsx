@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Supporter } from "@mseezee/shared";
 import { formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
+import { DistanceChip, ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
+import { BackLink, iconButtonClass } from "@/components/ui/IconButton";
+import { HeartIcon, ShieldIcon } from "@/components/ui/Icons";
 import { AreaMiniMap } from "@/components/circle/AreaMiniMap";
+import { CircleTabs } from "@/components/circle/CircleTabs";
 import { ContributeBar } from "@/components/circle/ContributeBar";
 import { ContributeRail } from "@/components/circle/ContributeRail";
 import { ShareCircle, ShareIconButton } from "@/components/circle/ShareCircle";
 import { circleShareText } from "@/lib/share";
 import { contributionBlock } from "@/lib/contributions-open";
-import { eventDateLabel, relativeDay } from "@/lib/format";
+import { eventDateLabel, initials, relativeDay } from "@/lib/format";
 
 type Params = { slug: string };
 
@@ -63,202 +67,217 @@ export default async function CirclePage({
 
   const isFuneral = circle.type === "funeral";
   const blocked = contributionBlock(circle);
+  const placeLabel = circle.areaSection
+    ? `${circle.area.name} · ${circle.areaSection}`
+    : circle.area.name;
+  const faces = supporters.slice(0, 3);
+  const moreFaces = circle.supporterCount - faces.length;
 
   return (
-    <div className="pb-60 lg:pb-16">
-      {/* Hero */}
-      <div className="mx-auto w-full max-w-6xl lg:px-8">
-        <div className="relative lg:overflow-hidden lg:rounded-card">
-          <CoverArt
-            cover={circle.cover}
-            showMonogram={false}
-            emblemAside
-            className={isFuneral ? "h-64 lg:h-72" : "h-44 lg:h-64"}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-          <Link
-            href="/"
-            className="absolute left-3 top-3 flex size-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur lg:hidden"
-            aria-label="Back"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="m15 5-7 7 7 7"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
-          {!blocked && (
-            <div className="absolute right-3 top-3 lg:right-5 lg:top-5">
-              <ShareIconButton circle={circle} />
+    <div className="min-h-dvh bg-surface pb-36 lg:bg-transparent lg:pb-16">
+      <div className="mx-auto flex w-full max-w-6xl flex-col lg:flex-row lg:items-start lg:gap-10 lg:px-10 lg:pt-8">
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Hero */}
+          <div className="relative h-72 lg:h-80 lg:overflow-hidden lg:rounded-[32px]">
+            <CoverArt cover={circle.cover} className="h-full w-full" />
+            <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:pt-5">
+              <BackLink href="/" shape="round" />
+              <div className="flex gap-3">
+                {!blocked && <ShareIconButton circle={circle} />}
+                <button type="button" aria-label="Save circle" className={iconButtonClass("round")}>
+                  <HeartIcon className="size-[22px]" />
+                </button>
+              </div>
             </div>
-          )}
-          <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-4 text-white lg:p-7">
-            <TypeChip type={circle.type} onDark />
-            {isFuneral && !circle.title.toLowerCase().startsWith("in loving memory") && (
-              <p className="font-display text-sm italic text-white/85 lg:text-base">
-                In loving memory of {circle.beneficiaryName.replace(" family", "")}
-              </p>
-            )}
-            <h1 className="font-display text-2xl leading-tight text-white lg:text-4xl">
-              {circle.title}
-            </h1>
-            <p className="text-sm text-white/80 lg:text-base">
-              {circle.area.name}
-              {circle.areaSection ? ` · ${circle.areaSection}` : ""} ·{" "}
-              {circle.area.municipality}
-            </p>
-            {isFuneral && circle.eventDate && (
-              <p className="text-sm font-medium text-white lg:text-base">
-                Service {eventDateLabel(circle.eventDate)}
-              </p>
-            )}
           </div>
-        </div>
-      </div>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-5 lg:flex-row lg:items-start lg:gap-10 lg:px-8">
-        <div className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-2xl">
-          {/* Progress + verification — the desktop rail covers this, so this
-              block is mobile/tablet only. */}
-          <section className="flex flex-col gap-3 lg:hidden">
-            <ProgressBar
-              raisedCents={circle.raisedCents}
-              goalCents={circle.goalCents}
-              supporterCount={circle.supporterCount}
-            />
-            <div className="flex flex-wrap items-center gap-1.5">
-              <VerifiedChip tier={circle.verificationTier} />
-              {circle.isDemo && <ExampleChip />}
-              {circle.status === "goal_reached" && (
-                <span className="rounded-full bg-good/10 px-2 py-0.5 text-[0.68rem] font-semibold text-good">
-                  Goal reached · still open
-                </span>
+          {/* Sheet */}
+          <div className="relative -mt-10 flex flex-col gap-6 rounded-t-[32px] bg-surface px-5 pt-3 lg:mt-8 lg:rounded-none lg:px-0 lg:pt-0">
+            <span aria-hidden="true" className="mx-auto h-1.5 w-12 rounded-full bg-line lg:hidden" />
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <DistanceChip areaName={placeLabel} />
+                <VerifiedChip tier={circle.verificationTier} />
+                <TypeChip type={circle.type} />
+                {circle.isDemo && <ExampleChip />}
+                {circle.status === "goal_reached" && (
+                  <span className="rounded-full bg-good/10 px-3 py-1.5 text-[0.8rem] font-bold text-good">
+                    Goal reached · still open
+                  </span>
+                )}
+              </div>
+
+              {isFuneral && !circle.title.toLowerCase().startsWith("in loving memory") && (
+                <p className="-mb-2 text-[0.95rem] italic text-ink-soft">
+                  In loving memory of {circle.beneficiaryName.replace(" family", "")}
+                </p>
               )}
-            </div>
-          </section>
-
-          {/* Organiser / proxy */}
-          <section className="rounded-card border border-line bg-surface p-4 text-sm shadow-card lg:p-5">
-            <dl className="flex flex-col gap-2">
-              <div className="flex justify-between gap-4">
-                <dt className="text-ink-faint">Organised by</dt>
-                <dd className="text-right font-medium text-ink">
-                  {circle.organiserName}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-ink-faint">Funds received by</dt>
-                <dd className="text-right font-medium text-ink">
-                  {circle.proxyName ?? `${circle.beneficiaryName} (verified)`}
-                </dd>
-              </div>
-            </dl>
-            {circle.proxyName && (
-              <p className="mt-3 border-t border-line pt-3 text-[0.8rem] text-ink-soft">
-                A registered community partner holds and disburses these funds,
-                and is accountable for getting them to the family.
+              <h1 className="text-[2.1rem] font-extrabold leading-[1.06] tracking-[-0.035em] lg:text-[2.6rem]">
+                {circle.title}
+              </h1>
+              {isFuneral && circle.eventDate && (
+                <p className="-mt-1 font-semibold text-ink">
+                  Service {eventDateLabel(circle.eventDate)}
+                </p>
+              )}
+              <p className="text-[1.05rem] leading-relaxed text-ink-soft">
+                {circle.summary}{" "}
+                <a href="#circle-tabs" className="link whitespace-nowrap">
+                  Read more
+                </a>
               </p>
-            )}
-          </section>
-
-          {!blocked && <ShareCircle circle={circle} />}
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-lg">About this circle</h2>
-            <p className="whitespace-pre-line text-[0.95rem] text-ink-soft">
-              {circle.story}
-            </p>
-          </section>
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-lg">Where this is</h2>
-            <AreaMiniMap
-              areaName={circle.area.name}
-              section={circle.areaSection}
-              supportersFromArea={localSupporters}
-            />
-          </section>
-
-          {/* Supporters */}
-          <section className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg">Recent supporters</h2>
-              <Link
-                href={`/circles/${circle.slug}/supporters`}
-                className="text-sm font-semibold text-forest"
-              >
-                See all
-              </Link>
             </div>
-            <ul className="flex flex-col divide-y divide-line rounded-card border border-line bg-surface shadow-card">
-              {supporters.map((s) => (
-                <li key={s.id} className="flex items-start gap-3 p-3.5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-forest/10 font-display text-sm font-semibold text-forest">
-                    {initials(s.displayName)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="truncate text-sm font-semibold text-ink">
-                        {s.displayName}
+
+            {/* Progress — the desktop rail covers this, so it's phone/tablet only. */}
+            <section className="flex flex-col gap-5 rounded-card bg-surface-sunk p-6 lg:hidden">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[2.3rem] font-extrabold leading-none tracking-tight tnum">
+                    {formatZAR(circle.raisedCents)}
+                  </p>
+                  <p className="mt-2 text-ink-soft">raised of {formatZAR(circle.goalCents)}</p>
+                </div>
+                {faces.length > 0 && (
+                  <div className="flex shrink-0 -space-x-2.5" aria-hidden="true">
+                    {faces.map((s, i) => (
+                      <span
+                        key={s.id}
+                        className={`flex size-11 items-center justify-center rounded-full border-2 border-surface-sunk text-sm font-bold ${FACE_COLOURS[i]}`}
+                      >
+                        {initials(s.displayName)}
                       </span>
-                      <span className="shrink-0 text-sm font-semibold text-forest tnum">
-                        {s.amountCents === null
-                          ? "—"
-                          : formatZAR(s.amountCents)}
+                    ))}
+                    {moreFaces > 0 && (
+                      <span className="flex size-11 items-center justify-center rounded-full border-2 border-surface-sunk bg-night text-sm font-bold text-on-night tnum">
+                        +{moreFaces}
                       </span>
-                    </div>
-                    <p className="text-xs text-ink-faint">
-                      {relativeDay(s.createdAt)}
-                      {s.fromAreaName ? ` · from ${s.fromAreaName}` : ""}
-                    </p>
-                    {s.message && (
-                      <p className="mt-1 text-[0.85rem] text-ink-soft">
-                        “{s.message}”
-                      </p>
                     )}
                   </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Updates */}
-          {updates.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <h2 className="text-lg">Updates</h2>
-              <ul className="flex flex-col gap-3">
-                {updates.map((u) => (
-                  <li
-                    key={u.id}
-                    className="rounded-card border border-line bg-surface p-4 shadow-card"
-                  >
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-ink-faint">
-                      {relativeDay(u.createdAt)}
-                    </p>
-                    <p className="mt-1 text-[0.9rem] text-ink-soft">{u.body}</p>
-                  </li>
-                ))}
-              </ul>
+                )}
+              </div>
+              <ProgressBar
+                raisedCents={circle.raisedCents}
+                goalCents={circle.goalCents}
+                hideLabels
+                thick
+              />
+              <div className="flex items-baseline justify-between gap-4 text-[0.95rem] text-ink-soft">
+                <span className="tnum">
+                  {circle.supporterCount} {circle.supporterCount === 1 ? "supporter" : "supporters"}
+                </span>
+                <span className="text-right">Organised by {circle.organiserName}</span>
+              </div>
             </section>
-          )}
 
-          <section className="rounded-card bg-forest/5 p-4 text-[0.82rem] text-ink-soft">
-            <p className="font-semibold text-ink">How MseeZee keeps this safe</p>
-            <ul className="mt-2 flex list-disc flex-col gap-1 pl-4">
-              <li>Circles are verified before they can collect above a small cap.</li>
-              <li>Contributions are final — pay only what you intend to give.</li>
-              <li>
-                Every contribution is receipted and shown here.{" "}
-                <Link href="/about/safety" className="font-semibold text-forest">
-                  Learn more
-                </Link>
-              </li>
-            </ul>
-          </section>
+            <CircleTabs
+              tabs={[
+                {
+                  key: "about",
+                  label: "About",
+                  content: (
+                    <div className="flex flex-col gap-6">
+                      <p className="whitespace-pre-line text-[1rem] leading-relaxed text-ink-soft">
+                        {circle.story}
+                      </p>
+
+                      <dl className="flex flex-col gap-3 rounded-3xl border border-line p-5 text-[0.95rem]">
+                        <div className="flex justify-between gap-4">
+                          <dt className="text-ink-soft">Organised by</dt>
+                          <dd className="text-right font-bold text-ink">{circle.organiserName}</dd>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <dt className="text-ink-soft">Funds received by</dt>
+                          <dd className="text-right font-bold text-ink">
+                            {circle.proxyName ?? `${circle.beneficiaryName} (verified)`}
+                          </dd>
+                        </div>
+                        {circle.proxyName && (
+                          <p className="border-t border-line pt-3 text-[0.85rem] text-ink-soft">
+                            A registered community partner holds and disburses these funds,
+                            and is accountable for getting them to the family.
+                          </p>
+                        )}
+                      </dl>
+
+                      <section className="flex flex-col gap-3">
+                        <h2 className="text-[1.2rem] font-bold">Where this is</h2>
+                        <AreaMiniMap
+                          areaName={circle.area.name}
+                          section={circle.areaSection}
+                          supportersFromArea={localSupporters}
+                        />
+                      </section>
+
+                      <section className="flex gap-4 rounded-3xl bg-lime p-5 text-[0.88rem] text-on-lime">
+                        <ShieldIcon className="size-6 shrink-0" />
+                        <div>
+                          <p className="font-bold">How MseeZee keeps this safe</p>
+                          <ul className="mt-2 flex list-disc flex-col gap-1 pl-4 opacity-85">
+                            <li>Circles are verified before they can collect above a small cap.</li>
+                            <li>Contributions are final — pay only what you intend to give.</li>
+                            <li>
+                              Every contribution is receipted and shown here.{" "}
+                              <Link href="/about/safety" className="font-bold underline underline-offset-2">
+                                Learn more
+                              </Link>
+                            </li>
+                          </ul>
+                        </div>
+                      </section>
+                    </div>
+                  ),
+                },
+                {
+                  key: "updates",
+                  label: "Updates",
+                  count: updates.length,
+                  content:
+                    updates.length > 0 ? (
+                      <ul className="flex flex-col gap-3">
+                        {updates.map((u) => (
+                          <li key={u.id} className="rounded-3xl border border-line p-5">
+                            <p className="text-[0.85rem] font-semibold text-ink-soft">
+                              {relativeDay(u.createdAt)}
+                            </p>
+                            <p className="mt-1 text-ink">{u.body}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="rounded-3xl border border-dashed border-line px-5 py-8 text-center text-ink-soft">
+                        No updates yet. The organiser posts here as the money is used.
+                      </p>
+                    ),
+                },
+                {
+                  key: "supporters",
+                  label: "Supporters",
+                  content: (
+                    <div className="flex flex-col gap-3">
+                      <ul className="flex flex-col divide-y divide-line rounded-3xl border border-line">
+                        {supporters.map((s) => (
+                          <SupporterRow key={s.id} supporter={s} />
+                        ))}
+                        {supporters.length === 0 && (
+                          <li className="px-5 py-8 text-center text-ink-soft">
+                            No supporters yet — be the first.
+                          </li>
+                        )}
+                      </ul>
+                      {supporters.length > 0 && (
+                        <Link href={`/circles/${circle.slug}/supporters`} className="link self-end">
+                          See all {circle.supporterCount}
+                        </Link>
+                      )}
+                    </div>
+                  ),
+                },
+              ]}
+            />
+
+            {!blocked && <ShareCircle circle={circle} />}
+          </div>
         </div>
 
         <ContributeRail circle={circle} />
@@ -269,11 +288,32 @@ export default async function CirclePage({
   );
 }
 
-function initials(name: string): string {
-  const clean = name.replace(/[^a-zA-Z ]/g, "").trim();
-  if (!clean) return "•";
-  const parts = clean.split(/\s+/);
+/** Avatar discs for the first few supporters — forest, sand, sky. */
+const FACE_COLOURS = [
+  "bg-forest text-white",
+  "bg-[#e8d5c4] text-[#151815]",
+  "bg-[#cfe0f0] text-[#151815]",
+];
+
+function SupporterRow({ supporter: s }: { supporter: Supporter }) {
   return (
-    (parts[0]?.[0] ?? "") + (parts.length > 1 ? (parts.at(-1)?.[0] ?? "") : "")
-  ).toUpperCase();
+    <li className="flex items-start gap-3.5 p-4">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-sunk text-sm font-bold text-ink">
+        {initials(s.displayName)}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="truncate font-bold text-ink">{s.displayName}</span>
+          <span className="shrink-0 font-bold text-ink tnum">
+            {s.amountCents === null ? "—" : formatZAR(s.amountCents)}
+          </span>
+        </div>
+        <p className="text-[0.85rem] text-ink-soft">
+          {relativeDay(s.createdAt)}
+          {s.fromAreaName ? ` · from ${s.fromAreaName}` : ""}
+        </p>
+        {s.message && <p className="mt-1.5 text-[0.92rem] text-ink-soft">“{s.message}”</p>}
+      </div>
+    </li>
+  );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink, PageTopBar } from "@/components/ui/IconButton";
 
 export const metadata: Metadata = { title: "How MseeZee keeps giving safe" };
 
@@ -28,36 +28,21 @@ const points = [
 
 export default function SafetyPage() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6 lg:px-8">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/"
-          aria-label="Back"
-          className="flex size-9 items-center justify-center rounded-full border border-line text-ink-soft"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="m15 5-7 7 7 7"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-        <h1 className="text-xl">Keeping giving safe</h1>
-      </div>
-      <ul className="flex flex-col gap-3">
-        {points.map((pt) => (
-          <li
-            key={pt.h}
-            className="rounded-card border border-line bg-surface p-4 shadow-card"
-          >
-            <p className="font-semibold text-ink">{pt.h}</p>
-            <p className="mt-1 text-sm text-ink-soft">{pt.p}</p>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:px-8 lg:pt-10">
+      <PageTopBar back={<BackLink href="/" />} title="Keeping giving safe" />
+      <ol className="flex flex-col gap-3">
+        {points.map((pt, i) => (
+          <li key={pt.h} className="flex gap-4 rounded-card bg-surface p-5 shadow-card">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-lime text-sm font-bold text-on-lime">
+              {i + 1}
+            </span>
+            <div>
+              <p className="text-[1.1rem] font-bold text-ink">{pt.h}</p>
+              <p className="mt-1 text-ink-soft">{pt.p}</p>
+            </div>
           </li>
         ))}
-      </ul>
+      </ol>
     </div>
   );
 }

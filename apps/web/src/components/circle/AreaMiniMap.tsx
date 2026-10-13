@@ -13,53 +13,31 @@ export function AreaMiniMap({
   supportersFromArea?: number;
 }) {
   return (
-    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
-      <div className="relative h-28 bg-surface-sunk">
+    <div className="overflow-hidden rounded-3xl bg-surface-sunk">
+      <div className="relative h-32">
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox="0 0 320 120"
           preserveAspectRatio="xMidYMid slice"
           aria-hidden="true"
         >
-          <rect width="320" height="120" fill="var(--surface-sunk)" />
-          <path
-            d="M-10 70 Q 60 40 130 66 T 330 58"
-            stroke="var(--line)"
-            strokeWidth="10"
-            fill="none"
-          />
-          <path
-            d="M40 -10 Q 70 60 30 130"
-            stroke="var(--line)"
-            strokeWidth="8"
-            fill="none"
-          />
-          <circle
-            cx="180"
-            cy="60"
-            r="34"
-            fill="var(--forest)"
-            fillOpacity="0.12"
-          />
-          <circle
-            cx="180"
-            cy="60"
-            r="20"
-            fill="var(--forest)"
-            fillOpacity="0.18"
-          />
-          <circle cx="180" cy="60" r="7" fill="var(--forest)" />
+          <rect width="320" height="120" fill="#e4e3de" />
+          <path d="M-10 70 Q 60 40 130 66 T 330 58" stroke="#ffffff" strokeWidth="10" fill="none" />
+          <path d="M40 -10 Q 70 60 30 130" stroke="#ffffff" strokeWidth="8" fill="none" />
+          <path d="M240 -10 L 262 130" stroke="#efe6c4" strokeWidth="9" fill="none" />
+          <circle cx="180" cy="60" r="30" fill="#d4f26a" fillOpacity="0.6" />
+          <circle cx="180" cy="60" r="8" fill="#151815" stroke="#ffffff" strokeWidth="3" />
         </svg>
-        <span className="absolute bottom-2 left-3 rounded-full bg-surface/90 px-2 py-0.5 text-[0.66rem] font-medium text-ink-soft">
+        <span className="absolute bottom-2.5 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[0.7rem] font-semibold text-[#5b605b]">
           Approximate area · not an address
         </span>
       </div>
-      <div className="flex items-center justify-between px-4 py-3 text-sm">
-        <span className="font-semibold text-ink">
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 text-sm">
+        <span className="font-bold text-ink">
           {section ? `${areaName} · ${section}` : areaName}
         </span>
         {supportersFromArea !== undefined && supportersFromArea > 0 && (
-          <span className="text-ink-faint tnum">
+          <span className="text-ink-soft tnum">
             {supportersFromArea} local{" "}
             {supportersFromArea === 1 ? "supporter" : "supporters"}
           </span>

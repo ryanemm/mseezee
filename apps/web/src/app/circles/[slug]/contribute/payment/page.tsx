@@ -20,18 +20,20 @@ export default async function PaymentPage({
   if (!circle) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-xl pb-8">
-      <StepHeader
-        backHref={`/circles/${slug}/contribute`}
-        step={2}
-        total={3}
-        title="Payment"
-      />
-      <PaymentPanel
-        circle={circle}
-        methods={methods}
-        paymentsLive={isPaystackConfigured()}
-      />
+    <div className="min-h-dvh bg-surface">
+      <div className="mx-auto w-full max-w-xl">
+        <StepHeader
+          backHref={`/circles/${slug}/contribute`}
+          step={2}
+          total={3}
+          title="Payment"
+        />
+        <PaymentPanel
+          circle={circle}
+          methods={methods}
+          paymentsLive={isPaystackConfigured()}
+        />
+      </div>
     </div>
   );
 }

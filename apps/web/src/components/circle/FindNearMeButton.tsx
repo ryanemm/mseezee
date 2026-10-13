@@ -2,19 +2,26 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { LocateIcon } from "@/components/ui/Icons";
 
 /**
- * The primary way to switch the home feed from "top circles everywhere" to
- * "closest to me" — deliberately the boldest thing above the fold, since
- * that's the one action that needs a real decision (sharing device location)
- * from the viewer. A tap re-sorts the circle list by true distance; it
- * doesn't scope to one area the way tapping a map pin does.
+ * Switches a feed from "top circles everywhere" to "closest to me". A tap
+ * re-sorts the circle list by true distance; it doesn't scope to one area the
+ * way tapping a map pin does.
  *
  * Coordinates only ever travel as a one-off `?lat=&lng=` on this navigation —
  * read once by the server to sort that single response, never written to a
  * cookie or any other store.
  */
-export function FindNearMeButton() {
+export function FindNearMeButton({
+  basePath = "/",
+  variant = "dark",
+}: {
+  /** The page that sorts by `?lat=&lng=` — home, or Explore's map. */
+  basePath?: string;
+  /** `dark`: the black disc beside the home search. `map`: the white disc on a map. */
+  variant?: "dark" | "map";
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [locating, setLocating] = useState(false);
@@ -46,15 +53,15 @@ export function FindNearMeButton() {
         params.set("lng", position.coords.longitude.toFixed(4));
         const type = searchParams.get("type");
         if (type) params.set("type", type);
-        router.push(`/?${params.toString()}`);
+        router.push(`${basePath}?${params.toString()}`);
         router.refresh();
       },
       (err) => {
         setLocating(false);
         setError(
           err.code === err.PERMISSION_DENIED
-            ? "Location access is blocked for this site — check your browser's site settings or your device's location settings, or pick an area on the map instead."
-            : "Couldn't get your location. Pick an area on the map instead.",
+            ? "Location access is blocked for this site — check your browser's site settings or your device's location settings, or search for a place instead."
+            : "Couldn't get your location. Search for a place instead.",
         );
       },
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 5 * 60 * 1000 },
@@ -62,31 +69,31 @@ export function FindNearMeButton() {
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="relative shrink-0">
       <button
         type="button"
         onClick={findNearMe}
         disabled={locating}
-        className="flex w-full items-center justify-center gap-2.5 rounded-full bg-[linear-gradient(180deg,var(--forest-bright)_0%,var(--forest)_100%)] px-6 py-4 text-[1.02rem] font-semibold text-surface shadow-[0_10px_22px_-8px_rgba(31,74,52,0.6),inset_0_1px_0_rgba(255,255,255,0.2)] transition-[filter,transform] hover:brightness-110 active:scale-[0.99] disabled:opacity-70"
+        aria-label={locating ? "Finding your area…" : "Find circles near me"}
+        title="Find circles near me"
+        className={`flex size-14 items-center justify-center rounded-full transition-transform active:scale-95 disabled:opacity-70 ${
+          variant === "map"
+            ? "bg-surface text-ink shadow-float"
+            : "bg-night text-on-night"
+        }`}
       >
-        <LocateIcon />
-        {locating ? "Finding your area…" : "Find circles near me"}
+        <LocateIcon className={`size-6 ${locating ? "animate-pulse" : ""}`} />
       </button>
-      {error && <p className="px-1 text-xs text-crit">{error}</p>}
+      {error && (
+        <p
+          role="alert"
+          className={`absolute right-0 z-30 w-64 rounded-2xl bg-surface p-3 text-xs leading-relaxed text-crit shadow-float ${
+            variant === "map" ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
+        >
+          {error}
+        </p>
+      )}
     </div>
-  );
-}
-
-function LocateIcon() {
-  return (
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M12 2v3M12 19v3M2 12h3M19 12h3"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }

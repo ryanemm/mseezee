@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { distanceKm, formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
 import { circlesIn, getPlace } from "@/lib/places";
 import { ButtonLink } from "@/components/ui/Button";
 import { CircleCard } from "@/components/circle/CircleCard";
+import { BackLink } from "@/components/ui/IconButton";
+import { PinIcon } from "@/components/ui/Icons";
 
 type Params = { id: string };
 
@@ -53,28 +54,31 @@ export default async function PlacePage({
         .slice(0, 4);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-5 lg:px-8">
-      <header className="flex flex-col gap-2">
-        <Link href="/explore" className="text-sm font-semibold text-forest">
-          ← Search places
-        </Link>
-        <h1 className="font-sans text-[1.95rem] font-extrabold leading-[1.1] tracking-tight text-forest lg:text-[2.4rem]">
-          {place.name}
-        </h1>
-        <p className="text-sm text-ink-soft">{where(place)}</p>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:px-8 lg:pt-10">
+      <header className="flex flex-col gap-5">
+        <BackLink href="/explore" label="Search places" />
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-[2.4rem] font-extrabold leading-[1.04] tracking-[-0.04em] lg:text-[3rem]">
+            {place.name}
+          </h1>
+          <p className="flex items-center gap-1.5 text-ink-soft">
+            <PinIcon className="size-[18px] shrink-0" />
+            {where(place)}
+          </p>
+        </div>
       </header>
 
       {here.length > 0 ? (
         <>
-          <div className="grid grid-cols-3 gap-2 rounded-card border border-line bg-surface p-4 text-center shadow-card lg:max-w-md">
-            <Stat label="Circles" value={String(here.length)} />
-            <Stat label="Raised" value={formatZAR(raised, { compact: true })} />
-            <Stat label="Supporters" value={String(supporters)} />
+          <div className="grid grid-cols-3 gap-2.5 lg:max-w-xl">
+            <Stat label="Circles" value={String(here.length)} className="bg-night text-on-night" />
+            <Stat label="Raised" value={formatZAR(raised, { compact: true })} className="bg-lime text-on-lime" />
+            <Stat label="Supporters" value={String(supporters)} className="bg-surface text-ink" />
           </div>
 
-          <section className="flex flex-col gap-3">
-            <p className="eyebrow">Circles in {place.name}</p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <section className="flex flex-col gap-4">
+            <h2 className="text-[1.4rem] font-bold">Circles in {place.name}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {here.map((c) => (
                 <CircleCard key={c.id} circle={c} />
               ))}
@@ -83,21 +87,23 @@ export default async function PlacePage({
         </>
       ) : (
         <>
-          <div className="flex flex-col items-start gap-3 rounded-card border border-dashed border-line bg-surface p-5 lg:max-w-xl">
-            <p className="font-display text-lg font-bold text-ink">
+          <div className="flex flex-col items-start gap-3 rounded-card bg-surface p-6 shadow-card lg:max-w-xl">
+            <p className="text-[1.3rem] font-bold text-ink">
               No circles in {place.name} yet
             </p>
-            <p className="text-sm text-ink-soft">
+            <p className="text-ink-soft">
               Know a family, school or project here that needs support? Start the first
               circle and share it with the people around you.
             </p>
-            <ButtonLink href="/create">Start a circle</ButtonLink>
+            <ButtonLink href="/create" className="mt-2">
+              Start a circle
+            </ButtonLink>
           </div>
 
           {nearest.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <p className="eyebrow">Nearest circles</p>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <section className="flex flex-col gap-4">
+              <h2 className="text-[1.4rem] font-bold">Nearest circles</h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {nearest.map((c) => (
                   <CircleCard key={c.id} circle={c} />
                 ))}
@@ -110,11 +116,19 @@ export default async function PlacePage({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string;
+  className: string;
+}) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="font-display text-lg text-forest tnum">{value}</span>
-      <span className="text-[0.62rem] font-medium uppercase tracking-wide text-ink-faint">
+    <div className={`flex flex-col gap-1 rounded-3xl p-4 shadow-card ${className}`}>
+      <span className="text-[1.35rem] font-extrabold leading-tight tracking-tight tnum">{value}</span>
+      <span className="text-[0.72rem] font-semibold uppercase tracking-wide opacity-70">
         {label}
       </span>
     </div>

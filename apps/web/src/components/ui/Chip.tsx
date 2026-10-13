@@ -1,5 +1,6 @@
 import type { CircleType, VerificationTier } from "@mseezee/shared";
 import { findCircleType } from "@mseezee/shared";
+import { CheckIcon, PinIcon } from "./Icons";
 
 export function Chip({
   children,
@@ -10,7 +11,7 @@ export function Chip({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2 py-0.5 text-[0.68rem] font-medium text-ink-soft ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[0.8rem] font-semibold leading-tight text-ink ${className}`}
     >
       {children}
     </span>
@@ -24,22 +25,25 @@ export function TypeChip({
   type: CircleType;
   onDark?: boolean;
 }) {
+  const label = findCircleType(type)?.shortLabel ?? type;
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.1em] ${
-        onDark
-          ? "bg-black/30 text-[#f6e6bd] ring-1 ring-inset ring-gold-line/70 backdrop-blur-sm"
-          : "bg-gold-soft text-gold"
+      className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-[0.82rem] font-bold leading-tight ${
+        onDark ? "bg-black/40 text-white backdrop-blur-sm" : "bg-surface-sunk text-ink"
       }`}
     >
-      {findCircleType(type)?.shortLabel ?? type}
+      {label}
     </span>
   );
 }
 
-export function ExampleChip() {
+export function ExampleChip({ onDark = false }: { onDark?: boolean }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-dashed border-ink-faint/50 px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-[0.08em] text-ink-faint">
+    <span
+      className={`inline-flex items-center rounded-full border border-dashed px-3 py-1.5 text-[0.75rem] font-bold uppercase leading-tight tracking-[0.06em] ${
+        onDark ? "border-white/50 text-white/85" : "border-ink-faint/60 text-ink-faint"
+      }`}
+    >
       Example
     </span>
   );
@@ -54,7 +58,7 @@ export function DistanceChip({
 }) {
   return (
     <Chip>
-      <PinIcon />
+      <PinIcon className="size-4 shrink-0" />
       {distanceKm === undefined
         ? areaName
         : distanceKm === 0
@@ -73,43 +77,33 @@ const TIER_COPY: Record<VerificationTier, { label: string; hint: string }> = {
   },
 };
 
-export function VerifiedChip({ tier }: { tier: VerificationTier }) {
+export function VerifiedChip({
+  tier,
+  onDark = false,
+}: {
+  tier: VerificationTier;
+  onDark?: boolean;
+}) {
   const copy = TIER_COPY[tier];
   if (tier === "unverified") {
-    return <Chip className="text-ink-faint">{copy.label}</Chip>;
+    return (
+      <span
+        title={copy.hint}
+        className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-[0.82rem] font-bold leading-tight ${
+          onDark ? "bg-black/40 text-white/85 backdrop-blur-sm" : "bg-surface-sunk text-ink-soft"
+        }`}
+      >
+        {copy.label}
+      </span>
+    );
   }
   return (
-    <Chip className="border-good/30 text-good" >
-      <CheckIcon />
+    <span
+      title={copy.hint}
+      className="inline-flex items-center gap-1.5 rounded-full bg-lime px-3.5 py-1.5 text-[0.82rem] font-bold leading-tight text-on-lime"
+    >
+      <CheckIcon className="size-4" />
       {copy.label}
-    </Chip>
-  );
-}
-
-function PinIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 21c4.5-4.2 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.8 7 11z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="10" r="2.4" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="m5 13 4 4L19 7"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    </span>
   );
 }

@@ -5,6 +5,8 @@ import { formatZAR } from "@mseezee/shared";
 import { auth } from "@/auth";
 import { getMyOrganiserView } from "@/lib/api";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { CircleEmblem } from "@/components/ui/CoverArt";
+import { PlusIcon } from "@/components/ui/Icons";
 import { relativeDay } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Your circles" };
@@ -23,12 +25,14 @@ export default async function DashboardPage() {
   const needsThanks = view.circles.reduce((s, c) => s + c.unthankedCount, 0);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 lg:px-8">
-      <header className="flex flex-col gap-1">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 pt-[calc(env(safe-area-inset-top)+1.75rem)] lg:px-8 lg:pt-10">
+      <header className="flex flex-col gap-2">
         <p className="eyebrow">Organiser</p>
-        <h1 className="text-2xl">Good day, {firstName}</h1>
+        <h1 className="text-[2.2rem] font-extrabold leading-[1.05] tracking-[-0.035em]">
+          Good day, {firstName}
+        </h1>
         {view.circles.length > 0 && (
-          <p className="text-sm text-ink-soft">
+          <p className="text-ink-soft tnum">
             {view.circles.length} active{" "}
             {view.circles.length === 1 ? "circle" : "circles"} ·{" "}
             {formatZAR(totalSettled, { compact: true })} received ·{" "}
@@ -38,16 +42,16 @@ export default async function DashboardPage() {
       </header>
 
       {needsThanks > 0 && (
-        <div className="rounded-card border border-gold-line bg-gold-soft/50 px-4 py-3 text-sm text-ink">
-          <span className="font-semibold">{needsThanks} supporters</span> are
+        <div className="rounded-3xl bg-lime px-5 py-4 text-on-lime">
+          <span className="font-bold">{needsThanks} supporters</span> are
           waiting for a thank-you.
         </div>
       )}
 
       {view.circles.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-line bg-surface px-4 py-10 text-center">
-          <p className="font-display text-lg text-ink">No circles yet</p>
-          <p className="max-w-xs text-sm text-ink-soft">
+        <div className="flex flex-col items-center gap-2 rounded-card border-2 border-dashed border-line px-5 py-12 text-center">
+          <p className="text-lg font-bold text-ink">No circles yet</p>
+          <p className="max-w-xs text-ink-soft">
             When you start one, it'll show up here with its own dashboard —
             contributions, messages, and payouts.
           </p>
@@ -58,19 +62,20 @@ export default async function DashboardPage() {
             <Link
               key={circle.id}
               href={`/dashboard/${circle.slug}`}
-              className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4 shadow-card"
+              className="flex flex-col gap-4 rounded-card bg-surface p-5 shadow-card transition-transform active:scale-[0.99]"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-lg text-ink">{circle.title}</h2>
-                  <p className="text-xs text-ink-faint">
+              <div className="flex items-center gap-4">
+                <CircleEmblem type={circle.type} />
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate text-[1.15rem] font-bold text-ink">{circle.title}</h2>
+                  <p className="truncate text-[0.85rem] text-ink-soft">
                     {circle.area.name}
                     {circle.areaSection ? ` · ${circle.areaSection}` : ""} · Circle{" "}
                     {circle.slug}
                   </p>
                 </div>
                 {unthankedCount > 0 && (
-                  <span className="shrink-0 rounded-full bg-gold-soft px-2 py-0.5 text-[0.62rem] font-semibold text-gold">
+                  <span className="shrink-0 rounded-full bg-lime px-2.5 py-1 text-[0.72rem] font-bold text-on-lime">
                     {unthankedCount} to thank
                   </span>
                 )}
@@ -82,7 +87,7 @@ export default async function DashboardPage() {
                 compact
               />
               {lastContributionAt && (
-                <p className="text-[0.7rem] text-ink-faint">
+                <p className="text-[0.8rem] text-ink-soft">
                   Last contribution {relativeDay(lastContributionAt)}
                 </p>
               )}
@@ -93,9 +98,10 @@ export default async function DashboardPage() {
 
       <Link
         href="/create"
-        className="rounded-card border border-dashed border-line bg-surface px-4 py-4 text-center text-sm font-semibold text-forest"
+        className="flex items-center justify-center gap-2 rounded-full bg-night py-4 font-bold text-on-night"
       >
-        + Start {view.circles.length === 0 ? "your first" : "another"} circle
+        <PlusIcon className="size-5" />
+        Start {view.circles.length === 0 ? "your first" : "another"} circle
       </Link>
     </div>
   );

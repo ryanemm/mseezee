@@ -1,8 +1,9 @@
 import type { Circle } from "@mseezee/shared";
 import { formatZAR } from "@mseezee/shared";
-import { ButtonLink } from "@/components/ui/Button";
+import { ArrowCta } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { VerifiedChip } from "@/components/ui/Chip";
+import { HeartIcon } from "@/components/ui/Icons";
 import { contributionBlock } from "@/lib/contributions-open";
 
 /** The desktop (`lg`+) equivalent of the mobile `ContributeBar` — a sticky
@@ -11,13 +12,13 @@ export function ContributeRail({ circle }: { circle: Circle }) {
   const blocked = contributionBlock(circle);
 
   return (
-    <aside className="hidden w-[21rem] shrink-0 lg:block">
-      <div className="sticky top-24 flex flex-col gap-4 rounded-card border border-line bg-surface p-5 shadow-card">
+    <aside className="hidden w-[22rem] shrink-0 lg:block">
+      <div className="sticky top-8 flex flex-col gap-5 rounded-card bg-surface p-6 shadow-card">
         <div>
-          <p className="font-display text-3xl text-forest tnum">
+          <p className="text-[2.2rem] font-extrabold leading-none tracking-tight tnum">
             {formatZAR(circle.raisedCents)}
           </p>
-          <p className="text-sm text-ink-faint">
+          <p className="mt-1.5 text-ink-soft">
             raised of {formatZAR(circle.goalCents)} goal
           </p>
         </div>
@@ -26,6 +27,7 @@ export function ContributeRail({ circle }: { circle: Circle }) {
           raisedCents={circle.raisedCents}
           goalCents={circle.goalCents}
           supporterCount={circle.supporterCount}
+          thick
         />
 
         <div className="flex">
@@ -33,33 +35,24 @@ export function ContributeRail({ circle }: { circle: Circle }) {
         </div>
 
         {blocked ? (
-          <span className="rounded-full bg-surface-sunk py-3 text-center text-sm font-semibold text-ink-faint">
+          <span className="flex h-16 items-center justify-center rounded-full bg-surface-sunk px-6 text-center font-semibold text-ink-soft">
             {blocked}
           </span>
         ) : (
-          <ButtonLink href={`/circles/${circle.slug}/contribute`} className="w-full">
-            Contribute
-          </ButtonLink>
+          <ArrowCta href={`/circles/${circle.slug}/contribute`}>Give to this circle</ArrowCta>
         )}
 
         <button
           type="button"
-          className="flex items-center justify-center gap-2 rounded-full border border-line py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:bg-surface-sunk"
+          className="flex items-center justify-center gap-2 rounded-full border border-line py-3 text-sm font-bold text-ink transition-colors hover:bg-surface-sunk"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 20s-7-4.4-7-9.6A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 7 3.4C19 15.6 12 20 12 20z"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <HeartIcon className="size-[18px]" />
           Save circle
         </button>
 
-        <div className="border-t border-line pt-3.5 text-sm">
-          <p className="text-ink-faint">Funds received by</p>
-          <p className="font-medium text-ink">
+        <div className="border-t border-line pt-4 text-sm">
+          <p className="text-ink-soft">Funds received by</p>
+          <p className="font-bold text-ink">
             {circle.proxyName ?? `${circle.beneficiaryName} (verified)`}
           </p>
         </div>

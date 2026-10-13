@@ -2,14 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Circle, CircleType } from "@mseezee/shared";
 import { LEGACY_AREA_PLACES, distanceKm, isCircleType } from "@mseezee/shared";
+import { auth } from "@/auth";
 import { api } from "@/lib/api";
-import { summarisePlaces } from "@/lib/places";
-import { AreaMap } from "@/components/layout/AreaMap";
-import { CircleCard } from "@/components/circle/CircleCard";
+import { initials } from "@/lib/format";
+import { CircleCard, FeaturedCircleCard } from "@/components/circle/CircleCard";
 import { FilterTabs } from "@/components/circle/FilterTabs";
 import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
+import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
 
 type Search = { area?: string; type?: string; lat?: string; lng?: string };
+
+/** How many circles get the big card treatment before the compact grid. */
+const FEATURED = 5;
 
 export default async function HomePage({
   searchParams,
@@ -25,7 +29,10 @@ export default async function HomePage({
   const type = normaliseType(sp.type);
   const near = parseNear(sp.lat, sp.lng);
 
-  const all = await api.listCircles({ sort: "most_supported" });
+  const [all, session] = await Promise.all([
+    api.listCircles({ sort: "most_supported" }),
+    auth(),
+  ]);
   const everything: Circle[] = near
     ? all
         .map((c) => ({ ...c, distanceKm: distanceKm(near, c.area) }))
@@ -34,52 +41,113 @@ export default async function HomePage({
 
   const circles =
     type === "all" ? everything : everything.filter((c) => c.type === type);
+  const featured = circles.slice(0, FEATURED);
+  const more = circles.slice(FEATURED);
 
   const baseParams: Record<string, string> = near
     ? { lat: String(near.lat), lng: String(near.lng) }
     : {};
 
+  const user = session?.user;
+  const name = user?.name || user?.email || user?.phone || "";
+  const firstName = user?.name?.split(" ")[0];
+
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-6 lg:px-8">
-      <header className="flex flex-col gap-2">
-        <p className="eyebrow text-[0.78rem] tracking-[0.16em]">Sawubona</p>
-        <h1 className="font-sans text-[1.95rem] font-extrabold leading-[1.1] tracking-tight text-forest lg:text-[2.7rem]">
-          Who are we supporting today?
-        </h1>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 pt-7 lg:px-10 lg:pt-10">
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="truncate text-[1.6rem] font-extrabold leading-tight tracking-tight">
+            Sawubona{firstName ? `, ${firstName}` : ""}
+          </p>
+          <p className="text-[1.02rem] text-ink-soft">
+            {user ? "Welcome back to MseeZee" : "Welcome to MseeZee"}
+          </p>
+        </div>
+        {user ? (
+          <Link
+            href="/profile"
+            aria-label="Your profile"
+            className="flex size-14 shrink-0 items-center justify-center rounded-full bg-forest text-lg font-bold text-white"
+          >
+            {initials(name)}
+          </Link>
+        ) : (
+          <Link
+            href="/sign-in"
+            className="shrink-0 rounded-full bg-night px-5 py-3 text-[0.95rem] font-bold text-on-night md:hidden"
+          >
+            Sign in
+          </Link>
+        )}
       </header>
 
-      <FindNearMeButton />
+      <h1 className="max-w-xl text-[2.55rem] font-extrabold leading-[1.04] tracking-[-0.04em] lg:text-[3.4rem]">
+        Who are we supporting today?
+      </h1>
 
-      <AreaMap places={summarisePlaces(all)} near={near} />
+      <div className="flex items-center gap-3 lg:max-w-xl">
+        <div className="min-w-0 flex-1">
+          <ExplorePlaceSearch />
+        </div>
+        <FindNearMeButton />
+      </div>
 
       <FilterTabs active={type} baseParams={baseParams} />
 
-      <section className="flex flex-col gap-3 pb-4">
-        {circles.length > 0 && (
-          <p className="eyebrow text-[0.78rem] tracking-[0.16em]">
-            {near ? "Closest to you" : "Popular causes right now"}
-          </p>
-        )}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {circles.map((circle) => (
-            <CircleCard key={circle.id} circle={circle} />
-          ))}
-          {circles.length === 0 && (
-            <p className="rounded-card border border-dashed border-line bg-surface px-4 py-8 text-center text-sm text-ink-faint sm:col-span-2 xl:col-span-3">
-              No {type === "all" ? "" : `${type} `}circles right now.{" "}
-              <Link href="/explore" className="font-semibold text-forest">
-                Search by place
+      <section className="flex flex-col gap-4 pb-4">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-[1.4rem] font-bold">
+              {near ? "Closest to you" : "Popular right now"}
+            </h2>
+            {near && (
+              <Link href={type === "all" ? "/" : `/?type=${type}`} className="text-sm font-semibold text-ink-soft underline underline-offset-4">
+                Show popular instead
               </Link>
-            </p>
+            )}
+          </div>
+          {more.length > 0 && (
+            <a href="#more" className="link shrink-0 text-[1.02rem]">
+              See all
+            </a>
           )}
         </div>
+
+        {circles.length === 0 ? (
+          <p className="rounded-card bg-surface-sunk px-5 py-10 text-center text-ink-soft">
+            No {type === "all" ? "" : `${type} `}circles right now.{" "}
+            <Link href="/explore" className="link">
+              Search by place
+            </Link>
+          </p>
+        ) : (
+          <div className="rail -mx-5 gap-4 px-5 sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 xl:grid-cols-3">
+            {featured.map((circle) => (
+              <div key={circle.id} className="w-[86%] shrink-0 sm:w-auto">
+                <FeaturedCircleCard circle={circle} />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
+
+      {more.length > 0 && (
+        <section id="more" className="flex scroll-mt-6 flex-col gap-4 pb-4">
+          <h2 className="text-[1.4rem] font-bold">More circles</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {more.map((circle) => (
+              <CircleCard key={circle.id} circle={circle} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <Link
         href="/explore"
-        className="mb-2 text-center text-sm font-semibold text-forest"
+        className="mb-2 flex items-center justify-between rounded-card bg-surface-sunk px-5 py-4 font-bold"
       >
-        Search causes by place →
+        Search causes by place on the map
+        <span aria-hidden="true">→</span>
       </Link>
     </div>
   );

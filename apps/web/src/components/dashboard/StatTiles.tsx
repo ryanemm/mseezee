@@ -1,27 +1,25 @@
+const TONES = {
+  forest: "bg-lime text-on-lime",
+  gold: "bg-surface text-ink",
+  ink: "bg-night text-on-night",
+};
+
 export function StatTiles({
   items,
 }: {
-  items: { label: string; value: string; tone?: "ink" | "forest" | "gold" }[];
+  items: { label: string; value: string; tone?: keyof typeof TONES }[];
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2.5">
       {items.map((it) => (
         <div
           key={it.label}
-          className="flex flex-col gap-0.5 rounded-card border border-line bg-surface p-3 text-center shadow-card"
+          className={`flex flex-col gap-1 rounded-3xl p-4 shadow-card ${TONES[it.tone ?? "forest"]}`}
         >
-          <span
-            className={`font-display text-lg tnum ${
-              it.tone === "gold"
-                ? "text-gold"
-                : it.tone === "ink"
-                  ? "text-ink"
-                  : "text-forest"
-            }`}
-          >
+          <span className="text-[1.35rem] font-extrabold leading-tight tracking-tight tnum">
             {it.value}
           </span>
-          <span className="text-[0.6rem] font-medium uppercase tracking-wide text-ink-faint">
+          <span className="text-[0.72rem] font-semibold uppercase tracking-wide opacity-70">
             {it.label}
           </span>
         </div>

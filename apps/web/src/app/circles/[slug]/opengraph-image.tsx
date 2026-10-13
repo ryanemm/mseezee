@@ -10,11 +10,12 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "A MseeZee circle";
 
+// Same deep cover colours as the in-app cover art (see COVER_BG in CoverArt.tsx).
 const TONES = {
-  funeral: { from: "#1a1511", to: "#4a3a28", accent: "#c8a24c" },
-  family: { from: "#12331f", to: "#2f6c4a", accent: "#f1e7ca" },
-  essentials: { from: "#5a2f25", to: "#a8663f", accent: "#f1e7ca" },
-  community: { from: "#244a55", to: "#3f7a6c", accent: "#f1e7ca" },
+  funeral: { from: "#2c1f17", to: "#3b2a20", accent: "#c8a24c", bar: "#c8a24c" },
+  family: { from: "#6f3524", to: "#8a4630", accent: "#d4f26a", bar: "#d4f26a" },
+  essentials: { from: "#3d2c48", to: "#4a3657", accent: "#d4f26a", bar: "#d4f26a" },
+  community: { from: "#12301f", to: "#1f4a34", accent: "#d4f26a", bar: "#d4f26a" },
 } as const;
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
@@ -59,7 +60,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           height: "100%",
           padding: "64px 72px",
           background: `linear-gradient(135deg, ${tone.from} 0%, ${tone.to} 100%)`,
-          color: "#fffdf7",
+          color: "#ffffff",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -69,12 +70,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               display: "flex",
               padding: "10px 24px",
               borderRadius: 999,
-              border: `2px solid ${tone.accent}`,
-              color: tone.accent,
-              fontSize: 24,
-              fontWeight: 600,
-              letterSpacing: 3,
-              textTransform: "uppercase",
+              background: tone.accent,
+              color: "#151815",
+              fontSize: 26,
+              fontWeight: 700,
             }}
           >
             {label}
@@ -86,8 +85,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             style={{
               display: "flex",
               fontSize: circle.title.length > 40 ? 60 : 72,
-              fontWeight: 700,
-              lineHeight: 1.1,
+              fontWeight: 800,
+              lineHeight: 1.05,
+              letterSpacing: -2,
             }}
           >
             {circle.title}
@@ -113,7 +113,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 width: `${Math.max(pct, 3)}%`,
                 height: "100%",
                 borderRadius: 999,
-                background: "linear-gradient(90deg, #2f6c4a 0%, #c8a24c 100%)",
+                background: tone.bar,
               }}
             />
           </div>

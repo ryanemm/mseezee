@@ -11,32 +11,54 @@ export function FilterTabs({
   baseParams,
 }: {
   active: string;
-  /** Whichever params describe the current mode (`{ area }`, `{ lat, lng }`,
-   *  or `{}` for the default view) — carried along so switching a tab never
-   *  drops the viewer's area or "near me" choice. */
+  /** Whichever params describe the current mode (`{ lat, lng }`, or `{}` for
+   *  the default view) — carried along so switching a tab never drops the
+   *  viewer's "near me" choice. */
   baseParams: Record<string, string>;
 }) {
   return (
-    <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-2 pt-0.5 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+    <div className="rail -mx-5 gap-2.5 px-5 lg:mx-0 lg:px-0">
       {TABS.map((tab) => {
         const isActive = active === tab.key;
         const params = new URLSearchParams(baseParams);
         if (tab.key !== "all") params.set("type", tab.key);
         const href = `/?${params.toString()}`;
         return (
-          <Link
-            key={tab.key}
-            href={href}
-            className={`shrink-0 rounded-full border px-4 py-2 text-[0.88rem] font-semibold transition-[background-color,box-shadow,color] ${
-              isActive
-                ? "border-forest bg-[linear-gradient(180deg,var(--forest-bright),var(--forest))] text-surface shadow-[0_6px_14px_-5px_rgba(31,74,52,0.55),inset_0_1px_0_rgba(255,255,255,0.2)]"
-                : "border-gold-line/45 bg-surface text-ink shadow-pill hover:border-gold-line"
-            }`}
-          >
+          <Pill key={tab.key} href={href} active={isActive}>
             {tab.label}
-          </Link>
+          </Pill>
         );
       })}
     </div>
+  );
+}
+
+/** A filter pill: solid near-black when on; light grey when off, or white
+ *  with a shadow when it floats over the map. */
+export function Pill({
+  href,
+  active,
+  floating = false,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  floating?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "true" : undefined}
+      className={`flex h-12 shrink-0 items-center rounded-full px-6 text-[0.98rem] font-semibold transition-colors ${
+        active
+          ? "bg-night text-on-night"
+          : floating
+            ? "bg-surface text-ink shadow-pill hover:bg-surface-sunk"
+            : "bg-surface-sunk text-ink hover:bg-line"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }

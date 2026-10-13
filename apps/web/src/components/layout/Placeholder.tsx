@@ -1,30 +1,34 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/Button";
+import { ClockIcon } from "@/components/ui/Icons";
 
+/** A centred message screen — not found, signed out, a payment that didn't
+ *  go through — with one way forward. */
 export function Placeholder({
   title,
   body,
+  actionHref = "/",
+  actionLabel = "Back to home",
+  icon,
+  children,
 }: {
   title: string;
   body: string;
+  actionHref?: string;
+  actionLabel?: string;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-4 px-6 py-16 text-center">
-      <div className="flex size-14 items-center justify-center rounded-full bg-forest/10 text-forest">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" />
-          <path
-            d="M12 7v5l3 2"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-          />
-        </svg>
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 px-6 py-20 text-center">
+      <div className="flex size-20 items-center justify-center rounded-full bg-lime text-on-lime">
+        {icon ?? <ClockIcon className="size-9" />}
       </div>
-      <h1 className="text-xl">{title}</h1>
-      <p className="max-w-xs text-sm text-ink-soft">{body}</p>
-      <Link href="/" className="pt-1 text-sm font-semibold text-forest">
-        Back to home
-      </Link>
+      <h1 className="text-[1.8rem] font-extrabold leading-tight">{title}</h1>
+      <p className="text-ink-soft">{body}</p>
+      <ButtonLink href={actionHref} className="mt-2 min-w-48">
+        {actionLabel}
+      </ButtonLink>
+      {children}
     </div>
   );
 }

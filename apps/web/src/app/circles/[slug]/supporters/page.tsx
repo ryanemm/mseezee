@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
-import { relativeDay } from "@/lib/format";
+import { initials, relativeDay } from "@/lib/format";
+import { BackLink, PageTopBar } from "@/components/ui/IconButton";
 
 export const metadata: Metadata = { title: "Supporters" };
 
@@ -18,50 +18,43 @@ export default async function SupportersPage({
   const supporters = await api.listSupporters(circle.id);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-5 lg:px-8">
-      <div className="flex items-center gap-3">
-        <Link
-          href={`/circles/${slug}`}
-          aria-label="Back"
-          className="flex size-9 items-center justify-center rounded-full border border-line text-ink-soft"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="m15 5-7 7 7 7"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-        <h1 className="text-xl">{circle.supporterCount} supporters</h1>
+    <div className="min-h-dvh bg-surface">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:px-8 lg:pt-10">
+        <PageTopBar
+          back={<BackLink href={`/circles/${slug}`} />}
+          title={`${circle.supporterCount} supporters`}
+        />
+
+        <p className="text-center text-ink-soft">
+          Everyone who has contributed to {circle.beneficiaryName}. Amounts are
+          shown when the supporter chose to.
+        </p>
+
+        <ul className="flex flex-col divide-y divide-line rounded-card bg-surface-sunk px-5">
+          {supporters.map((s) => (
+            <li key={s.id} className="flex items-start gap-3.5 py-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-sm font-bold text-ink">
+                {initials(s.displayName)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="truncate font-bold text-ink">{s.displayName}</p>
+                  <span className="shrink-0 font-bold text-ink tnum">
+                    {s.amountCents === null ? "—" : formatZAR(s.amountCents)}
+                  </span>
+                </div>
+                <p className="text-[0.85rem] text-ink-soft">
+                  {relativeDay(s.createdAt)}
+                  {s.fromAreaName ? ` · ${s.fromAreaName}` : ""}
+                </p>
+                {s.message && (
+                  <p className="mt-1.5 text-[0.92rem] text-ink-soft">“{s.message}”</p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-
-      <p className="text-sm text-ink-soft">
-        Everyone who has contributed to {circle.beneficiaryName}. Amounts are
-        shown when the supporter chose to.
-      </p>
-
-      <ul className="flex flex-col divide-y divide-line rounded-card border border-line bg-surface shadow-card">
-        {supporters.map((s) => (
-          <li key={s.id} className="flex items-start justify-between gap-3 p-3.5">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-ink">{s.displayName}</p>
-              <p className="text-xs text-ink-faint">
-                {relativeDay(s.createdAt)}
-                {s.fromAreaName ? ` · ${s.fromAreaName}` : ""}
-              </p>
-              {s.message && (
-                <p className="mt-1 text-[0.85rem] text-ink-soft">“{s.message}”</p>
-              )}
-            </div>
-            <span className="shrink-0 text-sm font-semibold text-forest tnum">
-              {s.amountCents === null ? "—" : formatZAR(s.amountCents)}
-            </span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

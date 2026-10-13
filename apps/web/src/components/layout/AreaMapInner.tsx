@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
 import { useRouter } from "next/navigation";
 import { MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
@@ -12,47 +12,41 @@ import { formatZAR } from "@mseezee/shared";
  * The actual Leaflet map — loaded only on the client via `next/dynamic` in
  * `AreaMap.tsx`, since Leaflet touches `window` at load time.
  *
- * One pin per place that has circles, at the place's centre point (from Stats
+ * One amount pin per place that has circles, at the place's centre point (from Stats
  * SA), never a household. The map can't zoom in past township level
  * (`maxZoom`) — "general area" is a hard limit, not a convention. Nothing here reads device location itself — `near`
  * arrives already resolved from a one-off "find circles near me" tap
  * elsewhere on the page.
  */
 
-const FOREST = "#1f4a34";
-
-/** A teardrop pin drawn inline — no image assets, so nothing to bundle or 404. */
-function pinIcon(): L.DivIcon {
-  const w = 32;
-  const h = 40;
+/** An amount bubble ("R9.8k") with a tail, drawn in HTML so it sizes to its
+ *  text — see `.mz-bubble` in globals.css. The marker element itself is 0×0
+ *  at the point and the bubble hangs above it. */
+function bubbleIcon(label: string, hot: boolean): L.DivIcon {
   return L.divIcon({
     className: "mz-pin",
-    html: `<svg width="${w}" height="${h}" viewBox="0 0 32 40" aria-hidden="true">
-      <path d="M16 38.5S3.2 24.6 3.2 15.6a12.8 12.8 0 1 1 25.6 0C28.8 24.6 16 38.5 16 38.5z" fill="${FOREST}" stroke="#fffdf7" stroke-width="2"/>
-      <circle cx="16" cy="15.6" r="4.6" fill="#fffdf7"/>
-    </svg>`,
-    iconSize: [w, h],
-    iconAnchor: [w / 2, h - 1],
-    tooltipAnchor: [0, -h + 6],
+    html: `<div class="mz-bubble${hot ? " mz-bubble-hot" : ""}">${label}</div>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+    tooltipAnchor: [0, hot ? -58 : -50],
   });
 }
 
 /** The viewer's own position, once "find circles near me" resolves it — a
- *  plain dot, deliberately not another teardrop pin, so it never reads as
- *  "a circle is here." */
+ *  plain dot in a lime halo, deliberately not another bubble, so it never
+ *  reads as "a circle is here." */
 function meIcon(): L.DivIcon {
   return L.divIcon({
     className: "mz-pin",
-    html: `<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" fill="#2f6c4a" fill-opacity="0.18"/>
-      <circle cx="11" cy="11" r="5.5" fill="#2f6c4a" stroke="#fffdf7" stroke-width="2.5"/>
+    html: `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="31" fill="#d4f26a" fill-opacity="0.55"/>
+      <circle cx="32" cy="32" r="10" fill="#151815" stroke="#ffffff" stroke-width="3.5"/>
     </svg>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
+    iconSize: [64, 64],
+    iconAnchor: [32, 32],
   });
 }
 
-const ICON_DEFAULT = pinIcon();
 const ICON_ME = meIcon();
 
 /** Never zoom tighter than this — township level, keeping it "general area". */
@@ -65,11 +59,23 @@ type LatLng = { lat: number; lng: number };
 export default function AreaMapInner({
   places,
   near,
+  highlightId,
 }: {
   places: PlaceSummary[];
   near?: LatLng | null;
+  highlightId?: string;
 }) {
   const router = useRouter();
+  const icons = useMemo(
+    () =>
+      new Map(
+        places.map((p) => [
+          p.id,
+          bubbleIcon(formatZAR(p.raisedCents, { compact: true }), p.id === highlightId),
+        ]),
+      ),
+    [places, highlightId],
+  );
   const initialCenter: [number, number] = near
     ? [near.lat, near.lng]
     : [-28.8, 24.7]; // roughly the centre of South Africa — the all-places default
@@ -78,7 +84,7 @@ export default function AreaMapInner({
     <MapContainer
       center={initialCenter}
       zoom={FRAME_MAX_ZOOM}
-      minZoom={5}
+      minZoom={4}
       maxZoom={11}
       scrollWheelZoom={false}
       zoomControl={false}
@@ -91,13 +97,14 @@ export default function AreaMapInner({
       <FrameMap places={places} near={near} />
       <QuietAttribution />
       {near && (
-        <Marker position={[near.lat, near.lng]} icon={ICON_ME} zIndexOffset={2000} interactive={false} />
+        <Marker position={[near.lat, near.lng]} icon={ICON_ME} zIndexOffset={-1000} interactive={false} />
       )}
       {places.map((p) => (
         <Marker
           key={p.id}
           position={[p.lat, p.lng]}
-          icon={ICON_DEFAULT}
+          icon={icons.get(p.id)}
+          zIndexOffset={p.id === highlightId ? 1000 : 0}
           eventHandlers={{ click: () => router.push(`/places/${p.id}`) }}
         >
           <Tooltip direction="top" offset={[0, 0]}>
@@ -134,8 +141,10 @@ function FrameMap({ places, near }: { places: PlaceSummary[]; near?: LatLng | nu
     if (places.length === 0) return;
     const bounds = L.latLngBounds(places.map((p) => [p.lat, p.lng] as [number, number]));
     const opts = {
-      paddingTopLeft: [32, 48] as [number, number],
-      paddingBottomRight: [32, 36] as [number, number],
+      // Clear of the search bar and pills laid over the top of the map, the
+      // bubbles' own height, and the sheet overlapping its bottom edge.
+      paddingTopLeft: [48, 200] as [number, number],
+      paddingBottomRight: [48, 56] as [number, number],
       maxZoom: FRAME_MAX_ZOOM,
     };
     if (animate) map.flyToBounds(bounds, { ...opts, duration: 0.8 });
