@@ -13,7 +13,7 @@ export const alt = "A MseeZee circle";
 // Same deep cover colours as the in-app cover art (see COVER_BG in CoverArt.tsx).
 const TONES = {
   funeral: { from: "#2c1f17", to: "#3b2a20", accent: "#c8a24c", bar: "#c8a24c" },
-  family: { from: "#6f3524", to: "#8a4630", accent: "#d4f26a", bar: "#d4f26a" },
+  family: { from: "#3d2c48", to: "#4a3657", accent: "#d4f26a", bar: "#d4f26a" },
   essentials: { from: "#3d2c48", to: "#4a3657", accent: "#d4f26a", bar: "#d4f26a" },
   community: { from: "#12301f", to: "#1f4a34", accent: "#d4f26a", bar: "#d4f26a" },
 } as const;

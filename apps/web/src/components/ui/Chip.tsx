@@ -18,17 +18,23 @@ export function Chip({
   );
 }
 
+/** Smaller chips for tight spots — the square home cards. */
+const COMPACT = "px-2.5 py-1 text-[0.72rem]";
+const REGULAR = "px-3.5 py-1.5 text-[0.82rem]";
+
 export function TypeChip({
   type,
   onDark = false,
+  compact = false,
 }: {
   type: CircleType;
   onDark?: boolean;
+  compact?: boolean;
 }) {
   const label = findCircleType(type)?.shortLabel ?? type;
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-[0.82rem] font-bold leading-tight ${
+      className={`inline-flex items-center rounded-full font-bold leading-tight ${compact ? COMPACT : REGULAR} ${
         onDark ? "bg-black/40 text-white backdrop-blur-sm" : "bg-surface-sunk text-ink"
       }`}
     >
@@ -37,10 +43,18 @@ export function TypeChip({
   );
 }
 
-export function ExampleChip({ onDark = false }: { onDark?: boolean }) {
+export function ExampleChip({
+  onDark = false,
+  compact = false,
+}: {
+  onDark?: boolean;
+  compact?: boolean;
+}) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-dashed px-3 py-1.5 text-[0.75rem] font-bold uppercase leading-tight tracking-[0.06em] ${
+      className={`inline-flex items-center rounded-full border border-dashed font-bold uppercase leading-tight tracking-[0.06em] ${
+        compact ? "px-2 py-[3px] text-[0.6rem]" : "px-3 py-1.5 text-[0.75rem]"
+      } ${
         onDark ? "border-white/50 text-white/85" : "border-ink-faint/60 text-ink-faint"
       }`}
     >
@@ -80,16 +94,18 @@ const TIER_COPY: Record<VerificationTier, { label: string; hint: string }> = {
 export function VerifiedChip({
   tier,
   onDark = false,
+  compact = false,
 }: {
   tier: VerificationTier;
   onDark?: boolean;
+  compact?: boolean;
 }) {
   const copy = TIER_COPY[tier];
   if (tier === "unverified") {
     return (
       <span
         title={copy.hint}
-        className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-[0.82rem] font-bold leading-tight ${
+        className={`inline-flex items-center rounded-full font-bold leading-tight ${compact ? COMPACT : REGULAR} ${
           onDark ? "bg-black/40 text-white/85 backdrop-blur-sm" : "bg-surface-sunk text-ink-soft"
         }`}
       >
@@ -100,9 +116,9 @@ export function VerifiedChip({
   return (
     <span
       title={copy.hint}
-      className="inline-flex items-center gap-1.5 rounded-full bg-lime px-3.5 py-1.5 text-[0.82rem] font-bold leading-tight text-on-lime"
+      className={`inline-flex items-center gap-1 rounded-full bg-lime font-bold leading-tight text-on-lime ${compact ? COMPACT : REGULAR}`}
     >
-      <CheckIcon className="size-4" />
+      <CheckIcon className={compact ? "size-3.5" : "size-4"} />
       {copy.label}
     </span>
   );

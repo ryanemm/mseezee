@@ -6,6 +6,7 @@ import { formatZAR } from "@mseezee/shared";
 import { api } from "@/lib/api";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { CountUp } from "@/components/ui/CountUp";
 import { DistanceChip, ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
 import { BackLink, iconButtonClass } from "@/components/ui/IconButton";
 import { SeeAllLink } from "@/components/ui/Button";
@@ -80,7 +81,7 @@ export default async function CirclePage({
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Hero */}
           <div className="relative h-72 lg:h-80 lg:overflow-hidden lg:rounded-[32px] lg:shadow-lift">
-            <CoverArt cover={circle.cover} className="h-full w-full" />
+            <CoverArt cover={circle.cover} accent="disc" className="h-full w-full" />
             <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:pt-5">
               <BackLink href="/" shape="round" />
               <div className="flex gap-3">
@@ -135,7 +136,7 @@ export default async function CirclePage({
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[2.3rem] font-extrabold leading-none tracking-tight tnum">
-                    {formatZAR(circle.raisedCents)}
+                    <CountUp value={circle.raisedCents} />
                   </p>
                   <p className="mt-2 text-ink-soft">raised of {formatZAR(circle.goalCents)}</p>
                 </div>

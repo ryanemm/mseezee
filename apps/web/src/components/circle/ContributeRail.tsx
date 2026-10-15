@@ -2,6 +2,7 @@ import type { Circle } from "@mseezee/shared";
 import { formatZAR } from "@mseezee/shared";
 import { ArrowCta } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { CountUp } from "@/components/ui/CountUp";
 import { VerifiedChip } from "@/components/ui/Chip";
 import { HeartIcon } from "@/components/ui/Icons";
 import { contributionBlock } from "@/lib/contributions-open";
@@ -16,7 +17,7 @@ export function ContributeRail({ circle }: { circle: Circle }) {
       <div className="sticky top-8 flex flex-col gap-5 rounded-card bg-surface p-6 shadow-card">
         <div>
           <p className="text-[2.2rem] font-extrabold leading-none tracking-tight tnum">
-            {formatZAR(circle.raisedCents)}
+            <CountUp value={circle.raisedCents} />
           </p>
           <p className="mt-1.5 text-ink-soft">
             raised of {formatZAR(circle.goalCents)} goal

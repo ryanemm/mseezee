@@ -26,7 +26,6 @@ const TILE_COLOURS = [
   "bg-funeral text-white",
   "bg-forest text-white",
   "bg-plum text-white",
-  "bg-clay text-white",
 ];
 
 const inputClass = "field";

@@ -103,11 +103,14 @@ export function PlaceSearch({
     setCircles([]);
     setOpen(false);
   }
+  // Blurring the input is what puts the phone keyboard away.
   function choose(place: PlaceSearchResult) {
+    inputRef.current?.blur();
     onSelect(place);
     reset();
   }
   function chooseCircle(circle: CircleSearchResult) {
+    inputRef.current?.blur();
     onSelectCircle?.(circle);
     reset();
   }

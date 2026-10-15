@@ -1,11 +1,9 @@
-import type { CircleType } from "@mseezee/shared";
 import { Logo } from "@/components/layout/Logo";
-import { CircleEmblem } from "@/components/ui/CoverArt";
 
 /**
- * Sign in, sign up and "what should we call you": an illustrated brand band
- * with the form on a white sheet sliding over it (phones), or the two side
- * by side (desktop).
+ * Sign in, sign up and "what should we call you": a dark typographic brand
+ * band with the form on a white sheet sliding over it (phones), or the two
+ * side by side (desktop).
  */
 export function AuthLayout({
   eyebrow,
@@ -37,47 +35,37 @@ export function AuthLayout({
   );
 }
 
-/** The four circle types, tilted like cards on a table. */
-const TILES: { type: CircleType; tilt: string }[] = [
-  { type: "funeral", tilt: "-rotate-6" },
-  { type: "community", tilt: "translate-y-6 rotate-6" },
-  { type: "essentials", tilt: "rotate-3" },
-  { type: "family", tilt: "translate-y-6 -rotate-3" },
-];
-
+/** A typographic brand panel: the promise in large type, nothing drawn.
+ *  Fixed colours — it reads the same in light and dark mode. */
 function AuthHero() {
   return (
-    <div
-      aria-hidden="true"
-      className="relative h-64 overflow-hidden bg-[#1f4a34] pt-[env(safe-area-inset-top)] md:h-[34rem] md:rounded-[32px] md:shadow-lift"
-    >
-      {/* Lime sun with faint halo rings. */}
-      <div className="absolute -right-20 -top-24 size-72 rounded-full bg-[#d4f26a] md:-right-24 md:-top-28 md:size-[26rem]" />
-      <div className="absolute -right-32 -top-36 size-96 rounded-full border border-white/10 md:size-[34rem]" />
-      <div className="absolute -right-44 -top-48 size-[30rem] rounded-full border border-white/10 md:size-[42rem]" />
-      {/* Stars. */}
-      <span className="absolute left-[12%] top-[18%] size-1.5 rounded-full bg-white/40" />
-      <span className="absolute left-[34%] top-[10%] size-1 rounded-full bg-white/40" />
-      <span className="absolute left-[46%] top-[34%] size-1.5 rounded-full bg-white/30" />
-      <span className="absolute left-[22%] top-[42%] size-1 rounded-full bg-white/30" />
+    <div className="relative overflow-hidden bg-[#151815] px-5 pb-16 pt-[calc(env(safe-area-inset-top)+1.75rem)] text-white md:flex md:h-[34rem] md:flex-col md:justify-between md:rounded-[32px] md:p-10 md:shadow-lift">
+      {/* A faint lime glow in one corner — depth without decoration. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full md:size-[28rem]"
+        style={{ background: "radial-gradient(closest-side, rgba(212, 242, 106, 0.22), transparent)" }}
+      />
 
-      <div className="absolute right-6 top-1/2 grid -translate-y-[62%] grid-cols-2 gap-3 md:right-10 md:-translate-y-1/2 md:gap-5">
-        {TILES.map(({ type, tilt }) => (
-          <span key={type} className={`block rounded-[22px] shadow-lift ring-4 ring-white/15 ${tilt}`}>
-            <CircleEmblem type={type} className="size-16 rounded-[20px] md:size-28 md:rounded-[30px]" />
-          </span>
-        ))}
+      <div className="relative flex items-center gap-2.5">
+        <Logo className="size-9" />
+        <span className="text-lg font-extrabold tracking-tight">MseeZee</span>
       </div>
 
-      <div className="absolute bottom-12 left-5 md:bottom-10 md:left-10">
-        <span className="mb-3 inline-flex rounded-full ring-2 ring-white/30">
-          <Logo className="size-11 md:size-14" />
-        </span>
-        <p className="text-[1.75rem] font-extrabold leading-none tracking-tight text-white md:text-[2.4rem]">
-          MseeZee
+      <div className="relative mt-10 md:mt-0">
+        <p className="text-[2.6rem] font-extrabold leading-[0.98] tracking-[-0.045em] md:text-[4rem]">
+          Give where
+          <br />
+          you <span className="text-[#d4f26a]">live.</span>
         </p>
-        <p className="mt-1.5 text-white/75 md:text-lg">Together, we uplift.</p>
+        <p className="mt-4 max-w-xs text-[0.98rem] leading-relaxed text-white/60 md:max-w-sm md:text-lg">
+          Funerals, families and community projects near you — supported in seconds.
+        </p>
       </div>
+
+      <p className="relative hidden text-sm font-semibold text-white/40 md:block">
+        Together, we uplift.
+      </p>
     </div>
   );
 }

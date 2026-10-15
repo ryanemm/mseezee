@@ -16,12 +16,18 @@ import { LocateIcon } from "@/components/ui/Icons";
 export function FindNearMeButton({
   basePath = "/",
   variant = "inline",
+  label = false,
+  errorBelow = false,
 }: {
   /** The page that sorts by `?lat=&lng=` — home, or Explore's map. */
   basePath?: string;
   /** `inline`: the black button tucked inside the home search bar. `map`:
    *  the white disc on a map. */
   variant?: "inline" | "map";
+  /** Spell out "Near me" beside the icon on the map button. */
+  label?: boolean;
+  /** Which way the error note opens — away from the map edge it sits on. */
+  errorBelow?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,7 +60,7 @@ export function FindNearMeButton({
         params.set("lng", position.coords.longitude.toFixed(4));
         const type = searchParams.get("type");
         if (type) params.set("type", type);
-        router.push(`${basePath}?${params.toString()}`);
+        router.push(`${basePath}?${params.toString()}`, { scroll: false });
         router.refresh();
       },
       (err) => {
@@ -79,7 +85,7 @@ export function FindNearMeButton({
         title="Find circles near me"
         className={`flex items-center justify-center gap-2 rounded-full font-bold transition-transform active:scale-95 disabled:opacity-70 ${
           variant === "map"
-            ? "size-14 bg-surface text-ink shadow-float"
+            ? `h-14 bg-surface text-ink shadow-float ${label ? "px-5 text-[0.95rem]" : "w-14"}`
             : "size-12 bg-night text-sm text-on-night shadow-pill sm:w-auto sm:px-4"
         }`}
       >
@@ -89,12 +95,15 @@ export function FindNearMeButton({
             {locating ? "Finding…" : "Near me"}
           </span>
         )}
+        {variant === "map" && label && (
+          <span className="whitespace-nowrap">{locating ? "Finding you…" : "Near me"}</span>
+        )}
       </button>
       {error && (
         <p
           role="alert"
           className={`mz-pop absolute right-0 z-30 w-64 rounded-2xl bg-surface p-3 text-xs leading-relaxed text-crit shadow-float ${
-            variant === "map" ? "bottom-full mb-2" : "top-full mt-3"
+            variant === "map" && !errorBelow ? "bottom-full mb-2" : "top-full mt-3"
           }`}
         >
           {error}

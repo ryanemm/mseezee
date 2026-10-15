@@ -32,11 +32,11 @@
   --gold-line: #c8a24c;
   --gold-soft: #f1e7ca;
 
-  /* Circle-type cover colours: funeral, essentials, family. Community uses forest. */
+  /* Circle-type cover colours: funeral brown, and plum for essentials and
+     family. Community uses forest. */
   --funeral: #3b2a20;
   --funeral-soft: #4f3b2d;
   --plum: #4a3657;
-  --clay: #8a4630;
 
   --good: #2f6c4a;
   --warn: #a4611f;
@@ -84,7 +84,6 @@
     --funeral: #2e2119;
     --funeral-soft: #3f3025;
     --plum: #3d2c48;
-    --clay: #713824;
 
     --good: #63b088;
     --warn: #d0904e;
@@ -124,7 +123,6 @@
   --color-funeral: var(--funeral);
   --color-funeral-soft: var(--funeral-soft);
   --color-plum: var(--plum);
-  --color-clay: var(--clay);
   --color-good: var(--good);
   --color-warn: var(--warn);
   --color-crit: var(--crit);
@@ -294,17 +292,6 @@ body {
   color: var(--on-lime);
 }
 
-/* Progress fills sweep in from the left when a page loads. */
-@keyframes mz-grow {
-  from {
-    transform: scaleX(0);
-  }
-}
-.mz-grow {
-  transform-origin: left;
-  animation: mz-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
 /* Dropdowns and popovers settle in rather than snapping open. */
 @keyframes mz-pop {
   from {
@@ -341,6 +328,15 @@ body {
 }
 .mz-map .leaflet-tile-pane {
   filter: grayscale(0.9) brightness(1.06) contrast(0.88);
+}
+/* At in-between zoom levels (the South Africa framing) the browser can leave
+   hairline gaps where tiles meet. A one-pixel overlap closes them — with
+   normal blending, since Leaflet's own additive blend would make the
+   overlap glow as a light grid instead. */
+.mz-map .leaflet-tile {
+  width: 257px !important;
+  height: 257px !important;
+  mix-blend-mode: normal !important;
 }
 .mz-map .mz-pin {
   background: none;

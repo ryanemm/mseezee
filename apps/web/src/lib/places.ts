@@ -32,6 +32,14 @@ function toCirclePlace(row: DbPlace): CirclePlace {
   };
 }
 
+/** Where a place sits, in words: "Soweto · City of Johannesburg · Gauteng"
+ *  (the main place is left out when it's the place itself). */
+export function placeWhere(place: CirclePlace): string {
+  return [place.name === place.mainPlaceName ? null : place.mainPlaceName, place.municipality, place.province]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 /** Circles in a place — for a main place, anything anywhere inside it. */
 export function circlesIn(circles: Circle[], placeId: string): Circle[] {
   return circles.filter((c) => c.area.id === placeId || c.area.mainPlaceId === placeId);
@@ -111,6 +119,8 @@ export function summarisePlaces(circles: Circle[]): PlaceSummary[] {
 
 export interface CircleSearchResult {
   slug: string;
+  /** The place the circle shows publicly — what the map focuses on. */
+  placeId: string;
   title: string;
   type: Circle["type"];
   placeName: string;
@@ -148,6 +158,7 @@ export function searchCircles(query: string, all: Circle[], limit = 4): CircleSe
     .slice(0, limit)
     .map(({ c }) => ({
       slug: c.slug,
+      placeId: c.area.id,
       title: c.title,
       type: c.type,
       placeName: c.area.name,

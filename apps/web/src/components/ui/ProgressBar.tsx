@@ -1,4 +1,5 @@
 import { formatZAR, progressPercent } from "@mseezee/shared";
+import { CountUp, ProgressFill } from "./CountUp";
 
 const FILLS = {
   // Black on a light track — the default on white and grey surfaces.
@@ -41,10 +42,7 @@ export function ProgressBar({
         aria-valuemax={100}
         aria-label="Progress towards goal"
       >
-        <div
-          className={`mz-grow h-full rounded-full transition-[width] duration-500 ${fill}`}
-          style={{ width: `${Math.max(pct, 3)}%` }}
-        />
+        <ProgressFill pct={pct} className={fill} />
       </div>
       {!hideLabels && (
         <div
@@ -53,7 +51,7 @@ export function ProgressBar({
           } ${onDark ? "text-white" : "text-ink"}`}
         >
           <span className="whitespace-nowrap font-bold tnum">
-            {formatZAR(raisedCents, { compact })}
+            <CountUp value={raisedCents} format={compact ? "zarCompact" : "zar"} />
             <span className={`font-medium ${onDark ? "text-white/80" : "text-ink-soft"}`}>
               {" "}
               of {formatZAR(goalCents, { compact })}
