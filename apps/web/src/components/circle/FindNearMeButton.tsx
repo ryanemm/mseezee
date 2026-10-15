@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { LocateIcon } from "@/components/ui/Icons";
 
 /**
@@ -21,8 +21,8 @@ export function FindNearMeButton({
 }: {
   /** The page that sorts by `?lat=&lng=` — home, or Explore's map. */
   basePath?: string;
-  /** `inline`: the black button tucked inside the home search bar. `map`:
-   *  the white disc on a map. */
+  /** `inline`: the lime button tucked inside the home search bar. `map`:
+   *  the white button on a map. */
   variant?: "inline" | "map";
   /** Spell out "Near me" beside the icon on the map button. */
   label?: boolean;
@@ -30,7 +30,6 @@ export function FindNearMeButton({
   errorBelow?: boolean;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,8 +57,6 @@ export function FindNearMeButton({
         const params = new URLSearchParams();
         params.set("lat", position.coords.latitude.toFixed(4));
         params.set("lng", position.coords.longitude.toFixed(4));
-        const type = searchParams.get("type");
-        if (type) params.set("type", type);
         router.push(`${basePath}?${params.toString()}`, { scroll: false });
         router.refresh();
       },
@@ -83,10 +80,10 @@ export function FindNearMeButton({
         disabled={locating}
         aria-label={locating ? "Finding your area…" : "Find circles near me"}
         title="Find circles near me"
-        className={`flex items-center justify-center gap-2 rounded-full font-bold transition-transform active:scale-95 disabled:opacity-70 ${
+        className={`flex items-center justify-center gap-2 font-bold transition-transform active:scale-95 disabled:opacity-70 ${
           variant === "map"
-            ? `h-14 bg-surface text-ink shadow-float ${label ? "px-5 text-[0.95rem]" : "w-14"}`
-            : "size-12 bg-night text-sm text-on-night shadow-pill sm:w-auto sm:px-4"
+            ? `h-14 rounded-full bg-surface text-ink shadow-float ${label ? "px-5 text-[0.95rem]" : "w-14"}`
+            : "size-12 rounded-[20px] bg-lime text-sm text-on-lime sm:w-auto sm:px-4"
         }`}
       >
         <LocateIcon className={`size-6 shrink-0 ${locating ? "animate-pulse" : ""}`} />

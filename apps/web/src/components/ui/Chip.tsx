@@ -35,7 +35,7 @@ export function TypeChip({
   return (
     <span
       className={`inline-flex items-center rounded-full font-bold leading-tight ${compact ? COMPACT : REGULAR} ${
-        onDark ? "bg-black/40 text-white backdrop-blur-sm" : "bg-surface-sunk text-ink"
+        onDark ? "bg-shade/40 text-white backdrop-blur-sm" : "bg-surface-sunk text-ink"
       }`}
     >
       {label}
@@ -106,7 +106,7 @@ export function VerifiedChip({
       <span
         title={copy.hint}
         className={`inline-flex items-center rounded-full font-bold leading-tight ${compact ? COMPACT : REGULAR} ${
-          onDark ? "bg-black/40 text-white/85 backdrop-blur-sm" : "bg-surface-sunk text-ink-soft"
+          onDark ? "bg-shade/40 text-white/85 backdrop-blur-sm" : "bg-surface-sunk text-ink-soft"
         }`}
       >
         {copy.label}

@@ -43,7 +43,7 @@ export function ButtonLink({
   );
 }
 
-/** "See all" as a small white pill with a black arrow disc. */
+/** "See all" as a small white pill with a near-black arrow disc. */
 export function SeeAllLink({
   href,
   children = "See all",

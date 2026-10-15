@@ -6,11 +6,11 @@ import { circlesIn, getPlace, placeWhere, summarisePlaces } from "@/lib/places";
 import { AreaMap } from "@/components/layout/AreaMap";
 import { CircleCard } from "@/components/circle/CircleCard";
 import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
-import { Pill } from "@/components/circle/FilterTabs";
+import { Pill } from "@/components/ui/Pill";
 import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
 import { BackLink } from "@/components/ui/IconButton";
 import { ButtonLink, SeeAllLink } from "@/components/ui/Button";
-import { ChevronRightIcon } from "@/components/ui/Icons";
+import { ChevronRightIcon, PlusIcon } from "@/components/ui/Icons";
 
 export const metadata: Metadata = {
   title: "Explore places",
@@ -89,7 +89,7 @@ export default async function ExplorePage({
     // The sheet runs under the bottom nav's clearance (the negative margin
     // matches BottomNav's spacer) so the page ends in the sheet, not a gap.
     <div className="-mb-[calc(4.5rem+env(safe-area-inset-bottom))] flex flex-col md:mx-auto md:mb-0 md:w-full md:max-w-6xl md:px-10 md:pt-8">
-      <div className="relative h-[62dvh] min-h-[26rem] md:h-[30rem] md:overflow-hidden md:rounded-[32px] md:shadow-lift">
+      <div className="relative h-[62dvh] min-h-[26rem] md:h-[30rem] md:overflow-hidden md:rounded-card md:shadow-lift">
         <AreaMap
           places={focusPlace ? areas : visible}
           near={near}
@@ -257,14 +257,23 @@ export default async function ExplorePage({
           </ul>
         </section>
 
-        <div className="rounded-3xl bg-lime p-5 text-[0.9rem] leading-relaxed text-on-lime shadow-lime">
-          <p className="text-[1.05rem] font-bold">Twinning · coming soon</p>
-          <p className="mt-1 opacity-80">
-            Pair a wealthier suburb with a township so support flows where it is
-            needed most. If your workplace or church wants to twin with an area,
-            get in touch.
-          </p>
-        </div>
+        {/* An empty chosen place already offers this in its own card. */}
+        {!(focusPlace && inFocus.length === 0) && (
+          <div className="flex flex-col items-start gap-3 rounded-card bg-lime p-6 text-on-lime shadow-lime">
+            <p className="text-[1.25rem] font-bold leading-tight">Don&apos;t see your area?</p>
+            <p className="opacity-80">
+              Start the first circle for a family, a school or a street near you. Once
+              it&apos;s created, it shows up on this map for everyone nearby to find.
+            </p>
+            <Link
+              href="/create"
+              className="mt-1 flex items-center gap-2 rounded-full bg-shade px-5 py-3.5 font-bold text-white shadow-pill"
+            >
+              <PlusIcon className="size-5" />
+              Start a circle
+            </Link>
+          </div>
+        )}
         <p className="text-center text-[0.7rem] text-ink-faint">{PLACE_DATA_CREDIT}</p>
       </div>
     </div>

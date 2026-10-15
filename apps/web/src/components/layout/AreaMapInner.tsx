@@ -105,9 +105,11 @@ function countUpIn(root: Element, done?: () => void): () => void {
 
 export type FramePadding = { topLeft: [number, number]; bottomRight: [number, number] };
 
-/** Clear of the search bar and pills laid over the top of the Explore map,
- *  the bubbles' own height, and the sheet overlapping its bottom edge. */
-const EXPLORE_PADDING: FramePadding = { topLeft: [48, 200], bottomRight: [48, 56] };
+/** Clear of the search bar and pills laid over the top of the Explore map
+ *  and the sheet overlapping its bottom edge. Only South Africa's northern
+ *  border has to clear the overlays — the pins sit well south of it — so
+ *  this stays tight enough for the country to fill the map. */
+const EXPLORE_PADDING: FramePadding = { topLeft: [12, 130], bottomRight: [12, 40] };
 
 type LatLng = { lat: number; lng: number };
 

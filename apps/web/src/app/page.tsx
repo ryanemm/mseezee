@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { Circle, CircleType } from "@mseezee/shared";
+import type { Circle } from "@mseezee/shared";
 import {
   LEGACY_AREA_PLACES,
   PLACE_DATA_CREDIT,
   distanceKm,
   formatZAR,
-  isCircleType,
 } from "@mseezee/shared";
 import { auth } from "@/auth";
 import { api } from "@/lib/api";
@@ -14,17 +13,16 @@ import { circlesIn, getPlace, summarisePlaces } from "@/lib/places";
 import { AreaMap } from "@/components/layout/AreaMap";
 import { initials } from "@/lib/format";
 import { CircleCard, FeaturedCircleCard } from "@/components/circle/CircleCard";
-import { FilterTabs } from "@/components/circle/FilterTabs";
 import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
 import { ExplorePlaceSearch, HOME_MAP_ID } from "@/components/place/ExplorePlaceSearch";
 import { AreaPreview } from "@/components/home/AreaPreview";
 import { SeeAllLink } from "@/components/ui/Button";
 import { AlmostThere } from "@/components/home/AlmostThere";
 import { HowItWorks } from "@/components/home/HowItWorks";
+import { HomeAppBar } from "@/components/home/HomeAppBar";
 
 type Search = {
   area?: string;
-  type?: string;
   lat?: string;
   lng?: string;
   /** A place chosen from search or a map pin — the map focuses on it. */
@@ -47,7 +45,6 @@ export default async function HomePage({
   const legacy = sp.area ? LEGACY_AREA_PLACES[sp.area] : undefined;
   if (legacy) redirect(`/places/${legacy.id}`);
 
-  const type = normaliseType(sp.type);
   const near = parseNear(sp.lat, sp.lng);
 
   const [all, session, focusPlace] = await Promise.all([
@@ -61,9 +58,7 @@ export default async function HomePage({
         .sort((a, b) => a.distanceKm - b.distanceKm)
     : all;
 
-  const circles =
-    type === "all" ? everything : everything.filter((c) => c.type === type);
-  const featured = circles.slice(0, FEATURED);
+  const featured = everything.slice(0, FEATURED);
   const places = summarisePlaces(all);
   // The big lime pin: the closest place once located, else the one that has
   // raised the most. A chosen place gets its own labelled tag instead.
@@ -89,48 +84,37 @@ export default async function HomePage({
         raisedCents: inFocus.length > 0 ? focusRaised : null,
       }
     : null;
-  const more = circles.slice(FEATURED);
+  const more = everything.slice(FEATURED);
 
   const baseParams: Record<string, string> = near
     ? { lat: String(near.lat), lng: String(near.lng) }
     : {};
   // Clearing the chosen place keeps everything else about the view.
-  const clearParams = new URLSearchParams(baseParams);
-  if (type !== "all") clearParams.set("type", type);
-  const clearHref = `/?${clearParams.toString()}`;
-  const tabParams: Record<string, string> = focusPlace
-    ? { ...baseParams, place: focusPlace.id, ...(sp.circle ? { circle: sp.circle } : {}) }
-    : baseParams;
+  const clearHref = `/?${new URLSearchParams(baseParams).toString()}`;
 
   const user = session?.user;
   const name = user?.name || user?.email || user?.phone || "";
   const firstName = user?.name?.split(" ")[0];
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 pt-7 lg:px-10 lg:pt-10">
-      <header className="flex items-start justify-between gap-4">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 md:pt-8 lg:px-10 lg:pt-10">
+      <HomeAppBar avatar={user ? initials(name) : null} />
+
+      <header className="-mt-1 flex items-start justify-between gap-4 md:mt-0">
         <div className="min-w-0">
           <p className="truncate text-[1.6rem] font-extrabold leading-tight tracking-tight">
             Sawubona{firstName ? `, ${firstName}` : ""}
           </p>
-          <p className="text-[1.02rem] text-ink-soft">
-            {user ? "Welcome back to MseeZee" : "Welcome to MseeZee"}
-          </p>
+          <p className="text-[1.02rem] text-ink-soft">Close to home. Close to heart.</p>
         </div>
-        {user ? (
+        {/* Phones and tablets have this in the app bar. */}
+        {user && (
           <Link
             href="/profile"
             aria-label="Your profile"
-            className="flex size-14 shrink-0 items-center justify-center rounded-full bg-forest text-lg font-bold text-white"
+            className="hidden size-14 shrink-0 items-center justify-center rounded-full bg-forest text-lg font-bold text-white md:flex"
           >
             {initials(name)}
-          </Link>
-        ) : (
-          <Link
-            href="/sign-in"
-            className="shrink-0 rounded-full bg-night px-5 py-3 text-[0.95rem] font-bold text-on-night md:hidden"
-          >
-            Sign in
           </Link>
         )}
       </header>
@@ -139,8 +123,6 @@ export default async function HomePage({
         Who are we supporting today?
       </h1>
 
-      <FilterTabs active={type} baseParams={tabParams} counts={countByType(everything)} />
-
       <section className="flex flex-col gap-4 pb-4">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -148,7 +130,7 @@ export default async function HomePage({
               {near ? "Closest to you" : "Popular right now"}
             </h2>
             {near && (
-              <Link href={type === "all" ? "/" : `/?type=${type}`} className="text-sm font-semibold text-ink-soft underline underline-offset-4">
+              <Link href="/" className="text-sm font-semibold text-ink-soft underline underline-offset-4">
                 Show popular instead
               </Link>
             )}
@@ -158,9 +140,9 @@ export default async function HomePage({
           )}
         </div>
 
-        {circles.length === 0 ? (
+        {everything.length === 0 ? (
           <p className="rounded-card bg-surface shadow-card px-5 py-10 text-center text-ink-soft">
-            No {type === "all" ? "" : `${type} `}circles right now.{" "}
+            No circles right now.{" "}
             <Link href="/explore" className="link">
               Search by place
             </Link>
@@ -177,7 +159,7 @@ export default async function HomePage({
       </section>
 
       <section id={HOME_MAP_ID} className="flex scroll-mt-4 flex-col gap-4">
-        <ExplorePlaceSearch mode="home" />
+        <ExplorePlaceSearch mode="home" trailing={<FindNearMeButton />} />
         <div className="relative h-80 overflow-hidden rounded-card border border-ink/10 shadow-card lg:h-[26rem]">
           <AreaMap
             places={places}
@@ -200,7 +182,7 @@ export default async function HomePage({
 
       {!user && <HowItWorks />}
 
-      <AlmostThere circles={circles} />
+      <AlmostThere circles={everything} />
 
       {more.length > 0 && (
         <section id="more" className="flex scroll-mt-6 flex-col gap-4 pb-4">
@@ -215,16 +197,6 @@ export default async function HomePage({
 
     </div>
   );
-}
-
-function countByType(circles: Circle[]): Record<string, number> {
-  const counts: Record<string, number> = { all: circles.length };
-  for (const c of circles) counts[c.type] = (counts[c.type] ?? 0) + 1;
-  return counts;
-}
-
-function normaliseType(value?: string): CircleType | "all" {
-  return value && isCircleType(value) ? value : "all";
 }
 
 function parseNear(

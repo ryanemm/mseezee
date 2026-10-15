@@ -53,13 +53,14 @@ function AuthHero() {
       </div>
 
       <div className="relative mt-10 md:mt-0">
-        <p className="text-[2.6rem] font-extrabold leading-[0.98] tracking-[-0.045em] md:text-[4rem]">
-          Give where
+        <p className="text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.045em] md:text-[3.1rem]">
+          Close to home.
           <br />
-          you <span className="text-[#d4f26a]">live.</span>
+          Close to <span className="text-[#d4f26a]">heart.</span>
         </p>
         <p className="mt-4 max-w-xs text-[0.98rem] leading-relaxed text-white/60 md:max-w-sm md:text-lg">
-          Funerals, families and community projects near you — supported in seconds.
+          The family next door, the funeral down the road, the street you share — support
+          the people around you in seconds.
         </p>
       </div>
 

@@ -90,14 +90,14 @@
     --crit: #d76d5b;
 
     --mz-shadow-card:
-      0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4),
-      0 10px 28px -12px rgba(0, 0, 0, 0.6);
-    --mz-shadow-pill: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 14px -6px rgba(0, 0, 0, 0.5);
-    --mz-shadow-float: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
-    --mz-shadow-lift: 0 2px 6px -2px rgba(0, 0, 0, 0.5), 0 18px 34px -16px rgba(0, 0, 0, 0.8);
-    --mz-shadow-lime: 0 2px 6px -2px rgba(0, 0, 0, 0.4), 0 16px 32px -16px rgba(0, 0, 0, 0.7);
-    --mz-shadow-sheet: 0 -12px 30px -14px rgba(0, 0, 0, 0.7);
-    --mz-shadow-bar: 0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 24px -12px rgba(0, 0, 0, 0.6);
+      0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(14, 16, 14, 0.4),
+      0 10px 28px -12px rgba(14, 16, 14, 0.6);
+    --mz-shadow-pill: 0 1px 2px rgba(14, 16, 14, 0.4), 0 6px 14px -6px rgba(14, 16, 14, 0.5);
+    --mz-shadow-float: 0 18px 40px -14px rgba(14, 16, 14, 0.7);
+    --mz-shadow-lift: 0 2px 6px -2px rgba(14, 16, 14, 0.5), 0 18px 34px -16px rgba(14, 16, 14, 0.8);
+    --mz-shadow-lime: 0 2px 6px -2px rgba(14, 16, 14, 0.4), 0 16px 32px -16px rgba(14, 16, 14, 0.7);
+    --mz-shadow-sheet: 0 -12px 30px -14px rgba(14, 16, 14, 0.7);
+    --mz-shadow-bar: 0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 24px -12px rgba(14, 16, 14, 0.6);
   }
 }
 
@@ -110,6 +110,9 @@
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
   --color-night: var(--night);
+  /* Fixed near-black for scrims over cover art — never pure black, and not
+     inverted in dark mode like --night. */
+  --color-shade: #151815;
   --color-on-night: var(--on-night);
   --color-lime: var(--lime);
   --color-lime-deep: var(--lime-deep);
@@ -207,13 +210,13 @@ body {
   }
 
   /* The big search bar: white, lifted, and ringed in ink with a lime halo
-     while you type. */
+     while you type. Same corner radius as the cards (--radius-card). */
   .search-bar {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     height: 4rem;
-    border-radius: 999px;
+    border-radius: 28px;
     background: var(--surface);
     padding-left: 1.25rem;
     box-shadow: var(--mz-shadow-card);

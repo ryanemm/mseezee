@@ -39,7 +39,7 @@ export function CircleCard({ circle }: { circle: Circle }) {
           {circle.isDemo && <ExampleChip onDark />}
         </div>
         {circle.type === "funeral" && circle.eventDate && (
-          <div className="absolute bottom-3 left-3 rounded-full bg-black/45 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
+          <div className="absolute bottom-3 left-3 rounded-full bg-shade/45 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
             Service {eventDateLabel(circle.eventDate)}
           </div>
         )}
@@ -85,7 +85,7 @@ export function FeaturedCircleCard({ circle }: { circle: Circle }) {
       className="relative flex aspect-square h-full flex-col justify-between gap-4 rounded-[28px] p-5 text-white shadow-lift transition-transform active:scale-[0.99]"
     >
       <CoverArt cover={circle.cover} className="absolute inset-0 rounded-[inherit]" />
-      <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-t from-black/85 via-black/35 to-black/5" />
+      <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-t from-shade/85 via-shade/35 to-shade/5" />
 
       <div className="relative flex flex-wrap items-center gap-1.5">
         <TypeChip type={circle.type} onDark compact />
@@ -148,7 +148,7 @@ export function CircleTile({
       className="relative flex h-44 w-56 shrink-0 flex-col justify-end gap-1 overflow-hidden rounded-[28px] p-5 text-white shadow-lift"
     >
       <CoverArt cover={circle.cover} className="absolute inset-0 opacity-60" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-shade/50 to-transparent" />
       <p className="relative line-clamp-2 text-[1.05rem] font-bold leading-snug">{circle.title}</p>
       <p className="relative text-sm text-white/80 tnum">
         <CountUp value={raisedCents} format="zarCompact" /> of{" "}

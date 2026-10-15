@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   // to the live domain.
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://mseezee.co.za"),
   title: {
-    default: "MseeZee — give where you live",
+    default: "MseeZee — close to home, close to heart",
     template: "%s · MseeZee",
   },
   description:
-    "Find funerals, families and community projects near you in South Africa, and contribute in seconds. Together, we uplift.",
+    "Support the people and causes closest to you — funerals, families and community projects across South Africa, in seconds. Close to home, close to heart.",
   applicationName: "MseeZee",
 };
 
