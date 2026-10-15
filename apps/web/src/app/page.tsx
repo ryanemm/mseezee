@@ -9,6 +9,8 @@ import { CircleCard, FeaturedCircleCard } from "@/components/circle/CircleCard";
 import { FilterTabs } from "@/components/circle/FilterTabs";
 import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
 import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
+import { AlmostThere } from "@/components/home/AlmostThere";
+import { HowItWorks } from "@/components/home/HowItWorks";
 
 type Search = { area?: string; type?: string; lat?: string; lng?: string };
 
@@ -130,6 +132,10 @@ export default async function HomePage({
           </div>
         )}
       </section>
+
+      {!user && <HowItWorks />}
+
+      <AlmostThere circles={circles} />
 
       {more.length > 0 && (
         <section id="more" className="flex scroll-mt-6 flex-col gap-4 pb-4">

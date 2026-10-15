@@ -53,9 +53,9 @@ export default async function ExplorePage({
   const nearParams = near ? `lat=${near.lat}&lng=${near.lng}` : "";
 
   return (
-    // The sheet runs under the bottom nav's clearance (-mb-32) so the page ends
-    // in white, not a strip of grey.
-    <div className="-mb-32 flex flex-col md:mx-auto md:mb-0 md:w-full md:max-w-6xl md:px-10 md:pt-8">
+    // The sheet runs under the bottom nav's clearance (the negative margin
+    // matches BottomNav's spacer) so the page ends in the sheet, not a gap.
+    <div className="-mb-[calc(4.5rem+env(safe-area-inset-bottom))] flex flex-col md:mx-auto md:mb-0 md:w-full md:max-w-6xl md:px-10 md:pt-8">
       <div className="relative h-[62dvh] min-h-[26rem] md:h-[30rem] md:overflow-hidden md:rounded-[32px]">
         <AreaMap places={visible} near={near} highlightId={highlightId} className="absolute inset-0" />
 
@@ -90,7 +90,7 @@ export default async function ExplorePage({
         </div>
       </div>
 
-      <div className="relative z-20 -mt-8 flex flex-col gap-7 rounded-t-[32px] bg-surface px-5 pb-40 pt-3 md:mt-8 md:rounded-none md:px-0 md:pb-10 md:pt-0">
+      <div className="relative z-20 -mt-8 flex flex-col gap-7 rounded-t-[32px] bg-surface px-5 pb-28 pt-3 md:mt-8 md:rounded-none md:px-0 md:pb-10 md:pt-0">
         <span aria-hidden="true" className="mx-auto h-1.5 w-12 rounded-full bg-line md:hidden" />
 
         {near && (

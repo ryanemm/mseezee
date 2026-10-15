@@ -10,8 +10,8 @@ import { HeartIcon, HomeIcon, MapIcon, PlusIcon, UserIcon } from "@/components/u
 const NAV = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/explore", label: "Explore", icon: MapIcon },
-  { href: "/activity", label: "Circles", icon: HeartIcon, authOnly: true },
-  { href: "/profile", label: "Profile", icon: UserIcon, authOnly: true },
+  { href: "/activity", label: "My circles", icon: HeartIcon, authOnly: true },
+  { href: "/profile", label: "Account", icon: UserIcon, authOnly: true },
 ];
 
 /** The persistent left-hand nav shown at `md` and above, replacing the
