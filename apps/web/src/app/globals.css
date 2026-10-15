@@ -42,11 +42,20 @@
   --warn: #a4611f;
   --crit: #8f3a2c;
 
-  /* White cards on a white page: a hairline does the separating, shadows only
-     lift what floats. */
-  --mz-shadow-card: 0 0 0 1px var(--line), 0 2px 6px -2px rgba(21, 24, 21, 0.06);
-  --mz-shadow-pill: 0 1px 2px rgba(21, 24, 21, 0.06);
+  /* Soft, layered elevation: a faint edge, a tight contact shadow and a wide
+     low blur. White cards and coloured cards lift; grey panels stay flat. */
+  --mz-shadow-card:
+    0 0 0 1px rgba(21, 24, 21, 0.05), 0 1px 2px rgba(21, 24, 21, 0.05),
+    0 10px 28px -12px rgba(21, 24, 21, 0.16);
+  --mz-shadow-pill: 0 1px 2px rgba(21, 24, 21, 0.06), 0 6px 14px -6px rgba(21, 24, 21, 0.18);
   --mz-shadow-float: 0 18px 40px -14px rgba(21, 24, 21, 0.4);
+  /* Cover-art cards and dark buttons — deeper, so colour reads as raised. */
+  --mz-shadow-lift: 0 2px 6px -2px rgba(21, 24, 21, 0.14), 0 18px 34px -16px rgba(21, 24, 21, 0.5);
+  /* Lime cards cast a faint lime-tinted glow instead of grey. */
+  --mz-shadow-lime: 0 2px 6px -2px rgba(110, 140, 20, 0.18), 0 16px 32px -16px rgba(110, 140, 20, 0.55);
+  /* White sheets sliding over the map or a hero, and the bottom bars. */
+  --mz-shadow-sheet: 0 -12px 30px -14px rgba(21, 24, 21, 0.28);
+  --mz-shadow-bar: 0 -1px 0 rgba(21, 24, 21, 0.06), 0 -8px 24px -12px rgba(21, 24, 21, 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -81,9 +90,15 @@
     --warn: #d0904e;
     --crit: #d76d5b;
 
-    --mz-shadow-card: 0 0 0 1px var(--line), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
-    --mz-shadow-pill: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --mz-shadow-card:
+      0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4),
+      0 10px 28px -12px rgba(0, 0, 0, 0.6);
+    --mz-shadow-pill: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 14px -6px rgba(0, 0, 0, 0.5);
     --mz-shadow-float: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
+    --mz-shadow-lift: 0 2px 6px -2px rgba(0, 0, 0, 0.5), 0 18px 34px -16px rgba(0, 0, 0, 0.8);
+    --mz-shadow-lime: 0 2px 6px -2px rgba(0, 0, 0, 0.4), 0 16px 32px -16px rgba(0, 0, 0, 0.7);
+    --mz-shadow-sheet: 0 -12px 30px -14px rgba(0, 0, 0, 0.7);
+    --mz-shadow-bar: 0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 24px -12px rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -121,6 +136,10 @@
   --shadow-card: var(--mz-shadow-card);
   --shadow-pill: var(--mz-shadow-pill);
   --shadow-float: var(--mz-shadow-float);
+  --shadow-lift: var(--mz-shadow-lift);
+  --shadow-lime: var(--mz-shadow-lime);
+  --shadow-sheet: var(--mz-shadow-sheet);
+  --shadow-bar: var(--mz-shadow-bar);
 }
 
 /* iOS Safari zooms the whole page when a field with text under 16px gets focus,
@@ -189,6 +208,63 @@ body {
     text-underline-offset: 5px;
   }
 
+  /* The big search bar: white, lifted, and ringed in ink with a lime halo
+     while you type. */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 4rem;
+    border-radius: 999px;
+    background: var(--surface);
+    padding-left: 1.25rem;
+    box-shadow: var(--mz-shadow-card);
+    transition: box-shadow 0.2s ease;
+  }
+  .search-bar-float {
+    box-shadow: var(--mz-shadow-float);
+  }
+  .search-bar:focus-within {
+    box-shadow:
+      0 0 0 2px var(--ink),
+      0 0 0 7px color-mix(in srgb, var(--lime) 60%, transparent),
+      var(--mz-shadow-card);
+  }
+
+  /* Form fields: soft grey fill at rest; white, ink-ringed and lime-haloed
+     when focused. `.field` is the input itself, `.field-within` a wrapper
+     around one (e.g. an "R" prefix plus the input). */
+  .field,
+  .field-within {
+    border-radius: 1rem;
+    border: 0;
+    background: var(--surface-sunk);
+    color: var(--ink);
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .field {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+  }
+  .field::placeholder {
+    color: var(--ink-faint);
+  }
+  .field:focus,
+  .field-within:focus-within {
+    outline: none;
+    background: var(--surface);
+    box-shadow:
+      0 0 0 2px var(--ink),
+      0 0 0 6px color-mix(in srgb, var(--lime) 60%, transparent);
+  }
+  .field:disabled {
+    color: var(--ink-faint);
+    cursor: not-allowed;
+  }
+
   /* Horizontal card rails that bleed to the screen edge on phones. The scroll
      padding matches the rail's side padding (px-5), so snapping lines cards
      up with the page margin instead of pulling them to the screen edge. */
@@ -197,6 +273,8 @@ body {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 1.25rem;
+    padding-block: 0.25rem 1.75rem;
+    margin-block: -0.25rem -1.75rem;
     scrollbar-width: none;
   }
   .rail::-webkit-scrollbar {
@@ -211,6 +289,34 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+::selection {
+  background: var(--lime);
+  color: var(--on-lime);
+}
+
+/* Progress fills sweep in from the left when a page loads. */
+@keyframes mz-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.mz-grow {
+  transform-origin: left;
+  animation: mz-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Dropdowns and popovers settle in rather than snapping open. */
+@keyframes mz-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+.mz-pop {
+  transform-origin: top;
+  animation: mz-pop 0.18s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -220,10 +326,9 @@ body {
   }
 }
 
-:where(a, button, input, select, textarea):focus-visible {
+:where(a, button, [tabindex]):focus-visible {
   outline: 2px solid var(--ink);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline-offset: 3px;
 }
 
 /* ---------------------------------------------------------------------------

@@ -5,10 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
-import { Logo } from "@/components/layout/Logo";
-
-const inputClass =
-  "rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink";
+import { AuthLayout } from "./AuthLayout";
+import { AuthField, PasswordField } from "./AuthField";
+import { LockIcon, MailIcon, UserIcon } from "@/components/ui/Icons";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -47,58 +46,52 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+3rem)] md:pt-16">
-      <header className="flex flex-col items-center gap-1.5 text-center">
-        <Logo className="mb-3 size-14" />
-        <p className="eyebrow">Join MseeZee</p>
-        <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Create an account</h1>
-        <p className="text-ink-soft">
-          You'll need this to start and manage a circle.
-        </p>
-      </header>
-
+    <AuthLayout
+      eyebrow="Join MseeZee"
+      title="Create an account"
+      subtitle="You'll need this to start and manage a circle."
+    >
       {error && (
-        <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
+        <p role="alert" className="mz-pop rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">
+          {error}
+        </p>
       )}
 
       <form onSubmit={submit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-2">
-          <span className="font-semibold text-ink">
-            Your name <span className="font-normal text-ink-faint">(optional)</span>
-          </span>
-          <input
-            type="text"
-            autoComplete="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={inputClass}
-          />
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="font-semibold text-ink">Email</span>
-          <input
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="font-semibold text-ink">Password</span>
-          <input
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-            required
-          />
-          <span className="text-xs text-ink-faint">At least 8 characters.</span>
-        </label>
-        <Button disabled={busy} className="w-full">
+        <AuthField
+          label={
+            <>
+              Your name <span className="font-normal text-ink-faint">(optional)</span>
+            </>
+          }
+          icon={<UserIcon className="size-5" />}
+          type="text"
+          autoComplete="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Lerato Mokoena"
+        />
+        <AuthField
+          label="Email"
+          icon={<MailIcon className="size-5" />}
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          required
+        />
+        <PasswordField
+          label="Password"
+          hint="At least 8 characters."
+          icon={<LockIcon className="size-5" />}
+          autoComplete="new-password"
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <Button disabled={busy} className="mt-2 w-full">
           {busy ? "Creating account…" : "Create account"}
         </Button>
       </form>
@@ -109,6 +102,6 @@ export function SignUpForm() {
           Sign in
         </Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 }

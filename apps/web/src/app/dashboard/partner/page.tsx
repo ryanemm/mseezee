@@ -35,7 +35,7 @@ export default async function PartnerDashboardPage() {
       />
 
       {view.awaitingActionCount > 0 && (
-        <div className="rounded-3xl bg-lime px-5 py-4 text-on-lime">
+        <div className="rounded-3xl bg-lime px-5 py-4 text-on-lime shadow-lime">
           <span className="font-bold">
             {view.awaitingActionCount} payout{view.awaitingActionCount === 1 ? "" : "s"}
           </span>{" "}
@@ -90,7 +90,7 @@ export default async function PartnerDashboardPage() {
         </p>
       </section>
 
-      <section className="rounded-card bg-surface-sunk p-5 text-[0.92rem] text-ink-soft">
+      <section className="rounded-card bg-surface shadow-card p-5 text-[0.92rem] text-ink-soft">
         <p className="font-bold text-ink">How disbursement works</p>
         <p className="mt-1">
           Contributions settle to your organisation's account. You release funds

@@ -69,7 +69,7 @@ export function ThankYou({
           </p>
         </div>
 
-        <dl className="w-full rounded-card bg-surface-sunk p-5 text-left text-[0.95rem]">
+        <dl className="w-full rounded-card bg-surface shadow-card p-5 text-left text-[0.95rem]">
           <div className="flex justify-between py-1">
             <dt className="text-ink-soft">Contribution</dt>
             <dd className="font-bold text-ink tnum">{formatZAR(receipt.amountCents)}</dd>

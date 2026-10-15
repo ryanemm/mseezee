@@ -95,11 +95,11 @@ export function ShareCircle({
   }
 
   const pill =
-    "inline-flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-4 py-3 text-sm font-bold text-ink transition-colors hover:bg-surface-sunk";
+    "inline-flex items-center justify-center gap-2 rounded-full bg-surface px-4 py-3 text-sm font-bold text-ink shadow-pill transition-colors hover:bg-surface-sunk";
 
   return (
     <section
-      className={`flex flex-col gap-3.5 ${framed ? "rounded-card bg-surface-sunk p-5 lg:p-6" : ""}`}
+      className={`flex flex-col gap-3.5 ${framed ? "rounded-card bg-surface shadow-card p-5 lg:p-6" : ""}`}
     >
       <div className={framed ? "" : "text-center"}>
         <h2 className="text-[1.3rem] font-bold">{heading}</h2>
@@ -110,7 +110,7 @@ export function ShareCircle({
         href={whatsapp}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex h-14 items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-5 text-[1rem] font-bold text-white transition-[filter,transform] hover:brightness-105 active:scale-[0.99]"
+        className="inline-flex h-14 items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-5 text-[1rem] font-bold text-white shadow-pill transition-[filter,transform] hover:brightness-105 active:scale-[0.99]"
       >
         <WhatsAppIcon />
         Share on WhatsApp

@@ -4,8 +4,7 @@ import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
-const inputClass =
-  "rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink";
+const inputClass = "field";
 
 /** Lets a signed-in user attach a verified phone number to their account —
  *  from then on, signing in with that number logs into this same account. */

@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
-import { Logo } from "@/components/layout/Logo";
+import { AuthLayout } from "./AuthLayout";
+import { AuthField, PasswordField } from "./AuthField";
+import { LockIcon, MailIcon, PhoneIcon, ShieldIcon, UserIcon } from "@/components/ui/Icons";
+import { SegmentedTrack, segmentClass } from "@/components/ui/Segmented";
 
 type Tab = "phone" | "email";
-
-const inputClass =
-  "rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink";
 
 export function SignInForm() {
   const router = useRouter();
@@ -112,97 +112,82 @@ export function SignInForm() {
 
   if (needsName) {
     return (
-      <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+3rem)] md:pt-16">
-        <header className="flex flex-col items-center gap-1.5 text-center">
-          <Logo className="mb-3 size-14" />
-          <p className="eyebrow">Almost there</p>
-          <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">What should we call you?</h1>
-          <p className="text-ink-soft">
-            Shown to your supporters and on any circle you organise.
-          </p>
-        </header>
-        {error && (
-          <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
-        )}
+      <AuthLayout
+        eyebrow="Almost there"
+        title="What should we call you?"
+        subtitle="Shown to your supporters and on any circle you organise."
+      >
+        {error && <ErrorNote>{error}</ErrorNote>}
         <form onSubmit={submitName} className="flex flex-col gap-4">
-          <Field label="Your name">
-            <input
-              type="text"
-              autoComplete="name"
-              autoFocus
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              placeholder="e.g. Lerato Mokoena"
-              className={inputClass}
-              required
-            />
-          </Field>
-          <Button disabled={busy} className="w-full">
+          <AuthField
+            label="Your name"
+            icon={<UserIcon className="size-5" />}
+            type="text"
+            autoComplete="name"
+            autoFocus
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            placeholder="e.g. Lerato Mokoena"
+            required
+          />
+          <Button disabled={busy} className="mt-2 w-full">
             {busy ? "Saving…" : "Continue"}
           </Button>
         </form>
-      </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-5 pb-10 pt-[calc(env(safe-area-inset-top)+3rem)] md:pt-16">
-      <header className="flex flex-col items-center gap-1.5 text-center">
-        <Logo className="mb-3 size-14" />
-        <p className="eyebrow">Welcome back</p>
-        <h1 className="text-[2rem] font-extrabold leading-tight tracking-[-0.03em]">Sign in to MseeZee</h1>
-      </header>
-
-      <div className="flex rounded-full bg-surface-sunk p-1.5">
+    <AuthLayout eyebrow="Welcome back" title="Sign in to MseeZee">
+      <SegmentedTrack count={2} index={tab === "phone" ? 0 : 1}>
         <TabButton active={tab === "phone"} onClick={() => switchTab("phone")}>
           Phone
         </TabButton>
         <TabButton active={tab === "email"} onClick={() => switchTab("email")}>
           Email
         </TabButton>
-      </div>
+      </SegmentedTrack>
 
-      {error && (
-        <p className="rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">{error}</p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {tab === "phone" ? (
         !codeSent ? (
-          <form onSubmit={sendCode} className="flex flex-col gap-4">
-            <Field label="Cellphone number">
-              <input
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="082 123 4567"
-                className={inputClass}
-                required
-              />
-            </Field>
-            <Button disabled={busy} className="w-full">
+          <form onSubmit={sendCode} className="mz-pop flex flex-col gap-4">
+            <AuthField
+              label="Cellphone number"
+              hint="We'll SMS you a code — no password needed."
+              icon={<PhoneIcon className="size-5" />}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="082 123 4567"
+              required
+            />
+            <Button disabled={busy} className="mt-2 w-full">
               {busy ? "Sending…" : "Send code"}
             </Button>
           </form>
         ) : (
-          <form onSubmit={verifyCode} className="flex flex-col gap-4">
-            <p className="text-sm text-ink-soft">
-              Enter the code we sent to <span className="font-medium text-ink">{phone}</span>.
+          <form onSubmit={verifyCode} className="mz-pop flex flex-col gap-4">
+            <p className="rounded-2xl bg-lime/40 px-4 py-3 text-[0.92rem] text-ink">
+              Enter the code we sent to <span className="font-bold">{phone}</span>.
             </p>
-            <Field label="Code">
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="123456"
-                className={inputClass}
-                required
-              />
-            </Field>
-            <Button disabled={busy} className="w-full">
+            <AuthField
+              label="Code"
+              icon={<ShieldIcon className="size-5" />}
+              large
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="123456"
+              required
+            />
+            <Button disabled={busy} className="mt-2 w-full">
               {busy ? "Verifying…" : "Verify & sign in"}
             </Button>
             <button
@@ -212,35 +197,33 @@ export function SignInForm() {
                 setCode("");
                 setError(null);
               }}
-              className="link text-sm"
+              className="link self-center text-sm"
             >
               Use a different number
             </button>
           </form>
         )
       ) : (
-        <form onSubmit={submitEmail} className="flex flex-col gap-4">
-          <Field label="Email">
-            <input
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-              required
-            />
-          </Field>
-          <Field label="Password">
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-              required
-            />
-          </Field>
-          <Button disabled={busy} className="w-full">
+        <form onSubmit={submitEmail} className="mz-pop flex flex-col gap-4">
+          <AuthField
+            label="Email"
+            icon={<MailIcon className="size-5" />}
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+          />
+          <PasswordField
+            label="Password"
+            icon={<LockIcon className="size-5" />}
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button disabled={busy} className="mt-2 w-full">
             {busy ? "Signing in…" : "Sign in"}
           </Button>
         </form>
@@ -252,7 +235,15 @@ export function SignInForm() {
           Create an account
         </Link>
       </p>
-    </div>
+    </AuthLayout>
+  );
+}
+
+function ErrorNote({ children }: { children: React.ReactNode }) {
+  return (
+    <p role="alert" className="mz-pop rounded-2xl bg-crit/10 px-4 py-3 text-sm text-crit">
+      {children}
+    </p>
   );
 }
 
@@ -269,20 +260,10 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-full py-3 font-semibold transition-colors ${
-        active ? "bg-night text-on-night" : "text-ink-soft hover:text-ink"
-      }`}
+      aria-pressed={active}
+      className={segmentClass(active)}
     >
       {children}
     </button>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-2">
-      <span className="font-semibold text-ink">{label}</span>
-      {children}
-    </label>
   );
 }

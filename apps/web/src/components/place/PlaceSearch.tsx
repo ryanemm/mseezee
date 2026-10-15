@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { findCircleType, formatZAR } from "@mseezee/shared";
 import type { CircleSearchResult, PlaceSearchResult } from "@/lib/places";
+import { CircleEmblem } from "@/components/ui/CoverArt";
+import { PinIcon, SearchIcon } from "@/components/ui/Icons";
 
 /**
  * Type-ahead search over Stats SA places — and, when `onSelectCircle` is
@@ -17,6 +19,7 @@ export function PlaceSearch({
   showCircleCounts = false,
   autoFocus = false,
   variant = "field",
+  trailing,
 }: {
   onSelect: (place: PlaceSearchResult) => void;
   onSelectCircle?: (circle: CircleSearchResult) => void;
@@ -24,11 +27,15 @@ export function PlaceSearch({
   /** Explore shows how many circles each result has; creating a circle doesn't need it. */
   showCircleCounts?: boolean;
   autoFocus?: boolean;
-  /** `field`: a form input. `pill`: the big grey search bar on home. `float`:
-   *  the same bar in white, floating over the map. */
-  variant?: "field" | "pill" | "float";
+  /** `field`: a form input. `bar`: the big white search bar on home.
+   *  `float`: the same bar floating over the map, with a deeper shadow. */
+  variant?: "field" | "bar" | "float";
+  /** A control tucked into the right end of the bar, e.g. "near me". */
+  trailing?: React.ReactNode;
 }) {
   const listId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceSearchResult[]>([]);
   const [circles, setCircles] = useState<CircleSearchResult[]>([]);
@@ -73,6 +80,23 @@ export function PlaceSearch({
     return () => clearTimeout(timer);
   }, [query, withCircles]);
 
+  // Close the list on a tap outside the search, or on Escape.
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   function reset() {
     setQuery("");
     setResults([]);
@@ -87,23 +111,27 @@ export function PlaceSearch({
     onSelectCircle?.(circle);
     reset();
   }
+  function clear() {
+    setQuery("");
+    inputRef.current?.focus();
+  }
   const nothing = results.length === 0 && circles.length === 0;
-
-  const showList = open && query.trim().length >= 2;
+  const q = query.trim();
+  const showList = open && q.length >= 2;
+  const isBar = variant !== "field";
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <div
         className={
-          variant === "field"
-            ? "flex items-center gap-2.5 rounded-2xl border border-line bg-surface px-4 py-3.5 focus-within:border-ink"
-            : `flex h-14 items-center gap-3 rounded-full px-5 focus-within:ring-2 focus-within:ring-ink ${
-                variant === "float" ? "bg-surface shadow-pill" : "bg-surface-sunk"
-              }`
+          isBar
+            ? `search-bar ${variant === "float" ? "search-bar-float" : ""} ${trailing ? "pr-2" : "pr-4"}`
+            : "field-within flex items-center gap-2.5 px-4 py-3.5"
         }
       >
-        <SearchIcon large={variant !== "field"} />
+        <SearchIcon className={`shrink-0 ${isBar ? "size-6 text-ink" : "size-[18px] text-ink-faint"}`} />
         <input
+          ref={inputRef}
           type="search"
           role="combobox"
           aria-expanded={showList}
@@ -118,67 +146,92 @@ export function PlaceSearch({
           }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
-          className={`w-full bg-transparent text-ink placeholder:text-ink-soft focus:outline-none ${
-            variant === "field" ? "text-sm" : "text-base"
+          className={`min-w-0 flex-1 bg-transparent text-ink placeholder:text-ink-soft focus:outline-none [&::-webkit-search-cancel-button]:hidden ${
+            isBar ? "text-base" : "text-[0.95rem]"
           }`}
         />
+        {query && (
+          <button
+            type="button"
+            onClick={clear}
+            aria-label="Clear search"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-ink-faint/25 text-ink-soft transition-colors hover:bg-ink-faint/40 hover:text-ink"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="size-3.5" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
+        {trailing}
       </div>
 
       {showList && (
         <ul
           id={listId}
           role="listbox"
-          className="absolute inset-x-0 top-full z-30 mt-2 max-h-80 overflow-y-auto rounded-3xl border border-line bg-surface py-2 shadow-float"
+          className="mz-pop absolute inset-x-0 top-full z-30 mt-2.5 max-h-96 overflow-y-auto rounded-[28px] bg-surface p-2 shadow-float"
         >
           {loading && nothing && (
-            <li className="px-4 py-3 text-sm text-ink-faint">Searching…</li>
-          )}
-          {!loading && nothing && (
-            <li className="px-4 py-3 text-sm text-ink-faint">
-              Nothing matches &ldquo;{query.trim()}&rdquo;. Try a nearby suburb or the
-              town name.
+            <li className="flex items-center gap-3 px-3 py-3 text-sm text-ink-soft">
+              <span className="size-4 animate-spin rounded-full border-2 border-line border-t-ink" aria-hidden="true" />
+              Searching…
             </li>
           )}
-          {circles.length > 0 && <GroupLabel>Circles</GroupLabel>}
+          {!loading && nothing && (
+            <li className="px-3 py-3 text-sm text-ink-soft">
+              Nothing matches &ldquo;{q}&rdquo;. Try a nearby suburb or the town name.
+            </li>
+          )}
+          {circles.length > 0 && <GroupLabel count={circles.length}>Circles</GroupLabel>}
           {circles.map((c) => (
             <li key={c.slug} role="option" aria-selected={false}>
               <button
                 type="button"
                 onClick={() => chooseCircle(c)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-surface-sunk"
+                className="flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors hover:bg-surface-sunk"
               >
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-ink">{c.title}</span>
-                  <span className="block truncate text-xs text-ink-faint">
+                <CircleEmblem type={c.type} className="size-11 rounded-xl" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold text-ink">
+                    <Highlight text={c.title} query={q} />
+                  </span>
+                  <span className="block truncate text-[0.82rem] text-ink-soft">
                     {findCircleType(c.type)?.shortLabel ?? c.type} · {c.placeName}
                     {c.isDemo ? " · Example" : ""}
                   </span>
                 </span>
-                <span className="shrink-0 text-xs font-bold text-ink tnum">
+                <span className="shrink-0 rounded-full bg-surface-sunk px-2.5 py-1 text-xs font-bold text-ink tnum">
                   {formatZAR(c.raisedCents, { compact: true })}
                 </span>
               </button>
             </li>
           ))}
-          {circles.length > 0 && results.length > 0 && <GroupLabel>Places</GroupLabel>}
+          {results.length > 0 && (circles.length > 0 || withCircles) && (
+            <GroupLabel count={results.length}>Places</GroupLabel>
+          )}
           {results.map((p) => (
             <li key={p.id} role="option" aria-selected={false}>
               <button
                 type="button"
                 onClick={() => choose(p)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-surface-sunk"
+                className="flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors hover:bg-surface-sunk"
               >
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-ink">{p.name}</span>
-                  <span className="block truncate text-xs text-ink-faint">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-sunk text-ink">
+                  <PinIcon className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold text-ink">
+                    <Highlight text={p.name} query={q} />
+                  </span>
+                  <span className="block truncate text-[0.82rem] text-ink-soft">
                     {p.kind === "sub" ? `${p.mainPlaceName} · ` : ""}
                     {p.municipality} · {p.province}
                   </span>
                 </span>
                 {showCircleCounts && (
                   <span
-                    className={`shrink-0 text-xs font-semibold ${
-                      p.circleCount > 0 ? "text-ink" : "text-ink-faint"
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                      p.circleCount > 0 ? "bg-lime text-on-lime" : "text-ink-faint"
                     }`}
                   >
                     {p.circleCount > 0
@@ -195,27 +248,27 @@ export function PlaceSearch({
   );
 }
 
-function GroupLabel({ children }: { children: React.ReactNode }) {
+function GroupLabel({ children, count }: { children: React.ReactNode; count: number }) {
   return (
     <li
       role="presentation"
-      className="px-4 pb-1 pt-2.5 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink-faint"
+      className="flex items-center gap-2 px-3 pb-1.5 pt-3 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-ink-faint"
     >
       {children}
+      <span className="rounded-full bg-surface-sunk px-1.5 py-0.5 tracking-normal tnum">{count}</span>
     </li>
   );
 }
 
-function SearchIcon({ large }: { large: boolean }) {
+/** Marks where the typed text appears in a result — case-insensitive, first match only. */
+function Highlight({ text, query }: { text: string; query: string }) {
+  const i = text.toLowerCase().indexOf(query.toLowerCase());
+  if (!query || i < 0) return <>{text}</>;
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      className={`shrink-0 ${large ? "size-6 text-ink" : "size-[18px] text-ink-faint"}`}
-    >
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path d="m16.5 16.5 3.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
+    <>
+      {text.slice(0, i)}
+      <mark className="rounded-[3px] bg-lime/70 text-on-lime">{text.slice(i, i + query.length)}</mark>
+      {text.slice(i + query.length)}
+    </>
   );
 }

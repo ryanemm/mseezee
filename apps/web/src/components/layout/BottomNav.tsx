@@ -67,7 +67,7 @@ export function BottomNav() {
       <div aria-hidden="true" className="h-[calc(4.5rem+env(safe-area-inset-bottom))] shrink-0 md:hidden" />
       <nav
         aria-label="Primary"
-        className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur transition-transform duration-300 ease-out motion-reduce:transition-none md:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-30 bg-surface/95 shadow-bar pb-[env(safe-area-inset-bottom)] backdrop-blur transition-transform duration-300 ease-out motion-reduce:transition-none md:hidden ${
           hidden ? "translate-y-full" : "translate-y-0"
         }`}
       >

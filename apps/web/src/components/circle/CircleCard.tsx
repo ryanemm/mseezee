@@ -70,7 +70,7 @@ export function FeaturedCircleCard({ circle }: { circle: Circle }) {
   return (
     <Link
       href={`/circles/${circle.slug}`}
-      className="relative flex h-full min-h-[27rem] flex-col justify-between gap-6 overflow-hidden rounded-[32px] p-5 text-white transition-transform active:scale-[0.99] lg:p-6"
+      className="relative flex h-full min-h-[27rem] flex-col justify-between gap-6 overflow-hidden rounded-[32px] p-5 text-white shadow-lift transition-transform active:scale-[0.99] lg:p-6"
     >
       <CoverArt cover={circle.cover} className="absolute inset-0" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -129,7 +129,7 @@ export function CircleTile({
   return (
     <Link
       href={href}
-      className="relative flex h-44 w-56 shrink-0 flex-col justify-end gap-1 overflow-hidden rounded-[28px] p-5 text-white"
+      className="relative flex h-44 w-56 shrink-0 flex-col justify-end gap-1 overflow-hidden rounded-[28px] p-5 text-white shadow-lift"
     >
       <CoverArt cover={circle.cover} className="absolute inset-0 opacity-60" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -140,7 +140,7 @@ export function CircleTile({
       </p>
       <div className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-white/25">
         <div
-          className={`h-full rounded-full ${circle.type === "funeral" ? "bg-gold-line" : "bg-lime"}`}
+          className={`mz-grow h-full rounded-full ${circle.type === "funeral" ? "bg-gold-line" : "bg-lime"}`}
           style={{ width: `${Math.max(pct, 3)}%` }}
         />
       </div>

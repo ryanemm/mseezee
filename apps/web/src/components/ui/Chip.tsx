@@ -11,7 +11,7 @@ export function Chip({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[0.8rem] font-semibold leading-tight text-ink ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 shadow-pill text-[0.8rem] font-semibold leading-tight text-ink ${className}`}
     >
       {children}
     </span>

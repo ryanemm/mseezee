@@ -119,7 +119,7 @@ export function PayoutAccountCard({
           value={bankCode}
           onChange={(e) => setBankCode(e.target.value)}
           required
-          className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink"
+          className="field"
         >
           <option value="" disabled>
             Choose your bank
@@ -138,7 +138,7 @@ export function PayoutAccountCard({
         placeholder="Account number"
         inputMode="numeric"
         required
-        className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink"
+        className="field"
       />
 
       {error && <p className="text-xs text-crit">{error}</p>}

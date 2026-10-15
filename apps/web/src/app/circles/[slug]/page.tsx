@@ -8,6 +8,7 @@ import { CoverArt } from "@/components/ui/CoverArt";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { DistanceChip, ExampleChip, TypeChip, VerifiedChip } from "@/components/ui/Chip";
 import { BackLink, iconButtonClass } from "@/components/ui/IconButton";
+import { SeeAllLink } from "@/components/ui/Button";
 import { HeartIcon, ShieldIcon } from "@/components/ui/Icons";
 import { AreaMiniMap } from "@/components/circle/AreaMiniMap";
 import { CircleTabs } from "@/components/circle/CircleTabs";
@@ -78,7 +79,7 @@ export default async function CirclePage({
       <div className="mx-auto flex w-full max-w-6xl flex-col lg:flex-row lg:items-start lg:gap-10 lg:px-10 lg:pt-8">
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Hero */}
-          <div className="relative h-72 lg:h-80 lg:overflow-hidden lg:rounded-[32px]">
+          <div className="relative h-72 lg:h-80 lg:overflow-hidden lg:rounded-[32px] lg:shadow-lift">
             <CoverArt cover={circle.cover} className="h-full w-full" />
             <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] lg:pt-5">
               <BackLink href="/" shape="round" />
@@ -92,7 +93,7 @@ export default async function CirclePage({
           </div>
 
           {/* Sheet */}
-          <div className="relative -mt-10 flex flex-col gap-6 rounded-t-[32px] bg-surface px-5 pt-3 lg:mt-8 lg:rounded-none lg:px-0 lg:pt-0">
+          <div className="relative -mt-10 flex flex-col gap-6 rounded-t-[32px] bg-surface px-5 pt-3 shadow-sheet lg:mt-8 lg:shadow-none lg:rounded-none lg:px-0 lg:pt-0">
             <span aria-hidden="true" className="mx-auto h-1.5 w-12 rounded-full bg-line lg:hidden" />
 
             <div className="flex flex-col gap-4">
@@ -130,7 +131,7 @@ export default async function CirclePage({
             </div>
 
             {/* Progress — the desktop rail covers this, so it's phone/tablet only. */}
-            <section className="flex flex-col gap-5 rounded-card bg-surface-sunk p-6 lg:hidden">
+            <section className="flex flex-col gap-5 rounded-card bg-surface shadow-card p-6 lg:hidden">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[2.3rem] font-extrabold leading-none tracking-tight tnum">
@@ -181,7 +182,7 @@ export default async function CirclePage({
                         {circle.story}
                       </p>
 
-                      <dl className="flex flex-col gap-3 rounded-3xl border border-line p-5 text-[0.95rem]">
+                      <dl className="flex flex-col gap-3 rounded-3xl bg-surface shadow-card p-5 text-[0.95rem]">
                         <div className="flex justify-between gap-4">
                           <dt className="text-ink-soft">Organised by</dt>
                           <dd className="text-right font-bold text-ink">{circle.organiserName}</dd>
@@ -209,7 +210,7 @@ export default async function CirclePage({
                         />
                       </section>
 
-                      <section className="flex gap-4 rounded-3xl bg-lime p-5 text-[0.88rem] text-on-lime">
+                      <section className="flex gap-4 rounded-3xl bg-lime p-5 text-[0.88rem] text-on-lime shadow-lime">
                         <ShieldIcon className="size-6 shrink-0" />
                         <div>
                           <p className="font-bold">How MseeZee keeps this safe</p>
@@ -236,7 +237,7 @@ export default async function CirclePage({
                     updates.length > 0 ? (
                       <ul className="flex flex-col gap-3">
                         {updates.map((u) => (
-                          <li key={u.id} className="rounded-3xl border border-line p-5">
+                          <li key={u.id} className="rounded-3xl bg-surface shadow-card p-5">
                             <p className="text-[0.85rem] font-semibold text-ink-soft">
                               {relativeDay(u.createdAt)}
                             </p>
@@ -255,7 +256,7 @@ export default async function CirclePage({
                   label: "Supporters",
                   content: (
                     <div className="flex flex-col gap-3">
-                      <ul className="flex flex-col divide-y divide-line rounded-3xl border border-line">
+                      <ul className="flex flex-col divide-y divide-line rounded-3xl bg-surface shadow-card">
                         {supporters.map((s) => (
                           <SupporterRow key={s.id} supporter={s} />
                         ))}
@@ -266,9 +267,11 @@ export default async function CirclePage({
                         )}
                       </ul>
                       {supporters.length > 0 && (
-                        <Link href={`/circles/${circle.slug}/supporters`} className="link self-end">
-                          See all {circle.supporterCount}
-                        </Link>
+                        <div className="self-end">
+                          <SeeAllLink href={`/circles/${circle.slug}/supporters`}>
+                            See all {circle.supporterCount}
+                          </SeeAllLink>
+                        </div>
                       )}
                     </div>
                   ),

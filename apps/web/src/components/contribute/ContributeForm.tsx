@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { LockIcon } from "@/components/ui/Icons";
 import { Watermark } from "@/components/ui/Watermark";
+import { SegmentedTrack, segmentClass } from "@/components/ui/Segmented";
 import { saveDraft } from "@/lib/draft";
 import { CircleSummary } from "./CircleSummary";
 
@@ -28,8 +29,7 @@ const TILE_COLOURS = [
   "bg-clay text-white",
 ];
 
-const inputClass =
-  "w-full rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none disabled:bg-surface-sunk disabled:text-ink-faint";
+const inputClass = "field";
 
 /** Rands without the ".00", but never hiding real cents. */
 function zar(cents: number): string {
@@ -106,7 +106,7 @@ export function ContributeForm({ circle }: { circle: Circle }) {
         <div
           role="radiogroup"
           aria-labelledby="amount-heading"
-          className="rail -mx-5 gap-3 px-5 py-1"
+          className="rail -mx-5 gap-3 px-5"
         >
           {PRESETS_CENTS.map((cents, i) => (
             <AmountTile
@@ -130,7 +130,7 @@ export function ContributeForm({ circle }: { circle: Circle }) {
           </AmountTile>
         </div>
         {isCustom && (
-          <div className="flex items-center gap-2 rounded-2xl border-2 border-ink bg-surface px-4 py-3">
+          <div className="field-within flex items-center gap-2 px-4 py-3">
             <span className="text-2xl font-extrabold text-ink-faint">R</span>
             <input
               type="text"
@@ -186,7 +186,7 @@ export function ContributeForm({ circle }: { circle: Circle }) {
           <span className="self-end text-xs text-ink-faint tnum">{message.length}/200</span>
         </label>
 
-        <div className="flex flex-col divide-y divide-line rounded-3xl bg-surface-sunk">
+        <div className="flex flex-col divide-y divide-line rounded-3xl bg-surface shadow-card">
           <Toggle label="Show my contribution amount" checked={showAmount} onChange={setShowAmount} />
           <Toggle
             label={`Show that I'm from ${circle.area.name}`}
@@ -214,10 +214,11 @@ export function ContributeForm({ circle }: { circle: Circle }) {
             Optional. MseeZee charges families nothing — tips from contributors keep it running.
           </p>
         </div>
-        <div
+        <SegmentedTrack
           role="radiogroup"
           aria-labelledby="tip-heading"
-          className="flex rounded-full bg-surface-sunk p-1.5"
+          count={TIP_OPTIONS.length}
+          index={TIP_OPTIONS.indexOf(tipRate)}
         >
           {TIP_OPTIONS.map((rate) => {
             const selected = tipRate === rate;
@@ -230,19 +231,17 @@ export function ContributeForm({ circle }: { circle: Circle }) {
                 aria-checked={selected}
                 aria-label={rate === 0 ? "No tip" : `${rate * 100}% tip`}
                 onClick={() => setTipRate(rate)}
-                className={`flex-1 rounded-full py-3 text-[1rem] font-semibold transition-colors tnum ${
-                  selected ? "bg-night text-on-night" : "text-ink-soft hover:text-ink"
-                }`}
+                className={`${segmentClass(selected)} tnum`}
               >
                 {rate === 0 ? "No tip" : amountError ? `${rate * 100}%` : zar(cents)}
               </button>
             );
           })}
-        </div>
+        </SegmentedTrack>
       </section>
 
       {/* Summary */}
-      <dl className="flex flex-col gap-2 rounded-3xl border border-line p-5 text-[0.95rem]">
+      <dl className="flex flex-col gap-2 rounded-3xl bg-surface shadow-card p-5 text-[0.95rem]">
         <Row label={`Contribution to ${beneficiaryShort}`} value={zar(amountCents)} />
         {coverFee && <Row label="Processing fee" value={zar(feeCents)} muted />}
         {tipCents > 0 && <Row label="Tip to MseeZee" value={zar(tipCents)} muted />}
@@ -252,7 +251,7 @@ export function ContributeForm({ circle }: { circle: Circle }) {
       </dl>
 
       {/* Continue */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur md:left-64">
+      <div className="fixed inset-x-0 bottom-0 z-20 bg-surface/95 shadow-bar px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur md:left-64">
         <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
           <p className="flex items-center justify-center gap-2 text-center text-[0.88rem] text-ink-soft">
             <LockIcon className="size-[18px] shrink-0" />
@@ -288,7 +287,7 @@ function AmountTile({
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`relative flex h-[7.5rem] w-[8.25rem] shrink-0 flex-col justify-between overflow-hidden rounded-[26px] p-4 text-left transition-transform active:scale-[0.98] ${
+      className={`relative flex h-[7.5rem] w-[8.25rem] shrink-0 flex-col justify-between overflow-hidden rounded-[26px] p-4 text-left shadow-pill transition-transform active:scale-[0.98] ${
         selected ? "bg-lime text-on-lime ring-2 ring-ink ring-offset-2 ring-offset-surface" : colour
       }`}
     >

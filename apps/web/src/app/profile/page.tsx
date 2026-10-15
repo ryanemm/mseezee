@@ -68,7 +68,7 @@ export default async function ProfilePage() {
       </header>
 
       {view.circles.length > 0 ? (
-        <section className="relative overflow-hidden rounded-[32px] bg-lime p-6 text-on-lime">
+        <section className="relative overflow-hidden rounded-[32px] bg-lime p-6 text-on-lime shadow-lime">
           <Watermark className="text-[2.6rem]" />
           <div className="relative flex flex-col gap-1">
             <p className="font-semibold">Raised across your circles</p>
@@ -91,7 +91,7 @@ export default async function ProfilePage() {
           </div>
         </section>
       ) : (
-        <section className="relative overflow-hidden rounded-[32px] bg-lime p-6 text-on-lime">
+        <section className="relative overflow-hidden rounded-[32px] bg-lime p-6 text-on-lime shadow-lime">
           <Watermark className="text-[2.6rem]" />
           <div className="relative flex flex-col gap-2">
             <p className="text-[1.6rem] font-extrabold leading-tight tracking-tight">

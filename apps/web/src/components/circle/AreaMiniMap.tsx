@@ -13,7 +13,7 @@ export function AreaMiniMap({
   supportersFromArea?: number;
 }) {
   return (
-    <div className="overflow-hidden rounded-3xl bg-surface-sunk">
+    <div className="overflow-hidden rounded-3xl bg-surface shadow-card">
       <div className="relative h-32">
         <svg
           className="absolute inset-0 h-full w-full"

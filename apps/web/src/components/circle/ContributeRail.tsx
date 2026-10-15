@@ -44,7 +44,7 @@ export function ContributeRail({ circle }: { circle: Circle }) {
 
         <button
           type="button"
-          className="flex items-center justify-center gap-2 rounded-full border border-line py-3 text-sm font-bold text-ink transition-colors hover:bg-surface-sunk"
+          className="flex items-center justify-center gap-2 rounded-full bg-surface py-3 text-sm font-bold text-ink shadow-pill transition-colors hover:bg-surface-sunk"
         >
           <HeartIcon className="size-[18px]" />
           Save circle

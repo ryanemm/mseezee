@@ -15,12 +15,13 @@ import { LocateIcon } from "@/components/ui/Icons";
  */
 export function FindNearMeButton({
   basePath = "/",
-  variant = "dark",
+  variant = "inline",
 }: {
   /** The page that sorts by `?lat=&lng=` — home, or Explore's map. */
   basePath?: string;
-  /** `dark`: the black disc beside the home search. `map`: the white disc on a map. */
-  variant?: "dark" | "map";
+  /** `inline`: the black button tucked inside the home search bar. `map`:
+   *  the white disc on a map. */
+  variant?: "inline" | "map";
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,19 +77,24 @@ export function FindNearMeButton({
         disabled={locating}
         aria-label={locating ? "Finding your area…" : "Find circles near me"}
         title="Find circles near me"
-        className={`flex size-14 items-center justify-center rounded-full transition-transform active:scale-95 disabled:opacity-70 ${
+        className={`flex items-center justify-center gap-2 rounded-full font-bold transition-transform active:scale-95 disabled:opacity-70 ${
           variant === "map"
-            ? "bg-surface text-ink shadow-float"
-            : "bg-night text-on-night"
+            ? "size-14 bg-surface text-ink shadow-float"
+            : "size-12 bg-night text-sm text-on-night shadow-pill sm:w-auto sm:px-4"
         }`}
       >
-        <LocateIcon className={`size-6 ${locating ? "animate-pulse" : ""}`} />
+        <LocateIcon className={`size-6 shrink-0 ${locating ? "animate-pulse" : ""}`} />
+        {variant === "inline" && (
+          <span className="hidden whitespace-nowrap sm:inline">
+            {locating ? "Finding…" : "Near me"}
+          </span>
+        )}
       </button>
       {error && (
         <p
           role="alert"
-          className={`absolute right-0 z-30 w-64 rounded-2xl bg-surface p-3 text-xs leading-relaxed text-crit shadow-float ${
-            variant === "map" ? "bottom-full mb-2" : "top-full mt-2"
+          className={`mz-pop absolute right-0 z-30 w-64 rounded-2xl bg-surface p-3 text-xs leading-relaxed text-crit shadow-float ${
+            variant === "map" ? "bottom-full mb-2" : "top-full mt-3"
           }`}
         >
           {error}

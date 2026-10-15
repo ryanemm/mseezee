@@ -4,8 +4,8 @@ import { BackIcon } from "./Icons";
 const shapes = {
   // White disc — floats over cover art and maps.
   round: "size-12 rounded-full bg-surface text-ink shadow-pill",
-  // Bordered rounded square — the back button on plain pages.
-  square: "size-12 rounded-2xl border border-line bg-surface text-ink",
+  // Rounded square — the back button on plain pages.
+  square: "size-12 rounded-2xl bg-surface text-ink shadow-card",
 };
 
 export function iconButtonClass(shape: keyof typeof shapes = "round") {

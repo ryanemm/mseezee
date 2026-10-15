@@ -42,7 +42,7 @@ export function ProgressBar({
         aria-label="Progress towards goal"
       >
         <div
-          className={`h-full rounded-full transition-[width] duration-500 ${fill}`}
+          className={`mz-grow h-full rounded-full transition-[width] duration-500 ${fill}`}
           style={{ width: `${Math.max(pct, 3)}%` }}
         />
       </div>

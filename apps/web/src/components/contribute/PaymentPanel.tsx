@@ -137,7 +137,7 @@ export function PaymentPanel({
     <div className="flex flex-col gap-8 px-5 pb-48 pt-6">
       <CircleSummary circle={circle} />
 
-      <div className="rounded-card bg-lime p-6 text-on-lime">
+      <div className="rounded-card bg-lime p-6 text-on-lime shadow-lime">
         <p className="font-semibold opacity-80">You&apos;re giving</p>
         <p className="mt-1 text-[2.6rem] font-extrabold leading-none tracking-tight tnum">
           {zar(totalCents)}
@@ -159,7 +159,7 @@ export function PaymentPanel({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] outline-none focus:border-ink"
+            className="field"
           />
         </label>
       )}
@@ -172,7 +172,7 @@ export function PaymentPanel({
           return (
             <label
               key={m.id}
-              className={`flex cursor-pointer items-center gap-4 rounded-3xl bg-surface-sunk p-3 pr-5 transition-shadow ${
+              className={`flex cursor-pointer items-center gap-4 rounded-3xl bg-surface shadow-card p-3 pr-5 transition-shadow ${
                 selected ? "ring-2 ring-ink" : ""
               }`}
             >
@@ -184,7 +184,7 @@ export function PaymentPanel({
                 onChange={() => setMethodId(m.id)}
                 className="sr-only"
               />
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface text-ink">
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface-sunk text-ink">
                 <Icon className="size-6" />
               </span>
               <span className="min-w-0 flex-1">
@@ -215,9 +215,9 @@ export function PaymentPanel({
             <div
               key={m.id}
               aria-disabled="true"
-              className="flex items-center gap-4 rounded-3xl bg-surface-sunk p-3 pr-5 opacity-60"
+              className="flex items-center gap-4 rounded-3xl border-2 border-dashed border-line p-3 pr-5 opacity-60"
             >
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface text-ink-soft">
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface-sunk text-ink-soft">
                 <Icon className="size-6" />
               </span>
               <span className="min-w-0 flex-1">
@@ -239,7 +239,7 @@ export function PaymentPanel({
         )}
       </fieldset>
 
-      <p className="rounded-3xl border border-line px-5 py-4 text-[0.88rem] text-ink-soft">
+      <p className="rounded-3xl bg-surface shadow-card px-5 py-4 text-[0.88rem] text-ink-soft">
         <span className="font-bold text-ink">Secure &amp; final.</span>{" "}
         Contributions are irreversible. Funds go to{" "}
         {circle.proxyName ?? circle.beneficiaryName}, not to MseeZee.
@@ -251,7 +251,7 @@ export function PaymentPanel({
         </p>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur md:left-64">
+      <div className="fixed inset-x-0 bottom-0 z-20 bg-surface/95 shadow-bar px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur md:left-64">
         <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
           <p className="flex items-center justify-center gap-2 text-center text-[0.88rem] text-ink-soft">
             <LockIcon className="size-[18px] shrink-0" />

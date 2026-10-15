@@ -30,10 +30,10 @@ export default async function SupportersPage({
           shown when the supporter chose to.
         </p>
 
-        <ul className="flex flex-col divide-y divide-line rounded-card bg-surface-sunk px-5">
+        <ul className="flex flex-col divide-y divide-line rounded-card bg-surface shadow-card px-5">
           {supporters.map((s) => (
             <li key={s.id} className="flex items-start gap-3.5 py-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-sm font-bold text-ink">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-sunk text-sm font-bold text-ink">
                 {initials(s.displayName)}
               </span>
               <div className="min-w-0 flex-1">

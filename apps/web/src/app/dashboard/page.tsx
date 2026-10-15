@@ -42,7 +42,7 @@ export default async function DashboardPage() {
       </header>
 
       {needsThanks > 0 && (
-        <div className="rounded-3xl bg-lime px-5 py-4 text-on-lime">
+        <div className="rounded-3xl bg-lime px-5 py-4 text-on-lime shadow-lime">
           <span className="font-bold">{needsThanks} supporters</span> are
           waiting for a thank-you.
         </div>

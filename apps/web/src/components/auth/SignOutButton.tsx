@@ -25,7 +25,7 @@ export function SignOutButton({ variant = "icon" }: { variant?: "icon" | "row" }
       onClick={() => signOut({ callbackUrl: "/" })}
       aria-label="Sign out"
       title="Sign out"
-      className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-ink transition-transform active:scale-95"
+      className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface text-ink shadow-card transition-transform active:scale-95"
     >
       <SignOutIcon className="size-6" />
     </button>

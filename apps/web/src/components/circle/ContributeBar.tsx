@@ -11,7 +11,7 @@ export function ContributeBar({
   blocked: string | null;
 }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur md:left-64 lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-20 bg-surface/95 shadow-bar px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur md:left-64 lg:hidden">
       <div className="mx-auto w-full max-w-xl">
         {blocked ? (
           <span className="flex h-16 items-center justify-center rounded-full bg-surface-sunk px-6 text-center font-semibold text-ink-soft">

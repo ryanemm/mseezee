@@ -234,3 +234,20 @@ export function ClockIcon({ className }: IconProps) {
     </Svg>
   );
 }
+
+export function EyeIcon({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" {...stroke} />
+      <circle cx="12" cy="12" r="3" {...stroke} />
+    </Svg>
+  );
+}
+
+export function EyeOffIcon({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M10 5.8A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.6 3.4M6.6 6.6C4 8.3 2.5 12 2.5 12S6 18.5 12 18.5a9 9 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2M3.5 3.5l17 17" {...stroke} />
+    </Svg>
+  );
+}

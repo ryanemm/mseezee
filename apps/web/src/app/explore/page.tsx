@@ -9,6 +9,7 @@ import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
 import { Pill } from "@/components/circle/FilterTabs";
 import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
 import { BackLink } from "@/components/ui/IconButton";
+import { SeeAllLink } from "@/components/ui/Button";
 import { ChevronRightIcon } from "@/components/ui/Icons";
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ export default async function ExplorePage({
     // The sheet runs under the bottom nav's clearance (the negative margin
     // matches BottomNav's spacer) so the page ends in the sheet, not a gap.
     <div className="-mb-[calc(4.5rem+env(safe-area-inset-bottom))] flex flex-col md:mx-auto md:mb-0 md:w-full md:max-w-6xl md:px-10 md:pt-8">
-      <div className="relative h-[62dvh] min-h-[26rem] md:h-[30rem] md:overflow-hidden md:rounded-[32px]">
+      <div className="relative h-[62dvh] min-h-[26rem] md:h-[30rem] md:overflow-hidden md:rounded-[32px] md:shadow-lift">
         <AreaMap places={visible} near={near} highlightId={highlightId} className="absolute inset-0" />
 
         <div className="absolute inset-x-0 top-0 z-30 flex flex-col gap-3 px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] md:px-6 md:pt-6">
@@ -69,7 +70,7 @@ export default async function ExplorePage({
             </div>
           </div>
           <div className="rail -mx-5 gap-2.5 px-5 md:mx-0 md:px-0">
-            <Pill href={near ? `/explore?${nearParams}` : "/explore"} active={!province} floating>
+            <Pill href={near ? `/explore?${nearParams}` : "/explore"} active={!province} count={areas.length}>
               All provinces
             </Pill>
             {provinces.map((p) => (
@@ -77,7 +78,7 @@ export default async function ExplorePage({
                 key={p}
                 href={`/explore?province=${encodeURIComponent(p)}${near ? `&${nearParams}` : ""}`}
                 active={province === p}
-                floating
+                count={areas.filter((a) => a.province === p).length}
               >
                 {p}
               </Pill>
@@ -90,7 +91,7 @@ export default async function ExplorePage({
         </div>
       </div>
 
-      <div className="relative z-20 -mt-8 flex flex-col gap-7 rounded-t-[32px] bg-surface px-5 pb-28 pt-3 md:mt-8 md:rounded-none md:px-0 md:pb-10 md:pt-0">
+      <div className="relative z-20 -mt-8 flex flex-col gap-7 rounded-t-[32px] bg-surface px-5 pb-28 pt-3 shadow-sheet md:mt-8 md:shadow-none md:rounded-none md:px-0 md:pb-10 md:pt-0">
         <span aria-hidden="true" className="mx-auto h-1.5 w-12 rounded-full bg-line md:hidden" />
 
         {near && (
@@ -102,9 +103,7 @@ export default async function ExplorePage({
                   {closest.length} {closest.length === 1 ? "circle" : "circles"} · closest first
                 </p>
               </div>
-              <Link href={`/?${nearParams}`} className="link shrink-0">
-                See all
-              </Link>
+              <SeeAllLink href={`/?${nearParams}`} />
             </div>
             <div className="rail -mx-5 gap-4 px-5 md:mx-0 md:grid md:grid-cols-2 md:px-0 lg:grid-cols-3">
               {closest.map((c) => (
@@ -134,7 +133,7 @@ export default async function ExplorePage({
               <li key={area.id}>
                 <Link
                   href={`/places/${area.id}`}
-                  className="flex items-center gap-4 rounded-3xl bg-surface-sunk px-5 py-4 transition-transform active:scale-[0.99]"
+                  className="flex items-center gap-4 rounded-3xl bg-surface shadow-card px-5 py-4 transition-transform active:scale-[0.99]"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[1.1rem] font-bold leading-tight text-ink">
@@ -158,14 +157,14 @@ export default async function ExplorePage({
               </li>
             ))}
             {visible.length === 0 && (
-              <li className="rounded-3xl bg-surface-sunk px-4 py-8 text-center text-sm text-ink-soft md:col-span-2">
+              <li className="rounded-3xl border-2 border-dashed border-line px-4 py-8 text-center text-sm text-ink-soft md:col-span-2">
                 No circles in this province yet — search a place above, or start one.
               </li>
             )}
           </ul>
         </section>
 
-        <div className="rounded-3xl bg-lime p-5 text-[0.9rem] leading-relaxed text-on-lime">
+        <div className="rounded-3xl bg-lime p-5 text-[0.9rem] leading-relaxed text-on-lime shadow-lime">
           <p className="text-[1.05rem] font-bold">Twinning · coming soon</p>
           <p className="mt-1 opacity-80">
             Pair a wealthier suburb with a township so support flows where it is

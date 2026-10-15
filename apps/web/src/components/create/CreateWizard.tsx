@@ -280,7 +280,7 @@ export function CreateWizard() {
               value={section}
               onChange={(e) => setSection(e.target.value)}
               placeholder="e.g. Zone 4, Site B, NU7"
-              className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+              className="field"
             />
           </label>
 
@@ -322,7 +322,7 @@ export function CreateWizard() {
               </label>
             ))}
             {isFuneral && (
-              <p className="rounded-2xl bg-surface-sunk px-4 py-3 text-[0.85rem] text-ink-soft">
+              <p className="rounded-2xl bg-surface shadow-card px-4 py-3 text-[0.85rem] text-ink-soft">
                 For funerals we never show a street address — publishing one next
                 to a running total is a safety risk.
               </p>
@@ -354,7 +354,7 @@ export function CreateWizard() {
                       ? "e.g. Uniforms for Phase 4 learners"
                       : "e.g. Dlomo Street lighting"
               }
-              className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+              className="field"
             />
           </label>
 
@@ -367,13 +367,13 @@ export function CreateWizard() {
               value={beneficiary}
               onChange={(e) => setBeneficiary(e.target.value)}
               placeholder="Family name, or the committee / organisation"
-              className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+              className="field"
             />
           </label>
 
           <label className="flex flex-col gap-2">
             <span className="font-semibold text-ink">Goal amount</span>
-            <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3.5 focus-within:border-ink">
+            <div className="field-within flex items-center gap-2 px-4 py-3.5">
               <span className="text-sm font-semibold text-ink-faint">R</span>
               <input
                 type="text"
@@ -400,7 +400,7 @@ export function CreateWizard() {
               onChange={(e) => setStory(e.target.value.slice(0, 600))}
               rows={4}
               placeholder="What happened, who it helps, what the money covers."
-              className="resize-none rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+              className="field resize-none"
             />
             <span className="self-end text-[0.7rem] text-ink-faint tnum">
               {story.length}/600
@@ -439,7 +439,7 @@ export function CreateWizard() {
                 <select
                   value={bankCode}
                   onChange={(e) => setBankCode(e.target.value)}
-                  className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] font-semibold text-ink focus:border-ink focus:outline-none"
+                  className="field font-semibold"
                 >
                   <option value="">Choose a bank</option>
                   {banks.map((b) => (
@@ -459,14 +459,14 @@ export function CreateWizard() {
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
                   placeholder="e.g. 62012345678"
-                  className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[0.95rem] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+                  className="field"
                 />
                 {cleanAccount && !accountValid && (
                   <span className="text-xs text-crit">Enter digits only, 6 to 17 of them.</span>
                 )}
               </label>
 
-              <p className="rounded-2xl bg-surface-sunk px-4 py-3 text-[0.85rem] text-ink-soft">
+              <p className="rounded-2xl bg-surface shadow-card px-4 py-3 text-[0.85rem] text-ink-soft">
                 Double-check the account number — contributions are paid straight into
                 this account, so it should belong to the beneficiary or the
                 organisation holding the funds for them.
@@ -518,7 +518,7 @@ export function CreateWizard() {
             />
           </dl>
 
-          <div className="rounded-card bg-surface-sunk p-5 text-[0.88rem] text-ink-soft">
+          <div className="rounded-card bg-surface shadow-card p-5 text-[0.88rem] text-ink-soft">
             <p className="font-bold text-ink">What happens next</p>
             <ol className="mt-2 flex list-decimal flex-col gap-1 pl-4">
               {payoutEntered ? (

@@ -18,7 +18,7 @@ const STEPS = [
 /** Three steps for first-time visitors — shown on home when signed out. */
 export function HowItWorks() {
   return (
-    <section className="flex flex-col gap-5 rounded-card bg-surface-sunk p-6 lg:p-8">
+    <section className="flex flex-col gap-5 rounded-card bg-surface shadow-card p-6 lg:p-8">
       <h2 className="text-[1.4rem] font-bold">How MseeZee works</h2>
       <ol className="flex flex-col gap-5 lg:grid lg:grid-cols-3 lg:gap-8">
         {STEPS.map((step, i) => (

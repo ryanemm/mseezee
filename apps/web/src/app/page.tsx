@@ -9,6 +9,8 @@ import { CircleCard, FeaturedCircleCard } from "@/components/circle/CircleCard";
 import { FilterTabs } from "@/components/circle/FilterTabs";
 import { FindNearMeButton } from "@/components/circle/FindNearMeButton";
 import { ExplorePlaceSearch } from "@/components/place/ExplorePlaceSearch";
+import { SeeAllLink } from "@/components/ui/Button";
+import { ArrowRightIcon, MapIcon } from "@/components/ui/Icons";
 import { AlmostThere } from "@/components/home/AlmostThere";
 import { HowItWorks } from "@/components/home/HowItWorks";
 
@@ -87,14 +89,11 @@ export default async function HomePage({
         Who are we supporting today?
       </h1>
 
-      <div className="flex items-center gap-3 lg:max-w-xl">
-        <div className="min-w-0 flex-1">
-          <ExplorePlaceSearch />
-        </div>
-        <FindNearMeButton />
+      <div className="lg:max-w-xl">
+        <ExplorePlaceSearch trailing={<FindNearMeButton />} />
       </div>
 
-      <FilterTabs active={type} baseParams={baseParams} />
+      <FilterTabs active={type} baseParams={baseParams} counts={countByType(everything)} />
 
       <section className="flex flex-col gap-4 pb-4">
         <div className="flex items-end justify-between gap-4">
@@ -109,14 +108,12 @@ export default async function HomePage({
             )}
           </div>
           {more.length > 0 && (
-            <a href="#more" className="link shrink-0 text-[1.02rem]">
-              See all
-            </a>
+            <SeeAllLink href="#more" />
           )}
         </div>
 
         {circles.length === 0 ? (
-          <p className="rounded-card bg-surface-sunk px-5 py-10 text-center text-ink-soft">
+          <p className="rounded-card bg-surface shadow-card px-5 py-10 text-center text-ink-soft">
             No {type === "all" ? "" : `${type} `}circles right now.{" "}
             <Link href="/explore" className="link">
               Search by place
@@ -150,13 +147,29 @@ export default async function HomePage({
 
       <Link
         href="/explore"
-        className="mb-2 flex items-center justify-between rounded-card bg-surface-sunk px-5 py-4 font-bold"
+        className="mb-2 flex items-center gap-4 rounded-card bg-surface p-4 shadow-card transition-transform hover:-translate-y-px active:scale-[0.99]"
       >
-        Search causes by place on the map
-        <span aria-hidden="true">→</span>
+        <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-lime text-on-lime">
+          <MapIcon className="size-7" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-bold text-ink">Search causes by place on the map</span>
+          <span className="block text-[0.9rem] text-ink-soft">
+            Every suburb, township and town in South Africa
+          </span>
+        </span>
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-night text-on-night">
+          <ArrowRightIcon className="size-5" />
+        </span>
       </Link>
     </div>
   );
+}
+
+function countByType(circles: Circle[]): Record<string, number> {
+  const counts: Record<string, number> = { all: circles.length };
+  for (const c of circles) counts[c.type] = (counts[c.type] ?? 0) + 1;
+  return counts;
 }
 
 function normaliseType(value?: string): CircleType | "all" {
