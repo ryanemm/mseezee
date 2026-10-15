@@ -5,8 +5,7 @@ import type { CircleType, CoverArt as CoverArtData } from "@mseezee/shared";
  * deep wash of the circle type's colour, a soft glow, fine concentric rings
  * and one accent (a lime or amber ring, or a disc on the circle hero). Ring placement is derived from the
  * circle's monogram, so covers differ from each other but read as one set.
- * The colours are fixed (not theme tokens): it's artwork, and reads the same
- * in light and dark mode.
+ * The colours are fixed (not theme tokens): it's artwork.
  */
 
 const TONES: Record<

@@ -35,8 +35,7 @@ export function AuthLayout({
   );
 }
 
-/** A typographic brand panel: the promise in large type, nothing drawn.
- *  Fixed colours — it reads the same in light and dark mode. */
+/** A typographic brand panel: the promise in large type, nothing drawn. */
 function AuthHero() {
   return (
     <div className="relative overflow-hidden bg-[#151815] px-5 pb-16 pt-[calc(env(safe-area-inset-top)+1.75rem)] text-white md:flex md:h-[34rem] md:flex-col md:justify-between md:rounded-[32px] md:p-10 md:shadow-lift">

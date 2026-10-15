@@ -2,7 +2,7 @@
  * The MseeZee mark: two neighbouring houses that also form an M, inside a
  * ring, with one lit lime window. The ring and houses take `currentColor`, so
  * the mark follows the text colour around it (near-black on light surfaces,
- * light in dark mode and on the dark sign-in panel). The same drawing, on a
+ * white on the dark sign-in panel). The same drawing, on a
  * white disc, is the favicon — see `app/icon.svg`.
  */
 export function Logo({ className = "size-[26px]" }: { className?: string }) {

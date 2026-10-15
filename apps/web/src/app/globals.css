@@ -10,6 +10,9 @@
    --------------------------------------------------------------------------- */
 
 :root {
+  /* Light only for now — a proper dark mode comes later. This also keeps the
+     browser's own form controls and scrollbars light on dark-mode devices. */
+  color-scheme: light;
   --paper: #ffffff;
   --surface: #ffffff;
   --surface-sunk: #f4f4f0;
@@ -18,7 +21,7 @@
   --ink-faint: #8a8f89;
   --line: #e6e5e0;
 
-  /* Solid dark UI, and the text that sits on it. Inverted in dark mode. */
+  /* Solid dark UI, and the text that sits on it. */
   --night: #151815;
   --on-night: #ffffff;
   --lime: #d4f26a;
@@ -58,49 +61,6 @@
   --mz-shadow-bar: 0 -1px 0 rgba(21, 24, 21, 0.06), 0 -8px 24px -12px rgba(21, 24, 21, 0.18);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0e100e;
-    --surface: #191c19;
-    --surface-sunk: #222622;
-    --ink: #eef0ea;
-    --ink-soft: #a9afa7;
-    --ink-faint: #7b8179;
-    --line: #2c302c;
-
-    --night: #eef0ea;
-    --on-night: #151815;
-    --lime: #d4f26a;
-    --lime-deep: #b9d94c;
-    --on-lime: #151815;
-
-    --forest: #4f9b71;
-    --forest-deep: #0e2417;
-    --forest-bright: #63b088;
-    --gold: #d6ab5b;
-    --gold-line: #c8a24c;
-    --gold-soft: #241d10;
-
-    --funeral: #2e2119;
-    --funeral-soft: #3f3025;
-    --plum: #3d2c48;
-
-    --good: #63b088;
-    --warn: #d0904e;
-    --crit: #d76d5b;
-
-    --mz-shadow-card:
-      0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(14, 16, 14, 0.4),
-      0 10px 28px -12px rgba(14, 16, 14, 0.6);
-    --mz-shadow-pill: 0 1px 2px rgba(14, 16, 14, 0.4), 0 6px 14px -6px rgba(14, 16, 14, 0.5);
-    --mz-shadow-float: 0 18px 40px -14px rgba(14, 16, 14, 0.7);
-    --mz-shadow-lift: 0 2px 6px -2px rgba(14, 16, 14, 0.5), 0 18px 34px -16px rgba(14, 16, 14, 0.8);
-    --mz-shadow-lime: 0 2px 6px -2px rgba(14, 16, 14, 0.4), 0 16px 32px -16px rgba(14, 16, 14, 0.7);
-    --mz-shadow-sheet: 0 -12px 30px -14px rgba(14, 16, 14, 0.7);
-    --mz-shadow-bar: 0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 24px -12px rgba(14, 16, 14, 0.6);
-  }
-}
-
 @theme inline {
   --color-paper: var(--paper);
   --color-surface: var(--surface);
@@ -110,8 +70,7 @@
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
   --color-night: var(--night);
-  /* Fixed near-black for scrims over cover art — never pure black, and not
-     inverted in dark mode like --night. */
+  /* Fixed near-black for scrims over cover art — never pure black. */
   --color-shade: #151815;
   --color-on-night: var(--on-night);
   --color-lime: var(--lime);
